@@ -1,28 +1,34 @@
-// CloudBase PostgreSQL 服务端客户端封装。
-// 仅在服务端（CloudRun / 云函数 / Node 脚本）使用，密钥不暴露给浏览器。
-import pkg from "@cloudbase/node-sdk";
-const { init } = pkg;
+// CloudBase PostgreSQL REST gateway 客户端封装（服务端使用）。
+// 通过 CloudBase for Supabase 版提供的 PostgREST 网关访问 public schema 下的表。
+// 注意：node-sdk 的 app.rdb() 会把 envId 当作 schema 名导致无法访问，
+// 因此这里直接使用 REST gateway（https://<envId>.api.tcloudbasegateway.com/v1/rdb/rest/...）。
+import { readFileSync, existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-let cached: ReturnType<typeof init> | null = null;
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-function getApp() {
-  if (cached) return cached;
-  const envId = process.env.CLOUDBASE_ENV_ID;
-  if (!envId) {
-    throw new Error("CLOUDBASE_ENV_ID 未设置，无法连接 PostgreSQL");
+// 从 .env.local / 环境变量读取配置
+function loadEnvLocal() {
+  const p = join(__dirname, "..", "..", ".env.local");
+  if (!existsSync(p)) return;
+  const text = readFileSync(p, "utf-8");
+  for (const line of text.split("\n")) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
+    if (m && !(m[1] in process.env)) {
+      process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+    }
   }
-  cached = init({
-    env: envId,
-    // 云端运行环境会自动注入访问凭证，本地可用环境变量补充。
-  });
-  return cached;
 }
+loadEnvLocal();
 
-export function getDb() {
-  return getApp().rdb();
-}
+export const ENV_ID = process.env.CLOUDBASE_ENV_ID || "";
+const PUBLISHABLE_KEY = process.env.CLOUDBASE_PUBLISHABLE_KEY || "";
+const API_KEY = process.env.CLOUDBASE_API_KEY || "";
 
-// snake_case 物理列 -> SchoolFrontend camelCase 的字段映射。
+export const PG_GATEWAY_BASE = `https://${ENV_ID}.api.tcloudbasegateway.com/v1/rdb/rest`;
+
+// snake_case 物理列 -> SchoolFrontend camelCase 的字段映射
 export const SCHOOL_COLUMN_MAP: Record<string, string> = {
   id: "id",
   name: "name",
@@ -61,3 +67,16 @@ export const SCHOOL_COLUMN_MAP: Record<string, string> = {
 };
 
 export const SCHOOL_COLUMNS = Object.keys(SCHOOL_COLUMN_MAP);
+
+// 服务端查询（只读，用 Publishable Key / anon）
+export async function pgSelect(
+  table: string,
+  query = ""
+): Promise<Record<string, unknown>[]> {
+  const url = `${PG_GATEWAY_BASE}/${table}${query ? `?${query}` : ""}`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${PUBLISHABLE_KEY}` },
+  });
+  if (!res.ok) throw new Error(`PG 查询失败 ${res.status}: ${await res.text()}`);
+  return (await res.json()) as Record<string, unknown>[];
+}

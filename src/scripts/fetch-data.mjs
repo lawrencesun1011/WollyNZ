@@ -6,27 +6,54 @@
 //   - 中小学额外生成 schools-frontend.json：按参考 csv-to-json.py 规则过滤
 //     （类型/公私立/Open/有坐标）并派生前端友好字段。
 
-import { writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import pkg from "@cloudbase/node-sdk";
-const { init } = pkg;
+import { existsSync } from "node:fs";
 
+// 自动加载 .env.local（若存在），把 CLOUDBASE_* 注入 process.env。
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const envLocalPath = join(__dirname, "..", "..", ".env.local");
+if (existsSync(envLocalPath)) {
+  try {
+    const text = await readFile(envLocalPath, "utf-8");
+    for (const line of text.split("\n")) {
+      const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
+      if (m && !(m[1] in process.env)) {
+        process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+      }
+    }
+    console.log("[env] 已加载 .env.local");
+  } catch (e) {
+    console.warn("[env] 加载 .env.local 失败:", e.message);
+  }
+}
+
 const DATA_DIR = join(__dirname, "..", "..", "data");
 
-// 仅当配置了 CLOUDBASE_ENV_ID 时才写 PG，否则只落本地文件（本地调试用）。
-// 直连 PG 需要访问凭证：CLOUDBASE_SECRET_ID / CLOUDBASE_SECRET_KEY
-// （云端运行时如 CloudBase 云函数会自动注入，无需手动设置）。
-const PG_ENABLED = Boolean(process.env.CLOUDBASE_ENV_ID);
-const app = PG_ENABLED
-  ? init({
-      env: process.env.CLOUDBASE_ENV_ID,
-      secretId: process.env.CLOUDBASE_SECRET_ID,
-      secretKey: process.env.CLOUDBASE_SECRET_KEY,
-    })
-  : null;
-const db = app?.rdb() ?? null;
+// 通过 CloudBase PostgREST 网关直连 PostgreSQL（public schema）。
+// node-sdk 的 app.rdb() 会把 envId 当 schema 导致无法访问，故直接使用 REST gateway。
+const ENV_ID = process.env.CLOUDBASE_ENV_ID || "";
+const API_KEY = process.env.CLOUDBASE_API_KEY || "";
+const PG_BASE = `https://${ENV_ID}.api.tcloudbasegateway.com/v1/rdb/rest`;
+const PG_ENABLED = Boolean(ENV_ID && API_KEY);
+
+async function pgRequest(path, method, body) {
+  const res = await fetch(`${PG_BASE}${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${API_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) {
+    const msg = await res.text();
+    throw new Error(`PG ${method} ${path} 失败 ${res.status}: ${msg}`);
+  }
+  return res;
+}
 
 // camelCase 前端字段 -> snake_case 物理列
 const SCHOOL_COLUMN_MAP = {
@@ -41,30 +68,44 @@ const SCHOOL_COLUMN_MAP = {
   website: "website", url: "url",
 };
 
+// 数值列（对应表中 integer 类型），写入前统一清洗为 integer 或 null
+const INT_COLS = new Set([
+  "roll", "eqi", "isolation", "european", "maori", "pacific",
+  "asian", "melaa", "other", "intl",
+]);
+
+function cleanInt(v) {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Math.round(Number(v));
+  return Number.isFinite(n) ? n : null;
+}
+
 function toSnakeRow(frontend) {
   const row = {};
   for (const [key, col] of Object.entries(SCHOOL_COLUMN_MAP)) {
-    row[col] = frontend[key] ?? null;
+    const val = frontend[key] ?? null;
+    row[col] = INT_COLS.has(col) ? cleanInt(val) : val;
   }
   return row;
 }
 
 async function syncRaw(table, records) {
-  if (!db) return;
+  if (!PG_ENABLED) return;
   // 全量覆盖：先删后插
-  await db.from(table).delete();
+  await pgRequest(`/${table}`, "DELETE", null);
   const rows = records.map((r) => ({ id: String(r.School_Id ?? r.id ?? r._id), payload: r }));
   for (let i = 0; i < rows.length; i += 500) {
-    await db.from(table).insert(rows.slice(i, i + 500));
+    await pgRequest(`/${table}`, "POST", rows.slice(i, i + 500));
   }
   console.log(`[pg] ${table} 已写入 ${rows.length} 条`);
 }
 
 async function syncSchools(frontend) {
-  if (!db) return;
+  if (!PG_ENABLED) return;
   const rows = frontend.map(toSnakeRow);
+  // upsert：按 id 冲突时更新
   for (let i = 0; i < rows.length; i += 500) {
-    await db.from("schools").upsert(rows.slice(i, i + 500), { onConflict: "id" });
+    await pgRequest(`/schools?on_conflict=id`, "POST", rows.slice(i, i + 500));
   }
   console.log(`[pg] schools 已 upsert ${rows.length} 条`);
 }

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.wollynz.fetch-data</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>-c</string>
+    <string>cd /Users/sun/Code/NZ网站v2 &amp;&amp; /usr/bin/npm run fetch:data &gt;&gt; /tmp/wollynz-fetch.log 2&gt;&amp;1</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>3</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>/tmp/wollynz-fetch.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/wollynz-fetch.err.log</string>
+</dict>
+</plist>
