@@ -7,23 +7,19 @@ import { SearchX } from "lucide-react";
 interface Props {
   schools: SchoolFrontend[];
   view: ViewMode;
-  compareIds: string[];
   hoveredId: string | null;
   onHover: (id: string | null) => void;
   onOpen: (id: string) => void;
   onDetail: (id: string) => void;
-  onToggleCompare: (id: string) => void;
 }
 
 export function SchoolCardList({
   schools,
   view,
-  compareIds,
   hoveredId,
   onHover,
   onOpen,
   onDetail,
-  onToggleCompare,
 }: Props) {
   if (schools.length === 0) {
     return (
@@ -47,16 +43,14 @@ export function SchoolCardList({
     >
       {schools.map((s) => (
         <SchoolCard
-                      key={s.id}
-                      school={s}
-                      view={view}
-                      inCompare={compareIds.includes(s.id)}
-                      hovered={hoveredId === s.id}
-                      onHover={onHover}
-                      onOpen={onOpen}
-                      onDetail={onDetail}
-                      onToggleCompare={onToggleCompare}
-                    />
+          key={s.id}
+          school={s}
+          view={view}
+          hovered={hoveredId === s.id}
+          onHover={onHover}
+          onOpen={onOpen}
+          onDetail={onDetail}
+        />
       ))}
     </div>
   );

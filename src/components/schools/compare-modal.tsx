@@ -3,21 +3,16 @@
 import type { SchoolFrontend } from "@/lib/types";
 import { SchoolDetailCard } from "./school-modal";
 import { X, GitCompare, Trash2 } from "lucide-react";
+import { useCompare } from "@/lib/user-collections";
 
 interface Props {
   schools: SchoolFrontend[];
-  compareIds: string[];
-  onToggleCompare: (id: string) => void;
   onClose: () => void;
 }
 
 /** 对比视图：多个学校详情页横向平铺，方便逐项对比 */
-export function CompareModal({
-  schools,
-  compareIds,
-  onToggleCompare,
-  onClose,
-}: Props) {
+export function CompareModal({ schools, onClose }: Props) {
+  const { removeCompare } = useCompare();
   return (
     <div
       className="animate-overlay fixed inset-0 z-[1000] flex flex-col bg-ink/40 backdrop-blur-sm"
@@ -57,13 +52,11 @@ export function CompareModal({
             >
               <SchoolDetailCard
                 school={s}
-                inCompare={compareIds.includes(s.id)}
-                onToggleCompare={onToggleCompare}
                 noWrapTitle
                 closeButton={
                   <button
                     type="button"
-                    onClick={() => onToggleCompare(s.id)}
+                    onClick={() => removeCompare(s.id)}
                     aria-label="移出对比"
                     className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/20 transition-colors hover:bg-white/30"
                   >

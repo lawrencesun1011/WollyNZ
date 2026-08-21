@@ -38,13 +38,14 @@ const API_KEY = process.env.CLOUDBASE_API_KEY || "";
 const PG_BASE = `https://${ENV_ID}.api.tcloudbasegateway.com/v1/rdb/rest`;
 const PG_ENABLED = Boolean(ENV_ID && API_KEY);
 
-async function pgRequest(path, method, body) {
+async function pgRequest(path, method, body, extraHeaders) {
   const res = await fetch(`${PG_BASE}${path}`, {
     method,
     headers: {
       Authorization: `Bearer ${API_KEY}`,
       "Content-Type": "application/json",
       Prefer: "return=minimal",
+      ...extraHeaders,
     },
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -68,11 +69,14 @@ const SCHOOL_COLUMN_MAP = {
   website: "website", url: "url",
 };
 
-// 数值列（对应表中 integer 类型），写入前统一清洗为 integer 或 null
+// 整数列（对应表中 integer 类型），写入前统一清洗为整数或 null
 const INT_COLS = new Set([
-  "roll", "eqi", "isolation", "european", "maori", "pacific",
+  "roll", "eqi", "european", "maori", "pacific",
   "asian", "melaa", "other", "intl",
 ]);
+
+// 小数/实数列（如 isolation 偏远度指数 0~1 之间），保留小数原值
+const NUM_COLS = new Set(["isolation"]);
 
 function cleanInt(v) {
   if (v === null || v === undefined || v === "") return null;
@@ -80,11 +84,19 @@ function cleanInt(v) {
   return Number.isFinite(n) ? n : null;
 }
 
+function cleanNum(v) {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
 function toSnakeRow(frontend) {
   const row = {};
   for (const [key, col] of Object.entries(SCHOOL_COLUMN_MAP)) {
     const val = frontend[key] ?? null;
-    row[col] = INT_COLS.has(col) ? cleanInt(val) : val;
+    if (INT_COLS.has(col)) row[col] = cleanInt(val);
+    else if (NUM_COLS.has(col)) row[col] = cleanNum(val);
+    else row[col] = val;
   }
   return row;
 }
@@ -103,9 +115,14 @@ async function syncRaw(table, records) {
 async function syncSchools(frontend) {
   if (!PG_ENABLED) return;
   const rows = frontend.map(toSnakeRow);
-  // upsert：按 id 冲突时更新
+  // upsert：按 id 冲突时更新（PostgREST 需 Prefer: resolution=merge-duplicates 才触发 on_conflict）
   for (let i = 0; i < rows.length; i += 500) {
-    await pgRequest(`/schools?on_conflict=id`, "POST", rows.slice(i, i + 500));
+    await pgRequest(
+      `/schools?on_conflict=id`,
+      "POST",
+      rows.slice(i, i + 500),
+      { Prefer: "resolution=merge-duplicates,return=minimal" }
+    );
   }
   console.log(`[pg] schools 已 upsert ${rows.length} 条`);
 }
@@ -215,8 +232,8 @@ function buildSchoolFrontend(raw) {
     phone: (raw.Telephone || "").trim(),
     email: (raw.Email || "").trim(),
     roll,
-    eqi: toNumber(raw.EQi_Index) ?? 0,
-    isolation: toNumber(raw.Isolation_Index) ?? 0,
+    eqi: toNumber(raw.EQi_Index) ?? null,
+    isolation: toNumber(raw.Isolation_Index) ?? null,
     european: toNumber(raw.European) ?? 0,
     maori: toNumber(raw["Māori"]) ?? 0,
     pacific: toNumber(raw.Pacific) ?? 0,

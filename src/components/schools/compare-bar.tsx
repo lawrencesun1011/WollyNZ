@@ -2,20 +2,15 @@
 
 import type { SchoolFrontend } from "@/lib/types";
 import { X, GitCompare } from "lucide-react";
+import { useCompare } from "@/lib/user-collections";
 
 interface Props {
   schools: SchoolFrontend[];
-  onRemove: (id: string) => void;
-  onClear: () => void;
   onCompare: () => void;
 }
 
-export function CompareBar({
-  schools,
-  onRemove,
-  onClear,
-  onCompare,
-}: Props) {
+export function CompareBar({ schools, onCompare }: Props) {
+  const { removeCompare, clearCompare } = useCompare();
   return (
     <div className="fixed inset-x-0 bottom-0 z-[900] px-4 pb-4">
       <div className="glass mx-auto flex max-w-5xl items-center gap-3 rounded-2xl px-4 py-3 shadow-lg">
@@ -35,7 +30,7 @@ export function CompareBar({
               {s.name}
               <button
                 type="button"
-                onClick={() => onRemove(s.id)}
+                onClick={() => removeCompare(s.id)}
                 aria-label="移除"
                 className="text-ink-soft hover:text-error"
               >
@@ -51,7 +46,7 @@ export function CompareBar({
         <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
-            onClick={onClear}
+            onClick={clearCompare}
             className="rounded-lg px-3 py-1.5 text-sm text-ink-soft transition-colors hover:text-ink"
           >
             清空

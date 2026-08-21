@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { SchoolsPreloader } from "@/components/schools-preloader";
 
 export const metadata: Metadata = {
   title: "WollyNZ · 新西兰教育机构查询",
@@ -17,6 +18,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className="min-h-screen">
+        <SchoolsPreloader />
         <SiteHeader />
         <main className="pt-16">{children}</main>
         <SiteFooter />

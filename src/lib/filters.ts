@@ -224,6 +224,23 @@ export function levelColor(level: string): string {
   }
 }
 
+/* ── EQI / 偏远度 数值 → 中文释义（对齐筛选器档位标签） ── */
+export function eqiLabel(value: number | undefined): string | null {
+  if (value == null) return null;
+  if (value <= 420) return "资源较充足";
+  if (value <= 480) return "需要一定支持";
+  if (value <= 550) return "需要较高支持";
+  return "需要很高支持";
+}
+
+export function isolationLabel(value: number | undefined): string | null {
+  if (value == null) return null;
+  if (value <= 0.3) return "便利";
+  if (value <= 1) return "相对便利";
+  if (value <= 3) return "相对偏远";
+  return "很偏远";
+}
+
 export type MarkerShape = "circle" | "diamond" | "square" | "hexagon";
 
 export function levelShape(level: string): { shape: MarkerShape; color: string } {

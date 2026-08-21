@@ -1,7 +1,15 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Star } from "lucide-react";
+import { useFavorites } from "@/lib/user-collections";
+import { FavoritesPopover } from "./favorites-popover";
 
 export function SiteHeader() {
+  const { favoriteIds } = useFavorites();
+  const [favOpen, setFavOpen] = useState(false);
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/40 bg-bg/70 backdrop-blur-xl">
       <div className="px-6 lg:px-10">
@@ -15,30 +23,54 @@ export function SiteHeader() {
             </span>
           </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
-          <Link
-            href="/schools"
-            className="text-sm font-medium text-ink-soft transition-colors hover:text-primary"
-          >
-            中小学
-          </Link>
-          <Link
-            href="/ece"
-            className="text-sm font-medium text-ink-soft transition-colors hover:text-primary"
-          >
-            幼儿园
-          </Link>
-        </nav>
+          <nav className="hidden items-center gap-8 md:flex">
+            <Link
+              href="/schools"
+              className="text-sm font-medium text-ink-soft transition-colors hover:text-primary"
+            >
+              中小学
+            </Link>
+            <Link
+              href="/ece"
+              className="text-sm font-medium text-ink-soft transition-colors hover:text-primary"
+            >
+              幼儿园
+            </Link>
+          </nav>
 
-        <button
-          type="button"
-          disabled
-          title="登录功能即将上线"
-          className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full border border-stroke px-3.5 py-1 text-xs font-medium text-caption"
-        >
-          登录
-        </button>
-      </div></div>
+          <div className="flex items-center gap-2">
+            {/* 收藏夹入口：跨页面可见，与卡片 / 地图 popup 同源同步 */}
+            <div className="relative">
+              <button
+                type="button"
+                data-fav-trigger
+                onClick={() => setFavOpen((v) => !v)}
+                aria-label="我的收藏"
+                className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-stroke text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary"
+              >
+                <Star
+                  className={`h-[18px] w-[18px] ${favoriteIds.length ? "fill-amber-400 text-amber-400" : ""}`}
+                />
+                {favoriteIds.length > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold leading-none text-white">
+                    {favoriteIds.length > 99 ? "99+" : favoriteIds.length}
+                  </span>
+                )}
+              </button>
+              {favOpen && <FavoritesPopover onClose={() => setFavOpen(false)} />}
+            </div>
+
+            <button
+              type="button"
+              disabled
+              title="登录功能即将上线"
+              className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full border border-stroke px-3.5 py-1 text-xs font-medium text-caption"
+            >
+              登录
+            </button>
+          </div>
+        </div>
+      </div>
     </header>
   );
 }

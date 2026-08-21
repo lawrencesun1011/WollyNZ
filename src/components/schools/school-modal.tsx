@@ -4,13 +4,12 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toPng } from "html-to-image";
 import type { SchoolFrontend } from "@/lib/types";
 import { cnGender, cnLanguage } from "@/lib/labels";
+import { eqiLabel, isolationLabel } from "@/lib/filters";
 import { X, MapPin, Check, ExternalLink } from "lucide-react";
 
 interface Props {
   school: SchoolFrontend;
   onClose: () => void;
-  inCompare: boolean;
-  onToggleCompare: (id: string) => void;
 }
 
 /* ── 学段 → 学校类型描述（带年级范围） ── */
@@ -73,8 +72,6 @@ const ETHNIC_DISPLAY = [
 
 interface DetailProps {
   school: SchoolFrontend;
-  inCompare: boolean;
-  onToggleCompare: (id: string) => void;
   /** 渲染在顶部渐变栏右上角的额外按钮（如关闭/移除） */
   closeButton?: ReactNode;
   /** 学校名不换行（用于横向对比视图） */
@@ -84,8 +81,6 @@ interface DetailProps {
 /** 单所学校详情卡片（可被单个详情页与横向对比视图共用） */
 export function SchoolDetailCard({
   school,
-  inCompare,
-  onToggleCompare,
   closeButton,
   noWrapTitle,
 }: DetailProps) {
@@ -185,8 +180,22 @@ export function SchoolDetailCard({
           label="寄宿设施"
           value={school.boarding === "Yes" ? "有" : "无"}
         />
-        <Field label="公平指数（EQI）" value={fmtNoneZero(school.eqi)} />
-        <Field label="偏远度指数" value={fmtNoneZero(school.isolation)} />
+        <Field
+          label="公平指数（EQI）"
+          value={
+            fmtNoneZero(school.eqi) +
+            (eqiLabel(school.eqi) ? `（${eqiLabel(school.eqi)}）` : "")
+          }
+        />
+        <Field
+          label="偏远度指数"
+          value={
+            fmtNoneZero(school.isolation) +
+            (isolationLabel(school.isolation)
+              ? `（${isolationLabel(school.isolation)}）`
+              : "")
+          }
+        />
       </div>
 
       {/* ── 族裔分布卡片 ── */}
@@ -276,12 +285,7 @@ export function SchoolDetailCard({
   );
 }
 
-export function SchoolModal({
-  school,
-  onClose,
-  inCompare,
-  onToggleCompare,
-}: Props) {
+export function SchoolModal({ school, onClose }: Props) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -300,8 +304,6 @@ export function SchoolModal({
       >
         <SchoolDetailCard
           school={school}
-          inCompare={inCompare}
-          onToggleCompare={onToggleCompare}
           closeButton={
             <button
               type="button"

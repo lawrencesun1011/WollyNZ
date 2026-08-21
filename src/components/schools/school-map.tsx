@@ -10,6 +10,30 @@ import type { SchoolFrontend } from "@/lib/types";
 import { levelShape } from "@/lib/filters";
 import type { MarkerShape } from "@/lib/filters";
 import { cnGender } from "@/lib/labels";
+import { useFavorites, useCompare } from "@/lib/user-collections";
+
+// Leaflet popup 是纯 HTML，无法用 React 组件。
+// 这里把卡片用到的 4 个 lucide 图标以 inline SVG 形式注入，保持视觉一致。
+// path 取自 lucide-react@0.400（24x24 viewBox，stroke 渲染）。
+const SVG_HOUSE =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+const SVG_MAPPIN =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+const SVG_EXTERNAL =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>';
+const SVG_CHECK =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+const SVG_FAV =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+
+function esc(s: string): string {
+  // HTML 字符串里插值的简单转义，避免学校名/地址含特殊字符破坏 HTML
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
 interface Props {
   schools: SchoolFrontend[];
@@ -18,12 +42,12 @@ interface Props {
   onSelect: (id: string | null) => void;
   /** 打开学校详情（modal） */
   onDetail: (id: string) => void;
-  /** 加入/移出对比 */
-  onToggleCompare: (id: string) => void;
   /** 地图视野变化时上报当前范围 [south, west, north, east] */
   onBoundsChange?: (bounds: [number, number, number, number] | null) => void;
   /** 选中的城市（英文），变化后地图自动飞到该区域 */
   flyCities?: string[];
+  /** 搜索词（非空且变化时）：按当前 schools（=搜索结果）范围自适应缩放 */
+  fitSearchKey?: string;
 }
 
 const CLUSTER_THRESHOLD = 200;
@@ -33,6 +57,12 @@ const CLUSTER_THRESHOLD = 200;
 const DEFAULT_NZ_BOUNDS: [number, number, number, number] = [
   -47.5, 166.0, -34.0, 178.5,
 ];
+
+// 坐标合理性校验：过滤掉 Chatham Islands 等离群点（lng < 165 或 lng > 185 或 lat > -33），
+// 避免.fitBounds 被撑成全球视图（低 zoom 下墨卡托投影世界地图水平重复 = "地图复制"）。
+function isReasonableNZCoord(lat: number, lng: number): boolean {
+  return lat >= -50 && lat <= -33 && lng >= 165 && lng <= 185;
+}
 
 /* ── 学段年级范围（与学校卡片保持一致） ── */
 function levelYears(level: string): string {
@@ -65,9 +95,11 @@ function pinSvg(shape: MarkerShape, color: string): string {
   return `<svg width="26" height="26" viewBox="0 0 18 18" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round">${inner}</svg>`;
 }
 
-/* ── 图例 SVG（小尺寸） ── */
+/* ── 图例 SVG（与地图 pin 一致：白描边 + 阴影） ── */
 function legendSvg(shape: MarkerShape, color: string): string {
-  return pinSvg(shape, color);
+  const svg = pinSvg(shape, color);
+  // 注入 drop-shadow 使图例在白色背景上也有立体感（与 .map-pin svg 一致）
+  return svg.replace('<svg ', '<svg style="filter:drop-shadow(0 1px 3px rgba(31,45,43,0.4))" ');
 }
 
 export function SchoolMap({
@@ -76,10 +108,13 @@ export function SchoolMap({
   activeId,
   onSelect,
   onDetail,
-  onToggleCompare,
   onBoundsChange,
   flyCities,
+  fitSearchKey,
 }: Props) {
+  // 收藏 / 对比全局状态（与卡片、收藏夹浮层同源同步）
+  const { favoriteIds, toggleFavorite } = useFavorites();
+  const { compareIds, toggleCompare } = useCompare();
   // 当前激活的底图（默认街道，与初始化一致）
   const [baseLayer, setBaseLayer] = useState<"街道" | "卫星">("街道");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -90,10 +125,15 @@ export function SchoolMap({
   const baseLayersRef = useRef<Record<string, L.LayerGroup> | null>(null);
   const onSelectRef = useRef(onSelect);
   const onDetailRef = useRef(onDetail);
-  const onToggleCompareRef = useRef(onToggleCompare);
+  const onToggleCompareRef = useRef(toggleCompare);
+  const onToggleFavoriteRef = useRef(toggleFavorite);
   const onBoundsChangeRef = useRef(onBoundsChange);
   const firstFlyRef = useRef(true);
   const lastFlyKeyRef = useRef<string>("");
+  // 搜索自适应：记录上次已应用过的搜索词（避免 schools 数据替换时重复 fit）
+  const lastFitSearchRef = useRef<string>("");
+  // 搜索自适应防抖 timer
+  const fitSearchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeIdRef = useRef<string | null>(null);
   // 当前是否启用聚合（基于地图视野内点数，而非全量筛选数）
   const usingClusterRef = useRef<boolean>(false);
@@ -103,18 +143,44 @@ export function SchoolMap({
   // 标记：本次 activeId 是否由"点击地图上的 marker"触发（而非列表卡片）。
   // 用于聚合模式下区分：地图点点击保持视野；列表卡片点击则强制飞行定位。
   const fromMapClickRef = useRef<boolean>(false);
+  // 同步当前对比列表，供 popupopen 监听同步 popup 按钮视觉
+  const compareIdsRef = useRef<string[]>(compareIds);
+  const favoriteIdsRef = useRef<string[]>(favoriteIds);
   useEffect(() => {
     onSelectRef.current = onSelect;
     onDetailRef.current = onDetail;
-    onToggleCompareRef.current = onToggleCompare;
+    onToggleCompareRef.current = toggleCompare;
+    onToggleFavoriteRef.current = toggleFavorite;
     onBoundsChangeRef.current = onBoundsChange;
+    compareIdsRef.current = compareIds;
+    favoriteIdsRef.current = favoriteIds;
   });
 
   // 供 popup 内 HTML 按钮调用的全局回调（Leaflet popup 是纯 HTML，无法用 React onClick）
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__schoolMapActions = {
       detail: (id: string) => onDetailRef.current(id),
-      compare: (id: string) => onToggleCompareRef.current(id),
+      compare: (id: string) => {
+        onToggleCompareRef.current(id);
+        // 同步更新当前 popup 内的对比按钮视觉（Leaflet 不会自动重渲 popup）
+        const btn = document.querySelector(
+          `.popup-btn--compare[data-id="${CSS.escape(id)}"]`
+        ) as HTMLElement | null;
+        if (btn) btn.classList.toggle("is-on");
+      },
+      favorite: (id: string) => {
+        onToggleFavoriteRef.current(id);
+        // 同步更新当前 popup 内的收藏按钮视觉（Leaflet 不会自动重渲 popup）
+        const btn = document.querySelector(
+          `.popup-btn--favorite[data-id="${CSS.escape(id)}"]`
+        ) as HTMLElement | null;
+        if (!btn) return;
+        const wasOn = btn.classList.contains("is-on");
+        btn.classList.toggle("is-on");
+        // 切换文字：收藏 ↔ 已收藏
+        const label = btn.querySelector("span:last-child") as HTMLElement | null;
+        if (label) label.textContent = wasOn ? "收藏" : "已收藏";
+      },
     };
     return () => {
       delete (window as unknown as Record<string, unknown>).__schoolMapActions;
@@ -218,6 +284,28 @@ export function SchoolMap({
         if (markerClickInProgressRef.current) return;
         onSelectRef.current(null);
       });
+      // 每次 popup 打开时，把当前对比/收藏列表状态同步到 popup 内按钮
+      // （覆盖上次手动切换 / 处理从列表卡片点开 popup 的情况）
+      map.on("popupopen", (e: L.PopupEvent) => {
+        const popup = e.popup as L.Popup & { _content?: string };
+        const root = popup.getElement();
+        if (!root) return;
+        const cmpSet = new Set(compareIdsRef.current);
+        root.querySelectorAll<HTMLElement>(".popup-btn--compare").forEach((btn) => {
+          const id = btn.dataset.id;
+          if (!id) return;
+          btn.classList.toggle("is-on", cmpSet.has(id));
+        });
+        const favSet = new Set(favoriteIdsRef.current);
+        root.querySelectorAll<HTMLElement>(".popup-btn--favorite").forEach((btn) => {
+          const id = btn.dataset.id;
+          if (!id) return;
+          const isOn = favSet.has(id);
+          btn.classList.toggle("is-on", isOn);
+          const label = btn.querySelector("span:last-child") as HTMLElement | null;
+          if (label) label.textContent = isOn ? "已收藏" : "收藏";
+        });
+      });
       reportBounds();
       syncAggregation();
     });
@@ -254,7 +342,7 @@ export function SchoolMap({
     }
     // 有筛选时仍按当前结果 fitBounds（学校已过滤为该城市区域，点集中）
     const pts = schools
-      .filter((s) => s.lat != null && s.lng != null)
+      .filter((s) => s.lat != null && s.lng != null && isReasonableNZCoord(s.lat, s.lng))
       .map((s) => [s.lat as number, s.lng as number]);
     if (pts.length === 0) return;
     const bounds = L.latLngBounds(pts as [number, number][]);
@@ -264,6 +352,44 @@ export function SchoolMap({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flyCities]);
+
+  // 搜索自适应：输入搜索词时，地图按当前搜索结果（schools=filtered）的范围
+  // 自动缩放/平移到合适位置；清空搜索词后重置，便于再次输入相同词重新定位。
+  // 150ms 防抖，避免连续击键时地图反复动画。
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (!fitSearchKey) {
+      lastFitSearchRef.current = "";
+      return;
+    }
+    if (lastFitSearchRef.current === fitSearchKey) return;
+    if (fitSearchTimerRef.current) clearTimeout(fitSearchTimerRef.current);
+    fitSearchTimerRef.current = setTimeout(() => {
+      const m = mapRef.current;
+      if (!m) return;
+      lastFitSearchRef.current = fitSearchKey;
+      const pts = schools
+        .filter((s) => s.lat != null && s.lng != null && isReasonableNZCoord(s.lat, s.lng))
+        .map((s) => [s.lat as number, s.lng as number]);
+      if (pts.length === 0) return;
+      m.invalidateSize();
+      // 单点 fitBounds 会把 zoom 缩到 0（全球级），因为 bounds 大小为 0；
+      // 改用 setView 固定到合理 zoom；多点仍用 fitBounds。
+      if (pts.length === 1) {
+        m.setView(pts[0] as [number, number], 13);
+      } else {
+        m.fitBounds(L.latLngBounds(pts as [number, number][]), {
+          padding: [40, 40],
+          maxZoom: 13,
+        });
+      }
+    }, 150);
+    return () => {
+      if (fitSearchTimerRef.current) clearTimeout(fitSearchTimerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fitSearchKey, schools]);
 
   // 统计当前地图视野内的 marker 数量，并据此在聚合/普通图层间切换。
   // 聚合阈值按"视野内点数"而非"全量筛选数"判定，这样飞到一个学校附近
@@ -349,31 +475,31 @@ export function SchoolMap({
       });
       const marker = L.marker([s.lat, s.lng], { icon, id: s.id } as L.MarkerOptions & { id: string });
 
-      // popup 内容（与学校卡片保持一致：办学性质 / 学段+年级 / 性别 / 学生 / EQI）
+      // popup 内容（与学校卡片风格看齐：薄荷 chip tag + House/MapPin 图标 + 三按钮操作区）
       const loc = [s.suburb, s.city].filter(Boolean).join(", ") || s.territorial || "";
       const years = levelYears(s.level);
       const levelLabel = years ? `${s.level}（${years}）` : s.level;
-      const websiteHtml = s.website
-        ? `<a class="popup-card__action" href="${s.website}" target="_blank" rel="noopener noreferrer">官网</a>`
-        : `<span class="popup-card__action popup-card__action--disabled">官网</span>`;
-      marker.bindPopup(
-        `<div class="popup-card">
-          <div class="popup-card__title">${s.name}</div>
-          <div class="popup-card__loc">${loc}</div>
-          <div class="popup-card__tags">
-            <span class="tag tag--coral">${s.authorityCN}</span>
-            <span class="tag tag--green">${levelLabel}</span>
-            <span class="tag tag--ocean">${cnGender(s.gender, s.genderCN)}</span>
-            <span class="tag tag--amber">学生 ${s.roll ?? "—"}</span>
-            <span class="tag tag--gray">EQI ${s.eqi ?? "—"}</span>
-          </div>
+      const nameEsc = esc(s.name);
+      const locEsc = esc(loc || "—");
+      const tags = [
+        `<span class="popup-chip">${esc(s.authorityCN || "")}</span>`,
+        `<span class="popup-chip">${esc(levelLabel)}</span>`,
+        `<span class="popup-chip">${esc(cnGender(s.gender, s.genderCN))}</span>`,
+        `<span class="popup-chip">学生 ${s.roll ?? "—"}</span>`,
+        `<span class="popup-chip">EQI ${s.eqi ?? "—"}</span>`,
+      ].join("");
+      const favoriteHtml = `<button class="popup-btn popup-btn--favorite" data-id="${s.id}" onclick="window.__schoolMapActions.favorite('${s.id}')"><i class="popup-ic popup-ic--fav">${SVG_FAV}</i><span>收藏</span></button>`;
+      const popupHtml = `<div class="popup-card">
+          <div class="popup-card__head"><i class="popup-ic popup-ic--title">${SVG_HOUSE}</i><span class="popup-card__title">${nameEsc}</span></div>
+          <div class="popup-card__loc"><i class="popup-ic popup-ic--loc">${SVG_MAPPIN}</i><span>${locEsc}</span></div>
+          <div class="popup-card__tags">${tags}</div>
           <div class="popup-card__actions">
-            ${websiteHtml}
-            <button type="button" class="popup-card__action" onclick="window.__schoolMapActions.detail('${s.id}')">详情</button>
-            <button type="button" class="popup-card__action" onclick="window.__schoolMapActions.compare('${s.id}')">对比</button>
+            ${favoriteHtml}
+            <button type="button" class="popup-btn popup-btn--solid" onclick="window.__schoolMapActions.detail('${esc(s.id)}')">详情</button>
+            <button type="button" class="popup-btn popup-btn--compare" data-id="${esc(s.id)}" onclick="window.__schoolMapActions.compare('${esc(s.id)}')"><span class="popup-check"><i class="popup-ic">${SVG_CHECK}</i></span><span>对比</span></button>
           </div>
-        </div>`
-      );
+        </div>`;
+      marker.bindPopup(popupHtml);
 
       marker.on("click", (e: L.LeafletMouseEvent) => {
         // 阻止冒泡到 map click，否则 map click 的 closePopup/onSelect(null)
@@ -550,7 +676,7 @@ export function SchoolMap({
               className="flex items-center gap-2 text-sm text-ink-soft"
             >
               <span
-                className="flex h-5 w-5 items-center justify-center"
+                className="flex h-[26px] w-[26px] items-center justify-center"
                 dangerouslySetInnerHTML={{
                   __html: legendSvg(shape, color),
                 }}
@@ -603,67 +729,175 @@ export function SchoolMap({
           margin: 12px 14px;
         }
         .popup-card {
-          width: 240px;
+          width: 260px;
+          font-family: inherit;
+        }
+        .popup-card__head {
+          display: flex;
+          align-items: flex-start;
+          gap: 6px;
         }
         .popup-card__title {
           font-size: 15px;
           font-weight: 600;
           color: #1F2D2B;
           line-height: 1.4;
+          flex: 1;
         }
         .popup-card__loc {
+          display: flex;
+          align-items: center;
+          gap: 4px;
           font-size: 12px;
           color: #888;
+          margin-top: 4px;
+        }
+        .popup-ic {
+          display: inline-block;
+          width: 14px;
+          height: 14px;
+          flex-shrink: 0;
+          color: #2e9e8c;
+        }
+        .popup-ic svg {
+          width: 100%;
+          height: 100%;
+          display: block;
+        }
+        .popup-ic--title {
+          width: 18px;
+          height: 18px;
           margin-top: 2px;
+        }
+        .popup-ic--loc {
+          width: 12px;
+          height: 12px;
+          color: #94a3b8;
+        }
+        .popup-ic--r {
+          margin-left: 3px;
         }
         .popup-card__tags {
           display: flex;
           flex-wrap: wrap;
           gap: 6px;
-          margin-top: 8px;
+          margin-top: 10px;
         }
-        .popup-card__tags .tag {
+        .popup-chip {
           font-size: 12px;
           padding: 3px 10px;
           border-radius: 999px;
-          color: #fff;
+          background: rgba(46, 158, 140, 0.08);
+          color: #2e9e8c;
           font-weight: 500;
+          line-height: 1.5;
         }
-        .popup-card__tags .tag--coral { background: #E4572E; }
-        .popup-card__tags .tag--green { background: #3E9C8C; }
-        .popup-card__tags .tag--ocean { background: #0E6BA8; }
-        .popup-card__tags .tag--amber { background: #B8860B; }
-        .popup-card__tags .tag--gray { background: #94A3B8; }
         .popup-card__actions {
           display: flex;
-          gap: 8px;
+          gap: 6px;
           margin-top: 12px;
         }
-        .popup-card__action {
+        .popup-btn {
           flex: 1;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          padding: 7px 0;
+          gap: 3px;
+          padding: 6px 8px;
           font-size: 12px;
           font-weight: 500;
-          color: #3e9c8c;
-          background: #fff;
-          border: 1px solid #3e9c8c;
           border-radius: 8px;
           cursor: pointer;
           text-decoration: none;
-          transition: background 0.15s ease, color 0.15s ease;
+          line-height: 1.2;
+          transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
         }
-        .popup-card__action:hover {
-          background: #3e9c8c;
+        .popup-btn--ghost {
+          background: #fff;
+          color: #2e9e8c;
+          border: 1px solid rgba(46, 158, 140, 0.3);
+        }
+        .popup-btn--ghost:hover {
+          background: rgba(46, 158, 140, 0.05);
+        }
+        .popup-btn--solid {
+          background: #2e9e8c;
           color: #fff;
+          border: 1px solid #2e9e8c;
+          box-shadow: 0 1px 2px rgba(46,158,140,0.15);
         }
-        .popup-card__action--disabled {
+        .popup-btn--solid:hover {
+          background: #258a7a;
+        }
+        .popup-btn--compare {
+          background: #fff;
+          color: #6b7280;
+          border: 1px solid rgba(46, 158, 140, 0.2);
+        }
+        .popup-btn--compare:hover {
+          background: rgba(46, 158, 140, 0.05);
+          color: #2e9e8c;
+        }
+        .popup-btn--compare.is-on {
+          background: rgba(46, 158, 140, 0.05);
+          color: #2e9e8c;
+          border-color: #2e9e8c;
+        }
+        .popup-btn--disabled {
           color: #c0c4c9;
-          border-color: #e5e7eb;
-          cursor: not-allowed;
+          border: 1px solid #e5e7eb;
           background: #f9fafb;
+          cursor: not-allowed;
+        }
+        .popup-btn--favorite {
+          border: 1px solid #d1d5db;
+          color: #6b7280;
+        }
+        .popup-btn--favorite .popup-ic--fav {
+          width: 15px;
+          height: 15px;
+          color: #6b7280;
+        }
+        .popup-btn--favorite .popup-ic--fav svg polygon {
+          stroke: #6b7280;
+        }
+        .popup-btn--favorite.is-on {
+          background: #fff7ed;
+          color: #f59e0b;
+          border-color: #f59e0b;
+        }
+        .popup-btn--favorite.is-on .popup-ic--fav {
+          fill: #f59e0b;
+          color: #f59e0b;
+        }
+        .popup-btn--favorite.is-on .popup-ic--fav svg {
+          fill: #f59e0b !important;
+        }
+        .popup-btn--favorite.is-on .popup-ic--fav svg polygon {
+          stroke: #f59e0b;
+        }
+        .popup-check {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 14px;
+          height: 14px;
+          border: 1px solid rgba(107, 114, 128, 0.3);
+          border-radius: 3px;
+          background: #fff;
+          flex-shrink: 0;
+        }
+        .popup-check .popup-ic {
+          width: 10px;
+          height: 10px;
+          color: transparent;
+        }
+        .popup-btn--compare.is-on .popup-check {
+          background: #2e9e8c;
+          border-color: #2e9e8c;
+        }
+        .popup-btn--compare.is-on .popup-check .popup-ic {
+          color: #fff;
         }
       `}</style>
     </div>

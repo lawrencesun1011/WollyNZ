@@ -80,3 +80,39 @@ export async function pgSelect(
   if (!res.ok) throw new Error(`PG 查询失败 ${res.status}: ${await res.text()}`);
   return (await res.json()) as Record<string, unknown>[];
 }
+
+// 简单服务端内存缓存：避免每个请求都打 PG 网关（实测单次 1~3s）。
+// 注意：Serverless 实例可能多副本/冷启动，缓存仅作加速，不保证强一致。
+const _cache = new Map<string, { ts: number; data: unknown }>();
+const CACHE_TTL = 60_000; // 60s
+
+export function getCached<T>(key: string): T | null {
+  const hit = _cache.get(key);
+  if (hit && Date.now() - hit.ts < CACHE_TTL) return hit.data as T;
+  return null;
+}
+export function setCached<T>(key: string, data: T): void {
+  _cache.set(key, { ts: Date.now(), data });
+}
+
+// 分批拉全量（PostgREST 默认 limit=1000，不加分页会截断）。
+// 自动按 offset 累加直到取完，解决「只返回 1000 条」的截断问题。
+export async function pgSelectAll(
+  table: string,
+  columns: string[],
+  order = "name.asc",
+  pageSize = 1000
+): Promise<Record<string, unknown>[]> {
+  const orderPart = order ? `&order=${order}` : "";
+  const all: Record<string, unknown>[] = [];
+  let offset = 0;
+  // 上限保护，避免异常时死循环
+  for (let i = 0; i < 50; i++) {
+    const q = `select=${columns.join(",")}&limit=${pageSize}&offset=${offset}${orderPart}`;
+    const rows = await pgSelect(table, q);
+    all.push(...rows);
+    if (rows.length < pageSize) break; // 最后一页
+    offset += pageSize;
+  }
+  return all;
+}

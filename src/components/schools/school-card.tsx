@@ -2,19 +2,18 @@
 
 import type { SchoolFrontend } from "@/lib/types";
 import { cnGender } from "@/lib/labels";
-import { MapPin, Home, ExternalLink, Check } from "lucide-react";
+import { MapPin, Home, Check, Star } from "lucide-react";
+import { useFavorites, useCompare } from "@/lib/user-collections";
 
 interface Props {
   school: SchoolFrontend;
   view: "grid" | "list";
-  inCompare: boolean;
   hovered: boolean;
   onHover: (id: string | null) => void;
   /** 点击卡片或"详情"外的区域时打开地图 popup */
   onOpen: (id: string) => void;
   /** 点击"详情"按钮时打开详情页（modal） */
   onDetail: (id: string) => void;
-  onToggleCompare: (id: string) => void;
 }
 
 function levelYears(level: string) {
@@ -35,13 +34,15 @@ function levelYears(level: string) {
 export function SchoolCard({
   school,
   view,
-  inCompare,
   hovered,
   onHover,
   onOpen,
   onDetail,
-  onToggleCompare,
 }: Props) {
+  const { favoriteIds, toggleFavorite } = useFavorites();
+  const { compareIds, toggleCompare } = useCompare();
+  const inFavorite = favoriteIds.includes(school.id);
+  const inCompare = compareIds.includes(school.id);
   const location = [school.suburb, school.city].filter(Boolean).join(", ");
   const years = levelYears(school.level);
 
@@ -104,28 +105,18 @@ export function SchoolCard({
             : "mt-auto flex w-full items-center gap-2"
         }`}
       >
-        {school.website ? (
-          <a
-            href={school.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className={`inline-flex items-center justify-center gap-1 rounded-lg border border-primary/30 bg-white text-xs font-medium text-primary transition-colors hover:bg-primary/5 ${
-              view === "list" ? "h-9 w-full" : "flex-1 px-3 py-2"
-            }`}
-          >
-            <span>官网</span>
-            <ExternalLink className="h-3 w-3 shrink-0" />
-          </a>
-        ) : (
-          <span
-            className={`inline-flex cursor-not-allowed items-center justify-center gap-1 rounded-lg border border-primary/10 bg-bg-soft text-xs font-medium text-ink-soft ${
-              view === "list" ? "h-9 w-full" : "flex-1 px-3 py-2"
-            }`}
-          >
-            <span>官网</span>
-          </span>
-        )}
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); toggleFavorite(school.id); }}
+          className={`inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition-colors ${
+            inFavorite
+              ? "border-amber-400 bg-amber-50 text-amber-500"
+              : "border-primary/20 bg-white text-ink-soft hover:bg-primary/5 hover:text-primary"
+          } ${view === "list" ? "h-9 w-full" : "flex-1 px-3 py-2"}`}
+        >
+          <Star className={`h-3.5 w-3.5 ${inFavorite ? "fill-amber-400" : ""}`} />
+          <span>{inFavorite ? "已收藏" : "收藏"}</span>
+        </button>
 
         <button
           type="button"
@@ -139,7 +130,7 @@ export function SchoolCard({
 
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onToggleCompare(school.id); }}
+          onClick={(e) => { e.stopPropagation(); toggleCompare(school.id); }}
           className={`inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition-colors ${
             inCompare
               ? "border-primary bg-primary/5 text-primary"

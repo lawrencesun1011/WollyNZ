@@ -15,6 +15,8 @@ import { SchoolCardList } from "./school-card-list";
 import { SchoolModal } from "./school-modal";
 import { CompareBar } from "./compare-bar";
 import { CompareModal } from "./compare-modal";
+import { subscribeSchools, getSchoolsSnapshot } from "@/lib/schools-store";
+import { useFavorites, useCompare } from "@/lib/user-collections";
 
 
 const SchoolMap = dynamic(
@@ -32,19 +34,35 @@ const SchoolMap = dynamic(
 const PAGE_SIZE = 60;
 
 export function SchoolsExplorer({
-  schools,
+  initialSchools,
   fetchedAt,
 }: {
-  schools: SchoolFrontend[];
+  initialSchools: SchoolFrontend[];
   fetchedAt: string | null;
 }) {
+  // 首屏本地兜底秒开；PG 数据由全局预热层（布局内 SchoolsPreloader）拉取就绪后无缝替换。
+  const [schools, setSchools] = useState<SchoolFrontend[]>(initialSchools);
+
+  useEffect(() => {
+    // 若预热层已有数据（同会话命中或跨会话 localStorage 命中），直接采用
+    const snap = getSchoolsSnapshot();
+    if (snap && snap.length >= initialSchools.length) {
+      setSchools(snap);
+      return;
+    }
+    const unsub = subscribeSchools((list) => {
+      setSchools((prev) => (list.length >= prev.length ? list : prev));
+    });
+    return unsub;
+  }, [initialSchools]);
+
   const [filters, setFilters] = useState<Filters>(emptyFilters());
   const [sort, setSort] = useState<SortKey>("eqi");
   // 当前在地图上高亮/弹出 popup 的学校（点击地图或卡片触发）
   const [popupId, setPopupId] = useState<string | null>(null);
   // 当前详情页（modal）对应的学校 ID，由卡片"详情"按钮触发
   const [detailId, setDetailId] = useState<string | null>(null);
-  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const { compareIds } = useCompare();
   // 是否打开横向对比视图（"查看对比"触发）
   const [compareView, setCompareView] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -72,9 +90,11 @@ export function SchoolsExplorer({
     [filters.cities, filters.suburbs, filters.hotRegion]
   );
 
-  // 仅保留位于地图视野内的学校，使列表与地图保持一致
+  // 搜索时：结果为全局匹配（不受地图范围影响），仍受其它筛选项影响。
+  // 未搜索时：仅保留位于地图视野内的学校，使列表与地图保持一致。
+  const hasKeyword = filters.keyword.trim() !== "";
   const inBounds = useMemo(() => {
-    if (!mapBounds) return filtered;
+    if (hasKeyword || !mapBounds) return filtered;
     const [s, w, n, e] = mapBounds;
     return filtered.filter(
       (sc) =>
@@ -85,7 +105,7 @@ export function SchoolsExplorer({
         sc.lng >= w &&
         sc.lng <= e
     );
-  }, [filtered, mapBounds]);
+  }, [filtered, mapBounds, hasKeyword]);
 
   // 筛选或地图视野变化时，重置分页到首页
   useEffect(() => {
@@ -97,14 +117,6 @@ export function SchoolsExplorer({
   const compareSchools = compareIds
     .map((id) => schools.find((s) => s.id === id))
     .filter(Boolean) as SchoolFrontend[];
-
-  function toggleCompare(id: string) {
-    setCompareIds((prev) => {
-      if (prev.includes(id)) return prev.filter((x) => x !== id);
-      if (prev.length >= 4) return prev;
-      return [...prev, id];
-    });
-  }
 
   return (
     <div className="min-h-screen bg-bg">
@@ -133,12 +145,10 @@ export function SchoolsExplorer({
               <SchoolCardList
                 schools={visible}
                 view="list"
-                compareIds={compareIds}
                 hoveredId={hoveredId}
                 onHover={setHoveredId}
                 onOpen={setPopupId}
                 onDetail={setDetailId}
-                onToggleCompare={toggleCompare}
               />
               {visibleCount < inBounds.length && (
                 <div className="pt-4 text-center">
@@ -164,39 +174,24 @@ export function SchoolsExplorer({
               activeId={popupId}
               onSelect={setPopupId}
               onDetail={setDetailId}
-              onToggleCompare={toggleCompare}
               onBoundsChange={setMapBounds}
               flyCities={flyCities}
+              fitSearchKey={filters.keyword.trim() || undefined}
             />
           </section>
         </main>
       </div>
 
       {detailSchool && (
-        <SchoolModal
-          school={detailSchool}
-          onClose={() => setDetailId(null)}
-          inCompare={compareIds.includes(detailSchool.id)}
-          onToggleCompare={toggleCompare}
-        />
+        <SchoolModal school={detailSchool} onClose={() => setDetailId(null)} />
       )}
 
       {compareSchools.length > 0 && (
-        <CompareBar
-          schools={compareSchools}
-          onRemove={(id) => toggleCompare(id)}
-          onClear={() => setCompareIds([])}
-          onCompare={() => setCompareView(true)}
-        />
+        <CompareBar schools={compareSchools} onCompare={() => setCompareView(true)} />
       )}
 
       {compareView && compareSchools.length >= 2 && (
-        <CompareModal
-          schools={compareSchools}
-          compareIds={compareIds}
-          onToggleCompare={toggleCompare}
-          onClose={() => setCompareView(false)}
-        />
+        <CompareModal schools={compareSchools} onClose={() => setCompareView(false)} />
       )}
     </div>
   );

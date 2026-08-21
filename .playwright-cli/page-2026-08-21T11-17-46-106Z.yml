@@ -1,0 +1,999 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "WollyNZ" [ref=e5] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e11]:
+        - link "中小学" [ref=e12] [cursor=pointer]:
+          - /url: /schools
+        - link "幼儿园" [ref=e13] [cursor=pointer]:
+          - /url: /ece
+      - button "登录" [disabled] [ref=e14]
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e22]:
+            - paragraph [ref=e23]:
+              - text: 北岛
+              - generic [ref=e24]: NORTH ISLAND
+            - generic [ref=e25]:
+              - button "奥克兰" [ref=e26]
+              - button "奥克兰-北岸" [ref=e27]
+              - button "奥克兰-东区" [ref=e28]
+              - button "奥克兰-中区" [ref=e29]
+              - button "汉密尔顿" [ref=e30]
+              - button "惠灵顿" [ref=e31]
+              - button "陶朗加" [ref=e32]
+              - button "北帕默斯顿" [ref=e33]
+          - generic [ref=e35]:
+            - paragraph [ref=e36]:
+              - text: 南岛
+              - generic [ref=e37]: SOUTH ISLAND
+            - generic [ref=e38]:
+              - button "基督城" [ref=e39]
+              - button "皇后镇" [ref=e40]
+              - button "但尼丁" [ref=e41]
+        - generic [ref=e42]:
+          - generic [ref=e43]:
+            - textbox "搜索：名称 / 地点 / 关键词" [ref=e49]
+            - button "清空筛选" [disabled] [ref=e50]
+          - generic [ref=e54]:
+            - button "城市 任意" [ref=e56] [cursor=pointer]:
+              - generic [ref=e57]: 城市
+              - generic [ref=e58]: 任意
+            - button "学校类型 任意" [ref=e62] [cursor=pointer]:
+              - generic [ref=e63]: 学校类型
+              - generic [ref=e64]: 任意
+            - button "? 办学性质 任意" [ref=e68] [cursor=pointer]:
+              - generic [ref=e69]: "?"
+              - generic [ref=e71]: 办学性质
+              - generic [ref=e72]: 任意
+            - button "? 公平指数（EQI） 全部" [ref=e76] [cursor=pointer]:
+              - generic [ref=e77]: "?"
+              - generic [ref=e79]: 公平指数（EQI）
+              - generic [ref=e80]: 全部
+            - button "? 偏远度 全部" [ref=e84] [cursor=pointer]:
+              - generic [ref=e85]: "?"
+              - generic [ref=e87]: 偏远度
+              - generic [ref=e88]: 全部
+            - button "国际生 全部" [ref=e92] [cursor=pointer]:
+              - generic [ref=e93]: 国际生
+              - generic [ref=e94]: 全部
+            - button "? 寄宿设施 全部" [ref=e98] [cursor=pointer]:
+              - generic [ref=e99]: "?"
+              - generic [ref=e101]: 寄宿设施
+              - generic [ref=e102]: 全部
+      - main [ref=e106]:
+        - generic [ref=e107]:
+          - generic [ref=e109]:
+            - paragraph [ref=e110]: 共 2465 所 · 当前显示 60 / 2465
+            - combobox [ref=e116]:
+              - option "名称（A–Z）"
+              - option "EQI（升序）" [selected]
+              - option "人数（降序）"
+              - option "地区"
+          - generic [ref=e117]:
+            - generic [ref=e118]:
+              - article [ref=e119] [cursor=pointer]:
+                - generic [ref=e120]:
+                  - heading "Campbells Bay School" [level=3] [ref=e125]
+                  - generic [ref=e126]: Castor Bay, Auckland
+                  - generic [ref=e131]:
+                    - generic [ref=e132]: 公立
+                    - generic [ref=e133]: 小学（1-6 年级）
+                    - generic [ref=e134]: 男女混校
+                    - generic [ref=e135]: 学生 802
+                    - generic [ref=e136]: EQI 344
+                - generic [ref=e137]:
+                  - link "官网" [ref=e138]:
+                    - /url: http://www.campbellsbay.school.nz/
+                  - button "详情" [ref=e144]
+                  - button "对比" [ref=e145]
+              - article [ref=e147] [cursor=pointer]:
+                - generic [ref=e148]:
+                  - heading "Cashmere Avenue School" [level=3] [ref=e153]
+                  - generic [ref=e154]: Khandallah, Wellington
+                  - generic [ref=e159]:
+                    - generic [ref=e160]: 公立
+                    - generic [ref=e161]: 小学（1-6 年级）
+                    - generic [ref=e162]: 男女混校
+                    - generic [ref=e163]: 学生 310
+                    - generic [ref=e164]: EQI 344
+                - generic [ref=e165]:
+                  - link "官网" [ref=e166]:
+                    - /url: http://www.cashmere-ave.school.nz
+                  - button "详情" [ref=e172]
+                  - button "对比" [ref=e173]
+              - article [ref=e175] [cursor=pointer]:
+                - generic [ref=e176]:
+                  - heading "Kohia Terrace School" [level=3] [ref=e181]
+                  - generic [ref=e182]: Epsom, Auckland
+                  - generic [ref=e187]:
+                    - generic [ref=e188]: 公立
+                    - generic [ref=e189]: 小学（1-6 年级）
+                    - generic [ref=e190]: 男女混校
+                    - generic [ref=e191]: 学生 367
+                    - generic [ref=e192]: EQI 344
+                - generic [ref=e193]:
+                  - link "官网" [ref=e194]:
+                    - /url: http://www.kts.school.nz
+                  - button "详情" [ref=e200]
+                  - button "对比" [ref=e201]
+              - article [ref=e203] [cursor=pointer]:
+                - generic [ref=e204]:
+                  - heading "Maungawhau School" [level=3] [ref=e209]
+                  - generic [ref=e210]: Mount Eden, Auckland
+                  - generic [ref=e215]:
+                    - generic [ref=e216]: 公立
+                    - generic [ref=e217]: 小学（1-6 年级）
+                    - generic [ref=e218]: 男女混校
+                    - generic [ref=e219]: 学生 654
+                    - generic [ref=e220]: EQI 344
+                - generic [ref=e221]:
+                  - link "官网" [ref=e222]:
+                    - /url: http://www.maungawhau.school.nz/
+                  - button "详情" [ref=e228]
+                  - button "对比" [ref=e229]
+              - article [ref=e231] [cursor=pointer]:
+                - generic [ref=e232]:
+                  - heading "Our Lady Sacred Heart School (Epsom)" [level=3] [ref=e237]
+                  - generic [ref=e238]: Epsom, Auckland
+                  - generic [ref=e243]:
+                    - generic [ref=e244]: 公立整合
+                    - generic [ref=e245]: 小学（1-6 年级）
+                    - generic [ref=e246]: 男女混校
+                    - generic [ref=e247]: 学生 209
+                    - generic [ref=e248]: EQI 344
+                - generic [ref=e249]:
+                  - link "官网" [ref=e250]:
+                    - /url: http://www.olsh.school.nz
+                  - button "详情" [ref=e256]
+                  - button "对比" [ref=e257]
+              - article [ref=e259] [cursor=pointer]:
+                - generic [ref=e260]:
+                  - heading "Point View School" [level=3] [ref=e265]
+                  - generic [ref=e266]: Howick South, Auckland
+                  - generic [ref=e271]:
+                    - generic [ref=e272]: 公立
+                    - generic [ref=e273]: 小学（1-6 年级）
+                    - generic [ref=e274]: 男女混校
+                    - generic [ref=e275]: 学生 641
+                    - generic [ref=e276]: EQI 344
+                - generic [ref=e277]:
+                  - link "官网" [ref=e278]:
+                    - /url: http://www.pointview.school.nz
+                  - button "详情" [ref=e284]
+                  - button "对比" [ref=e285]
+              - article [ref=e287] [cursor=pointer]:
+                - generic [ref=e288]:
+                  - heading "St Michael's Catholic School (Remuera)" [level=3] [ref=e293]
+                  - generic [ref=e294]: Remuera, Auckland
+                  - generic [ref=e299]:
+                    - generic [ref=e300]: 公立整合
+                    - generic [ref=e301]: 小学（1-6 年级）
+                    - generic [ref=e302]: 男女混校
+                    - generic [ref=e303]: 学生 226
+                    - generic [ref=e304]: EQI 344
+                - generic [ref=e305]:
+                  - link "官网" [ref=e306]:
+                    - /url: http://www.smcs.school.nz/
+                  - button "详情" [ref=e312]
+                  - button "对比" [ref=e313]
+              - article [ref=e315] [cursor=pointer]:
+                - generic [ref=e316]:
+                  - heading "Victoria Avenue School" [level=3] [ref=e321]
+                  - generic [ref=e322]: Remuera, Auckland
+                  - generic [ref=e327]:
+                    - generic [ref=e328]: 公立
+                    - generic [ref=e329]: 小学（1-6 年级）
+                    - generic [ref=e330]: 男女混校
+                    - generic [ref=e331]: 学生 400
+                    - generic [ref=e332]: EQI 344
+                - generic [ref=e333]:
+                  - link "官网" [ref=e334]:
+                    - /url: http://www.victoria-avenue.school.nz
+                  - button "详情" [ref=e340]
+                  - button "对比" [ref=e341]
+              - article [ref=e343] [cursor=pointer]:
+                - generic [ref=e344]:
+                  - heading "Westminster Christian School" [level=3] [ref=e349]
+                  - generic [ref=e350]: Glenfield, Auckland
+                  - generic [ref=e355]:
+                    - generic [ref=e356]: 公立整合
+                    - generic [ref=e357]: 小学（1-6 年级）
+                    - generic [ref=e358]: 男女混校
+                    - generic [ref=e359]: 学生 364
+                    - generic [ref=e360]: EQI 344
+                - generic [ref=e361]:
+                  - link "官网" [ref=e362]:
+                    - /url: http://www.westminster.school.nz/
+                  - button "详情" [ref=e368]
+                  - button "对比" [ref=e369]
+              - article [ref=e371] [cursor=pointer]:
+                - generic [ref=e372]:
+                  - heading "Mt Eden Normal School" [level=3] [ref=e377]
+                  - generic [ref=e378]: Mount Eden, Auckland
+                  - generic [ref=e383]:
+                    - generic [ref=e384]: 公立
+                    - generic [ref=e385]: 小学（1-6 年级）
+                    - generic [ref=e386]: 男女混校
+                    - generic [ref=e387]: 学生 565
+                    - generic [ref=e388]: EQI 346
+                - generic [ref=e389]:
+                  - link "官网" [ref=e390]:
+                    - /url: http://www.mteden.school.nz/
+                  - button "详情" [ref=e396]
+                  - button "对比" [ref=e397]
+              - article [ref=e399] [cursor=pointer]:
+                - generic [ref=e400]:
+                  - heading "St Joseph's Catholic School (Takapuna)" [level=3] [ref=e405]
+                  - generic [ref=e406]: Takapuna, Auckland
+                  - generic [ref=e411]:
+                    - generic [ref=e412]: 公立整合
+                    - generic [ref=e413]: 小学（1-6 年级）
+                    - generic [ref=e414]: 男女混校
+                    - generic [ref=e415]: 学生 418
+                    - generic [ref=e416]: EQI 346
+                - generic [ref=e417]:
+                  - link "官网" [ref=e418]:
+                    - /url: http://www.sj.school.nz
+                  - button "详情" [ref=e424]
+                  - button "对比" [ref=e425]
+              - article [ref=e427] [cursor=pointer]:
+                - generic [ref=e428]:
+                  - heading "Remuera School" [level=3] [ref=e433]
+                  - generic [ref=e434]: Remuera, Auckland
+                  - generic [ref=e439]:
+                    - generic [ref=e440]: 公立
+                    - generic [ref=e441]: 小学（1-6 年级）
+                    - generic [ref=e442]: 男女混校
+                    - generic [ref=e443]: 学生 569
+                    - generic [ref=e444]: EQI 348
+                - generic [ref=e445]:
+                  - link "官网" [ref=e446]:
+                    - /url: http://www.rps.school.nz
+                  - button "详情" [ref=e452]
+                  - button "对比" [ref=e453]
+              - article [ref=e455] [cursor=pointer]:
+                - generic [ref=e456]:
+                  - heading "Amesbury School" [level=3] [ref=e461]
+                  - generic [ref=e462]: Churton Park, Wellington
+                  - generic [ref=e467]:
+                    - generic [ref=e468]: 公立
+                    - generic [ref=e469]: 小学（1-6 年级）
+                    - generic [ref=e470]: 男女混校
+                    - generic [ref=e471]: 学生 258
+                    - generic [ref=e472]: EQI 349
+                - generic [ref=e473]:
+                  - link "官网" [ref=e474]:
+                    - /url: http://www.amesbury.school.nz
+                  - button "详情" [ref=e480]
+                  - button "对比" [ref=e481]
+              - article [ref=e483] [cursor=pointer]:
+                - generic [ref=e484]:
+                  - heading "Meadowbank School" [level=3] [ref=e489]
+                  - generic [ref=e490]: Remuera, Auckland
+                  - generic [ref=e495]:
+                    - generic [ref=e496]: 公立
+                    - generic [ref=e497]: 小学（1-6 年级）
+                    - generic [ref=e498]: 男女混校
+                    - generic [ref=e499]: 学生 768
+                    - generic [ref=e500]: EQI 349
+                - generic [ref=e501]:
+                  - link "官网" [ref=e502]:
+                    - /url: http://www.meadowbank.school.nz
+                  - button "详情" [ref=e508]
+                  - button "对比" [ref=e509]
+              - article [ref=e511] [cursor=pointer]:
+                - generic [ref=e512]:
+                  - heading "Wadestown School" [level=3] [ref=e517]
+                  - generic [ref=e518]: Wadestown, Wellington
+                  - generic [ref=e523]:
+                    - generic [ref=e524]: 公立
+                    - generic [ref=e525]: 小学（1-6 年级）
+                    - generic [ref=e526]: 男女混校
+                    - generic [ref=e527]: 学生 249
+                    - generic [ref=e528]: EQI 349
+                - generic [ref=e529]:
+                  - link "官网" [ref=e530]:
+                    - /url: http://www.wadestown.school.nz
+                  - button "详情" [ref=e536]
+                  - button "对比" [ref=e537]
+              - article [ref=e539] [cursor=pointer]:
+                - generic [ref=e540]:
+                  - heading "Cornwall Park District School" [level=3] [ref=e545]
+                  - generic [ref=e546]: Greenlane, Auckland
+                  - generic [ref=e551]:
+                    - generic [ref=e552]: 公立
+                    - generic [ref=e553]: 小学（1-6 年级）
+                    - generic [ref=e554]: 男女混校
+                    - generic [ref=e555]: 学生 676
+                    - generic [ref=e556]: EQI 350
+                - generic [ref=e557]:
+                  - link "官网" [ref=e558]:
+                    - /url: http://www.cornwallpark.school.nz/
+                  - button "详情" [ref=e564]
+                  - button "对比" [ref=e565]
+              - article [ref=e567] [cursor=pointer]:
+                - generic [ref=e568]:
+                  - heading "St Benedict's School (Khandallah)" [level=3] [ref=e573]
+                  - generic [ref=e574]: Khandallah, Wellington
+                  - generic [ref=e579]:
+                    - generic [ref=e580]: 公立整合
+                    - generic [ref=e581]: 小学（1-6 年级）
+                    - generic [ref=e582]: 男女混校
+                    - generic [ref=e583]: 学生 209
+                    - generic [ref=e584]: EQI 350
+                - generic [ref=e585]:
+                  - link "官网" [ref=e586]:
+                    - /url: http://www.st-benedicts.school.nz
+                  - button "详情" [ref=e592]
+                  - button "对比" [ref=e593]
+              - article [ref=e595] [cursor=pointer]:
+                - generic [ref=e596]:
+                  - heading "St John's School (Mairangi Bay)" [level=3] [ref=e601]
+                  - generic [ref=e602]: Mairangi Bay, Auckland
+                  - generic [ref=e607]:
+                    - generic [ref=e608]: 公立整合
+                    - generic [ref=e609]: 小学（1-6 年级）
+                    - generic [ref=e610]: 男女混校
+                    - generic [ref=e611]: 学生 303
+                    - generic [ref=e612]: EQI 350
+                - generic [ref=e613]:
+                  - link "官网" [ref=e614]:
+                    - /url: http://www.stjohnsmairangibay.school.nz
+                  - button "详情" [ref=e620]
+                  - button "对比" [ref=e621]
+              - article [ref=e623] [cursor=pointer]:
+                - generic [ref=e624]:
+                  - heading "Upper Harbour Primary School" [level=3] [ref=e629]
+                  - generic [ref=e630]: Albany, Auckland
+                  - generic [ref=e635]:
+                    - generic [ref=e636]: 公立
+                    - generic [ref=e637]: 小学（1-6 年级）
+                    - generic [ref=e638]: 男女混校
+                    - generic [ref=e639]: 学生 360
+                    - generic [ref=e640]: EQI 351
+                - generic [ref=e641]:
+                  - link "官网" [ref=e642]:
+                    - /url: http://www.upperharbour.school.nz
+                  - button "详情" [ref=e648]
+                  - button "对比" [ref=e649]
+              - article [ref=e651] [cursor=pointer]:
+                - generic [ref=e652]:
+                  - heading "Worser Bay School" [level=3] [ref=e657]
+                  - generic [ref=e658]: Seatoun, Wellington
+                  - generic [ref=e663]:
+                    - generic [ref=e664]: 公立
+                    - generic [ref=e665]: 小学（1-6 年级）
+                    - generic [ref=e666]: 男女混校
+                    - generic [ref=e667]: 学生 110
+                    - generic [ref=e668]: EQI 351
+                - generic [ref=e669]:
+                  - link "官网" [ref=e670]:
+                    - /url: http://www.worserbay.school.nz
+                  - button "详情" [ref=e676]
+                  - button "对比" [ref=e677]
+              - article [ref=e679] [cursor=pointer]:
+                - generic [ref=e680]:
+                  - heading "Chelsea School" [level=3] [ref=e685]
+                  - generic [ref=e686]: Birkenhead, Auckland
+                  - generic [ref=e691]:
+                    - generic [ref=e692]: 公立
+                    - generic [ref=e693]: 小学（1-6 年级）
+                    - generic [ref=e694]: 男女混校
+                    - generic [ref=e695]: 学生 384
+                    - generic [ref=e696]: EQI 352
+                - generic [ref=e697]:
+                  - link "官网" [ref=e698]:
+                    - /url: http://www.chelsea.school.nz/
+                  - button "详情" [ref=e704]
+                  - button "对比" [ref=e705]
+              - article [ref=e707] [cursor=pointer]:
+                - generic [ref=e708]:
+                  - heading "Hauraki School" [level=3] [ref=e713]
+                  - generic [ref=e714]: Takapuna, Auckland
+                  - generic [ref=e719]:
+                    - generic [ref=e720]: 公立
+                    - generic [ref=e721]: 小学（1-6 年级）
+                    - generic [ref=e722]: 男女混校
+                    - generic [ref=e723]: 学生 505
+                    - generic [ref=e724]: EQI 353
+                - generic [ref=e725]:
+                  - link "官网" [ref=e726]:
+                    - /url: http://www.hauraki.school.nz/
+                  - button "详情" [ref=e732]
+                  - button "对比" [ref=e733]
+              - article [ref=e735] [cursor=pointer]:
+                - generic [ref=e736]:
+                  - heading "Kelburn Normal School" [level=3] [ref=e741]
+                  - generic [ref=e742]: Kelburn, Wellington
+                  - generic [ref=e747]:
+                    - generic [ref=e748]: 公立
+                    - generic [ref=e749]: 小学（1-6 年级）
+                    - generic [ref=e750]: 男女混校
+                    - generic [ref=e751]: 学生 269
+                    - generic [ref=e752]: EQI 353
+                - generic [ref=e753]:
+                  - link "官网" [ref=e754]:
+                    - /url: http://www.kelburnnormal.school.nz/
+                  - button "详情" [ref=e760]
+                  - button "对比" [ref=e761]
+              - article [ref=e763] [cursor=pointer]:
+                - generic [ref=e764]:
+                  - heading "Ngaio School" [level=3] [ref=e769]
+                  - generic [ref=e770]: Ngaio, Wellington
+                  - generic [ref=e775]:
+                    - generic [ref=e776]: 公立
+                    - generic [ref=e777]: 小学（1-6 年级）
+                    - generic [ref=e778]: 男女混校
+                    - generic [ref=e779]: 学生 275
+                    - generic [ref=e780]: EQI 353
+                - generic [ref=e781]:
+                  - link "官网" [ref=e782]:
+                    - /url: http://www.ngaio.school.nz
+                  - button "详情" [ref=e788]
+                  - button "对比" [ref=e789]
+              - article [ref=e791] [cursor=pointer]:
+                - generic [ref=e792]:
+                  - heading "Pigeon Mountain School" [level=3] [ref=e797]
+                  - generic [ref=e798]: Bucklands Beach, Auckland
+                  - generic [ref=e803]:
+                    - generic [ref=e804]: 公立
+                    - generic [ref=e805]: 小学（1-6 年级）
+                    - generic [ref=e806]: 男女混校
+                    - generic [ref=e807]: 学生 481
+                    - generic [ref=e808]: EQI 353
+                - generic [ref=e809]:
+                  - link "官网" [ref=e810]:
+                    - /url: http://www.pigeon-mountain.school.nz
+                  - button "详情" [ref=e816]
+                  - button "对比" [ref=e817]
+              - article [ref=e819] [cursor=pointer]:
+                - generic [ref=e820]:
+                  - heading "Karori Normal School" [level=3] [ref=e825]
+                  - generic [ref=e826]: Karori, Wellington
+                  - generic [ref=e831]:
+                    - generic [ref=e832]: 公立
+                    - generic [ref=e833]: 小学（1-6 年级）
+                    - generic [ref=e834]: 男女混校
+                    - generic [ref=e835]: 学生 594
+                    - generic [ref=e836]: EQI 354
+                - generic [ref=e837]:
+                  - link "官网" [ref=e838]:
+                    - /url: http://www.kns.school.nz
+                  - button "详情" [ref=e844]
+                  - button "对比" [ref=e845]
+              - article [ref=e847] [cursor=pointer]:
+                - generic [ref=e848]:
+                  - heading "Marist School (Mt Albert)" [level=3] [ref=e853]
+                  - generic [ref=e854]: Mount Albert, Auckland
+                  - generic [ref=e859]:
+                    - generic [ref=e860]: 公立整合
+                    - generic [ref=e861]: 小学（1-6 年级）
+                    - generic [ref=e862]: 男女混校
+                    - generic [ref=e863]: 学生 267
+                    - generic [ref=e864]: EQI 354
+                - generic [ref=e865]:
+                  - link "官网" [ref=e866]:
+                    - /url: http://www.marist.school.nz
+                  - button "详情" [ref=e872]
+                  - button "对比" [ref=e873]
+              - article [ref=e875] [cursor=pointer]:
+                - generic [ref=e876]:
+                  - heading "Mellons Bay School" [level=3] [ref=e881]
+                  - generic [ref=e882]: Howick, Auckland
+                  - generic [ref=e887]:
+                    - generic [ref=e888]: 公立
+                    - generic [ref=e889]: 小学（1-6 年级）
+                    - generic [ref=e890]: 男女混校
+                    - generic [ref=e891]: 学生 414
+                    - generic [ref=e892]: EQI 354
+                - generic [ref=e893]:
+                  - link "官网" [ref=e894]:
+                    - /url: http://mellonsbay.school.nz/
+                  - button "详情" [ref=e900]
+                  - button "对比" [ref=e901]
+              - article [ref=e903] [cursor=pointer]:
+                - generic [ref=e904]:
+                  - heading "Mt Carmel School (Meadowbank)" [level=3] [ref=e909]
+                  - generic [ref=e910]: Meadowbank, Auckland
+                  - generic [ref=e915]:
+                    - generic [ref=e916]: 公立整合
+                    - generic [ref=e917]: 小学（1-6 年级）
+                    - generic [ref=e918]: 男女混校
+                    - generic [ref=e919]: 学生 202
+                    - generic [ref=e920]: EQI 354
+                - generic [ref=e921]:
+                  - link "官网" [ref=e922]:
+                    - /url: http://www.mtcarmel.school.nz
+                  - button "详情" [ref=e928]
+                  - button "对比" [ref=e929]
+              - article [ref=e931] [cursor=pointer]:
+                - generic [ref=e932]:
+                  - heading "St Ignatius Catholic School (St Heliers)" [level=3] [ref=e937]
+                  - generic [ref=e938]: St Heliers, Auckland
+                  - generic [ref=e943]:
+                    - generic [ref=e944]: 公立整合
+                    - generic [ref=e945]: 小学（1-6 年级）
+                    - generic [ref=e946]: 男女混校
+                    - generic [ref=e947]: 学生 218
+                    - generic [ref=e948]: EQI 354
+                - generic [ref=e949]:
+                  - link "官网" [ref=e950]:
+                    - /url: http://www.stignatius.school.nz
+                  - button "详情" [ref=e956]
+                  - button "对比" [ref=e957]
+              - article [ref=e959] [cursor=pointer]:
+                - generic [ref=e960]:
+                  - heading "Epsom Normal School" [level=3] [ref=e965]
+                  - generic [ref=e966]: Epsom, Auckland
+                  - generic [ref=e971]:
+                    - generic [ref=e972]: 公立
+                    - generic [ref=e973]: 小学（1-6 年级）
+                    - generic [ref=e974]: 男女混校
+                    - generic [ref=e975]: 学生 611
+                    - generic [ref=e976]: EQI 355
+                - generic [ref=e977]:
+                  - link "官网" [ref=e978]:
+                    - /url: http://www.epsomnormalprimary.school.nz/
+                  - button "详情" [ref=e984]
+                  - button "对比" [ref=e985]
+              - article [ref=e987] [cursor=pointer]:
+                - generic [ref=e988]:
+                  - heading "Halsey Drive School" [level=3] [ref=e993]
+                  - generic [ref=e994]: Lynfield, Auckland
+                  - generic [ref=e999]:
+                    - generic [ref=e1000]: 公立
+                    - generic [ref=e1001]: 小学（1-6 年级）
+                    - generic [ref=e1002]: 男女混校
+                    - generic [ref=e1003]: 学生 467
+                    - generic [ref=e1004]: EQI 355
+                - generic [ref=e1005]:
+                  - link "官网" [ref=e1006]:
+                    - /url: http://www.halseydrive.school.nz
+                  - button "详情" [ref=e1012]
+                  - button "对比" [ref=e1013]
+              - article [ref=e1015] [cursor=pointer]:
+                - generic [ref=e1016]:
+                  - heading "Our Lady Star of the Sea School (Howick)" [level=3] [ref=e1021]
+                  - generic [ref=e1022]: Howick South, Auckland
+                  - generic [ref=e1027]:
+                    - generic [ref=e1028]: 公立整合
+                    - generic [ref=e1029]: 小学（1-6 年级）
+                    - generic [ref=e1030]: 男女混校
+                    - generic [ref=e1031]: 学生 297
+                    - generic [ref=e1032]: EQI 355
+                - generic [ref=e1033]:
+                  - link "官网" [ref=e1034]:
+                    - /url: http://www.starofthesea.school.nz/
+                  - button "详情" [ref=e1040]
+                  - button "对比" [ref=e1041]
+              - article [ref=e1043] [cursor=pointer]:
+                - generic [ref=e1044]:
+                  - heading "Bayfield School" [level=3] [ref=e1049]
+                  - generic [ref=e1050]: Herne Bay, Auckland
+                  - generic [ref=e1055]:
+                    - generic [ref=e1056]: 公立
+                    - generic [ref=e1057]: 小学（1-6 年级）
+                    - generic [ref=e1058]: 男女混校
+                    - generic [ref=e1059]: 学生 364
+                    - generic [ref=e1060]: EQI 356
+                - generic [ref=e1061]:
+                  - link "官网" [ref=e1062]:
+                    - /url: http://www.bayfield.school.nz
+                  - button "详情" [ref=e1068]
+                  - button "对比" [ref=e1069]
+              - article [ref=e1071] [cursor=pointer]:
+                - generic [ref=e1072]:
+                  - heading "Bucklands Beach Primary School" [level=3] [ref=e1077]
+                  - generic [ref=e1078]: Bucklands Beach, Auckland
+                  - generic [ref=e1083]:
+                    - generic [ref=e1084]: 公立
+                    - generic [ref=e1085]: 小学（1-6 年级）
+                    - generic [ref=e1086]: 男女混校
+                    - generic [ref=e1087]: 学生 395
+                    - generic [ref=e1088]: EQI 356
+                - generic [ref=e1089]:
+                  - link "官网" [ref=e1090]:
+                    - /url: http://www.bbps.school.nz
+                  - button "详情" [ref=e1096]
+                  - button "对比" [ref=e1097]
+              - article [ref=e1099] [cursor=pointer]:
+                - generic [ref=e1100]:
+                  - heading "Milford School (Auckland)" [level=3] [ref=e1105]
+                  - generic [ref=e1106]: Milford, Auckland
+                  - generic [ref=e1111]:
+                    - generic [ref=e1112]: 公立
+                    - generic [ref=e1113]: 小学（1-6 年级）
+                    - generic [ref=e1114]: 男女混校
+                    - generic [ref=e1115]: 学生 563
+                    - generic [ref=e1116]: EQI 356
+                - generic [ref=e1117]:
+                  - link "官网" [ref=e1118]:
+                    - /url: http://www.milford.school.nz
+                  - button "详情" [ref=e1124]
+                  - button "对比" [ref=e1125]
+              - article [ref=e1127] [cursor=pointer]:
+                - generic [ref=e1128]:
+                  - heading "Seatoun School" [level=3] [ref=e1133]
+                  - generic [ref=e1134]: Seatoun, Wellington
+                  - generic [ref=e1139]:
+                    - generic [ref=e1140]: 公立
+                    - generic [ref=e1141]: 小学（1-6 年级）
+                    - generic [ref=e1142]: 男女混校
+                    - generic [ref=e1143]: 学生 383
+                    - generic [ref=e1144]: EQI 356
+                - generic [ref=e1145]:
+                  - link "官网" [ref=e1146]:
+                    - /url: http://www.seatoun.school.nz/
+                  - button "详情" [ref=e1152]
+                  - button "对比" [ref=e1153]
+              - article [ref=e1155] [cursor=pointer]:
+                - generic [ref=e1156]:
+                  - heading "St Dominic's Catholic School (Blockhouse Bay)" [level=3] [ref=e1161]
+                  - generic [ref=e1162]: Blockhouse Bay, Auckland
+                  - generic [ref=e1167]:
+                    - generic [ref=e1168]: 公立整合
+                    - generic [ref=e1169]: 小学（1-6 年级）
+                    - generic [ref=e1170]: 男女混校
+                    - generic [ref=e1171]: 学生 264
+                    - generic [ref=e1172]: EQI 356
+                - generic [ref=e1173]:
+                  - link "官网" [ref=e1174]:
+                    - /url: http://www.stdominics.school.nz
+                  - button "详情" [ref=e1180]
+                  - button "对比" [ref=e1181]
+              - article [ref=e1183] [cursor=pointer]:
+                - generic [ref=e1184]:
+                  - heading "Crofton Downs Primary School" [level=3] [ref=e1189]
+                  - generic [ref=e1190]: Crofton Downs, Wellington
+                  - generic [ref=e1195]:
+                    - generic [ref=e1196]: 公立
+                    - generic [ref=e1197]: 小学（1-6 年级）
+                    - generic [ref=e1198]: 男女混校
+                    - generic [ref=e1199]: 学生 158
+                    - generic [ref=e1200]: EQI 357
+                - generic [ref=e1201]:
+                  - link "官网" [ref=e1202]:
+                    - /url: https://www.cdps.school.nz/
+                  - button "详情" [ref=e1208]
+                  - button "对比" [ref=e1209]
+              - article [ref=e1211] [cursor=pointer]:
+                - generic [ref=e1212]:
+                  - heading "Murrays Bay School" [level=3] [ref=e1217]
+                  - generic [ref=e1218]: Murrays Bay, Auckland
+                  - generic [ref=e1223]:
+                    - generic [ref=e1224]: 公立
+                    - generic [ref=e1225]: 小学（1-6 年级）
+                    - generic [ref=e1226]: 男女混校
+                    - generic [ref=e1227]: 学生 718
+                    - generic [ref=e1228]: EQI 357
+                - generic [ref=e1229]:
+                  - link "官网" [ref=e1230]:
+                    - /url: http://www.murraysbay.school.nz
+                  - button "详情" [ref=e1236]
+                  - button "对比" [ref=e1237]
+              - article [ref=e1239] [cursor=pointer]:
+                - generic [ref=e1240]:
+                  - heading "Oteha Valley School" [level=3] [ref=e1245]
+                  - generic [ref=e1246]: Oteha, Auckland
+                  - generic [ref=e1251]:
+                    - generic [ref=e1252]: 公立
+                    - generic [ref=e1253]: 小学（1-6 年级）
+                    - generic [ref=e1254]: 男女混校
+                    - generic [ref=e1255]: 学生 510
+                    - generic [ref=e1256]: EQI 357
+                - generic [ref=e1257]:
+                  - link "官网" [ref=e1258]:
+                    - /url: http://www.oteha.school.nz
+                  - button "详情" [ref=e1264]
+                  - button "对比" [ref=e1265]
+              - article [ref=e1267] [cursor=pointer]:
+                - generic [ref=e1268]:
+                  - heading "Greenhithe School" [level=3] [ref=e1273]
+                  - generic [ref=e1274]: Greenhithe, Auckland
+                  - generic [ref=e1279]:
+                    - generic [ref=e1280]: 公立
+                    - generic [ref=e1281]: 小学（1-6 年级）
+                    - generic [ref=e1282]: 男女混校
+                    - generic [ref=e1283]: 学生 462
+                    - generic [ref=e1284]: EQI 358
+                - generic [ref=e1285]:
+                  - link "官网" [ref=e1286]:
+                    - /url: http://www.greenhithe.school.nz
+                  - button "详情" [ref=e1292]
+                  - button "对比" [ref=e1293]
+              - article [ref=e1295] [cursor=pointer]:
+                - generic [ref=e1296]:
+                  - heading "Mairangi Bay School" [level=3] [ref=e1301]
+                  - generic [ref=e1302]: Mairangi Bay, Auckland
+                  - generic [ref=e1307]:
+                    - generic [ref=e1308]: 公立
+                    - generic [ref=e1309]: 小学（1-6 年级）
+                    - generic [ref=e1310]: 男女混校
+                    - generic [ref=e1311]: 学生 446
+                    - generic [ref=e1312]: EQI 358
+                - generic [ref=e1313]:
+                  - link "官网" [ref=e1314]:
+                    - /url: http://www.mairangibay.school.nz
+                  - button "详情" [ref=e1320]
+                  - button "对比" [ref=e1321]
+              - article [ref=e1323] [cursor=pointer]:
+                - generic [ref=e1324]:
+                  - heading "Pinehill School (Browns Bay)" [level=3] [ref=e1329]
+                  - generic [ref=e1330]: Pinehill, Auckland
+                  - generic [ref=e1335]:
+                    - generic [ref=e1336]: 公立
+                    - generic [ref=e1337]: 小学（1-6 年级）
+                    - generic [ref=e1338]: 男女混校
+                    - generic [ref=e1339]: 学生 388
+                    - generic [ref=e1340]: EQI 359
+                - generic [ref=e1341]:
+                  - link "官网" [ref=e1342]:
+                    - /url: http://www.pinehill.school.nz/
+                  - button "详情" [ref=e1348]
+                  - button "对比" [ref=e1349]
+              - article [ref=e1351] [cursor=pointer]:
+                - generic [ref=e1352]:
+                  - heading "Northland School" [level=3] [ref=e1357]
+                  - generic [ref=e1358]: Northland, Wellington
+                  - generic [ref=e1363]:
+                    - generic [ref=e1364]: 公立
+                    - generic [ref=e1365]: 小学（1-6 年级）
+                    - generic [ref=e1366]: 男女混校
+                    - generic [ref=e1367]: 学生 219
+                    - generic [ref=e1368]: EQI 360
+                - generic [ref=e1369]:
+                  - link "官网" [ref=e1370]:
+                    - /url: http://www.northland.school.nz
+                  - button "详情" [ref=e1376]
+                  - button "对比" [ref=e1377]
+              - article [ref=e1379] [cursor=pointer]:
+                - generic [ref=e1380]:
+                  - heading "Point Chevalier School Rangi-mata-rau" [level=3] [ref=e1385]
+                  - generic [ref=e1386]: Point Chevalier, Auckland
+                  - generic [ref=e1391]:
+                    - generic [ref=e1392]: 公立
+                    - generic [ref=e1393]: 小学（1-6 年级）
+                    - generic [ref=e1394]: 男女混校
+                    - generic [ref=e1395]: 学生 622
+                    - generic [ref=e1396]: EQI 360
+                - generic [ref=e1397]:
+                  - link "官网" [ref=e1398]:
+                    - /url: http://www.ptchev.school.nz
+                  - button "详情" [ref=e1404]
+                  - button "对比" [ref=e1405]
+              - article [ref=e1407] [cursor=pointer]:
+                - generic [ref=e1408]:
+                  - heading "Stanley Bay School" [level=3] [ref=e1413]
+                  - generic [ref=e1414]: Stanley Point, Auckland
+                  - generic [ref=e1419]:
+                    - generic [ref=e1420]: 公立
+                    - generic [ref=e1421]: 小学（1-6 年级）
+                    - generic [ref=e1422]: 男女混校
+                    - generic [ref=e1423]: 学生 167
+                    - generic [ref=e1424]: EQI 360
+                - generic [ref=e1425]:
+                  - link "官网" [ref=e1426]:
+                    - /url: http://www.stanleybay.school.nz/
+                  - button "详情" [ref=e1432]
+                  - button "对比" [ref=e1433]
+              - article [ref=e1435] [cursor=pointer]:
+                - generic [ref=e1436]:
+                  - heading "Churton Park School" [level=3] [ref=e1441]
+                  - generic [ref=e1442]: Churton Park, Wellington
+                  - generic [ref=e1447]:
+                    - generic [ref=e1448]: 公立
+                    - generic [ref=e1449]: 小学（1-6 年级）
+                    - generic [ref=e1450]: 男女混校
+                    - generic [ref=e1451]: 学生 312
+                    - generic [ref=e1452]: EQI 361
+                - generic [ref=e1453]:
+                  - link "官网" [ref=e1454]:
+                    - /url: http://www.churtonpark.school.nz
+                  - button "详情" [ref=e1460]
+                  - button "对比" [ref=e1461]
+              - article [ref=e1463] [cursor=pointer]:
+                - generic [ref=e1464]:
+                  - heading "Kadimah School" [level=3] [ref=e1469]
+                  - generic [ref=e1470]: Remuera, Auckland
+                  - generic [ref=e1475]:
+                    - generic [ref=e1476]: 公立整合
+                    - generic [ref=e1477]: 小学（1-6 年级）
+                    - generic [ref=e1478]: 男女混校
+                    - generic [ref=e1479]: 学生 143
+                    - generic [ref=e1480]: EQI 361
+                - generic [ref=e1481]:
+                  - link "官网" [ref=e1482]:
+                    - /url: http://www.kadimah.school.nz
+                  - button "详情" [ref=e1488]
+                  - button "对比" [ref=e1489]
+              - article [ref=e1491] [cursor=pointer]:
+                - generic [ref=e1492]:
+                  - heading "Kohimarama School" [level=3] [ref=e1497]
+                  - generic [ref=e1498]: Kohimarama, Auckland
+                  - generic [ref=e1503]:
+                    - generic [ref=e1504]: 公立
+                    - generic [ref=e1505]: 小学（1-6 年级）
+                    - generic [ref=e1506]: 男女混校
+                    - generic [ref=e1507]: 学生 476
+                    - generic [ref=e1508]: EQI 361
+                - generic [ref=e1509]:
+                  - link "官网" [ref=e1510]:
+                    - /url: http://www.kohimarama.school.nz
+                  - button "详情" [ref=e1516]
+                  - button "对比" [ref=e1517]
+              - article [ref=e1519] [cursor=pointer]:
+                - generic [ref=e1520]:
+                  - heading "Stonefields School" [level=3] [ref=e1525]
+                  - generic [ref=e1526]: Stonefields, Auckland
+                  - generic [ref=e1531]:
+                    - generic [ref=e1532]: 公立
+                    - generic [ref=e1533]: 小学（1-6 年级）
+                    - generic [ref=e1534]: 男女混校
+                    - generic [ref=e1535]: 学生 646
+                    - generic [ref=e1536]: EQI 361
+                - generic [ref=e1537]:
+                  - link "官网" [ref=e1538]:
+                    - /url: http://www.stonefields.school.nz/
+                  - button "详情" [ref=e1544]
+                  - button "对比" [ref=e1545]
+              - article [ref=e1547] [cursor=pointer]:
+                - generic [ref=e1548]:
+                  - heading "Brooklyn School (Wellington)" [level=3] [ref=e1553]
+                  - generic [ref=e1554]: Brooklyn, Wellington
+                  - generic [ref=e1559]:
+                    - generic [ref=e1560]: 公立
+                    - generic [ref=e1561]: 小学（1-6 年级）
+                    - generic [ref=e1562]: 男女混校
+                    - generic [ref=e1563]: 学生 373
+                    - generic [ref=e1564]: EQI 362
+                - generic [ref=e1565]:
+                  - link "官网" [ref=e1566]:
+                    - /url: http://www.brooklynprimary.school.nz
+                  - button "详情" [ref=e1572]
+                  - button "对比" [ref=e1573]
+              - article [ref=e1575] [cursor=pointer]:
+                - generic [ref=e1576]:
+                  - heading "Scott Point School" [level=3] [ref=e1581]
+                  - generic [ref=e1582]: Hobsonville, Auckland
+                  - generic [ref=e1587]:
+                    - generic [ref=e1588]: 公立
+                    - generic [ref=e1589]: 小学（1-6 年级）
+                    - generic [ref=e1590]: 男女混校
+                    - generic [ref=e1591]: 学生 895
+                    - generic [ref=e1592]: EQI 362
+                - generic [ref=e1593]:
+                  - link "官网" [ref=e1594]:
+                    - /url: https://www.scottpointschool.nz/
+                  - button "详情" [ref=e1600]
+                  - button "对比" [ref=e1601]
+              - article [ref=e1603] [cursor=pointer]:
+                - generic [ref=e1604]:
+                  - heading "Thorndon School" [level=3] [ref=e1609]
+                  - generic [ref=e1610]: Thorndon, Wellington
+                  - generic [ref=e1615]:
+                    - generic [ref=e1616]: 公立
+                    - generic [ref=e1617]: 小学（1-6 年级）
+                    - generic [ref=e1618]: 男女混校
+                    - generic [ref=e1619]: 学生 278
+                    - generic [ref=e1620]: EQI 362
+                - generic [ref=e1621]:
+                  - link "官网" [ref=e1622]:
+                    - /url: http://www.thorndon.school.nz
+                  - button "详情" [ref=e1628]
+                  - button "对比" [ref=e1629]
+              - article [ref=e1631] [cursor=pointer]:
+                - generic [ref=e1632]:
+                  - heading "Churchill Park School" [level=3] [ref=e1637]
+                  - generic [ref=e1638]: Glendowie, Auckland
+                  - generic [ref=e1643]:
+                    - generic [ref=e1644]: 公立
+                    - generic [ref=e1645]: 小学（1-6 年级）
+                    - generic [ref=e1646]: 男女混校
+                    - generic [ref=e1647]: 学生 391
+                    - generic [ref=e1648]: EQI 363
+                - generic [ref=e1649]:
+                  - link "官网" [ref=e1650]:
+                    - /url: http://www.churchillpark.school.nz
+                  - button "详情" [ref=e1656]
+                  - button "对比" [ref=e1657]
+              - article [ref=e1659] [cursor=pointer]:
+                - generic [ref=e1660]:
+                  - heading "Cockle Bay School" [level=3] [ref=e1665]
+                  - generic [ref=e1666]: Howick South, Auckland
+                  - generic [ref=e1671]:
+                    - generic [ref=e1672]: 公立
+                    - generic [ref=e1673]: 小学（1-6 年级）
+                    - generic [ref=e1674]: 男女混校
+                    - generic [ref=e1675]: 学生 737
+                    - generic [ref=e1676]: EQI 364
+                - generic [ref=e1677]:
+                  - link "官网" [ref=e1678]:
+                    - /url: http://www.cocklebay.school.nz
+                  - button "详情" [ref=e1684]
+                  - button "对比" [ref=e1685]
+              - article [ref=e1687] [cursor=pointer]:
+                - generic [ref=e1688]:
+                  - heading "Glendowie School" [level=3] [ref=e1693]
+                  - generic [ref=e1694]: Glendowie, Auckland
+                  - generic [ref=e1699]:
+                    - generic [ref=e1700]: 公立
+                    - generic [ref=e1701]: 小学（1-6 年级）
+                    - generic [ref=e1702]: 男女混校
+                    - generic [ref=e1703]: 学生 656
+                    - generic [ref=e1704]: EQI 364
+                - generic [ref=e1705]:
+                  - link "官网" [ref=e1706]:
+                    - /url: http://www.glendowie.school.nz/
+                  - button "详情" [ref=e1712]
+                  - button "对比" [ref=e1713]
+              - article [ref=e1715] [cursor=pointer]:
+                - generic [ref=e1716]:
+                  - heading "Ponsonby Primary School" [level=3] [ref=e1721]
+                  - generic [ref=e1722]: Herne Bay, Auckland
+                  - generic [ref=e1727]:
+                    - generic [ref=e1728]: 公立
+                    - generic [ref=e1729]: 小学（1-6 年级）
+                    - generic [ref=e1730]: 男女混校
+                    - generic [ref=e1731]: 学生 308
+                    - generic [ref=e1732]: EQI 364
+                - generic [ref=e1733]:
+                  - link "官网" [ref=e1734]:
+                    - /url: http://www.ponsprim.school.nz
+                  - button "详情" [ref=e1740]
+                  - button "对比" [ref=e1741]
+              - article [ref=e1743] [cursor=pointer]:
+                - generic [ref=e1744]:
+                  - heading "Belmont School (Auckland)" [level=3] [ref=e1749]
+                  - generic [ref=e1750]: Belmont, Auckland
+                  - generic [ref=e1755]:
+                    - generic [ref=e1756]: 公立
+                    - generic [ref=e1757]: 小学（1-6 年级）
+                    - generic [ref=e1758]: 男女混校
+                    - generic [ref=e1759]: 学生 422
+                    - generic [ref=e1760]: EQI 365
+                - generic [ref=e1761]:
+                  - link "官网" [ref=e1762]:
+                    - /url: http://www.belmont.school.nz
+                  - button "详情" [ref=e1768]
+                  - button "对比" [ref=e1769]
+              - article [ref=e1771] [cursor=pointer]:
+                - generic [ref=e1772]:
+                  - heading "Hataitai School" [level=3] [ref=e1777]
+                  - generic [ref=e1778]: Hataitai, Wellington
+                  - generic [ref=e1783]:
+                    - generic [ref=e1784]: 公立
+                    - generic [ref=e1785]: 小学（1-6 年级）
+                    - generic [ref=e1786]: 男女混校
+                    - generic [ref=e1787]: 学生 217
+                    - generic [ref=e1788]: EQI 365
+                - generic [ref=e1789]:
+                  - link "官网" [ref=e1790]:
+                    - /url: http://www.hataitai.school.nz/
+                  - button "详情" [ref=e1796]
+                  - button "对比" [ref=e1797]
+            - button "加载更多 · 剩余 2405 所" [ref=e1800]
+        - generic [ref=e1801]: 地图加载中…
+  - contentinfo [ref=e1803]:
+    - generic [ref=e1804]:
+      - generic [ref=e1805]:
+        - paragraph [ref=e1806]: WollyNZ
+        - paragraph [ref=e1807]: 面向中国游学家庭的新西兰优质教育机构查询平台，帮助您按地区、类型、语言等条件筛选合适的学校。
+      - generic [ref=e1808]:
+        - generic [ref=e1809]:
+          - paragraph [ref=e1810]: 学校库
+          - link "中小学" [ref=e1811] [cursor=pointer]:
+            - /url: /schools
+          - link "幼儿园" [ref=e1812] [cursor=pointer]:
+            - /url: /ece
+        - generic [ref=e1813]:
+          - paragraph [ref=e1814]: 数据
+          - link "数据来源" [ref=e1815] [cursor=pointer]:
+            - /url: https://data.govt.nz
+    - generic [ref=e1817]:
+      - paragraph [ref=e1818]: © 2026 WollyNZ · 仅供信息参考
+      - paragraph [ref=e1819]: 数据来源：data.govt.nz（CC BY 4.0）· 新西兰教育机构目录
+  - button "Open Next.js Dev Tools" [ref=e1825] [cursor=pointer]
