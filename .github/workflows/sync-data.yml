@@ -1,0 +1,34 @@
+name: Sync NZ Education Data
+
+on:
+  schedule:
+    # 每天 UTC 17:00 运行（北京时间次日凌晨 01:00），避开数据源高峰
+    - cron: "0 17 * * *"
+  workflow_dispatch: {} # 支持在 GitHub 网页手动触发
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch & sync to CloudBase PostgreSQL
+        env:
+          CLOUDBASE_ENV_ID: ${{ secrets.CLOUDBASE_ENV_ID }}
+          CLOUDBASE_SECRET_ID: ${{ secrets.CLOUDBASE_SECRET_ID }}
+          CLOUDBASE_SECRET_KEY: ${{ secrets.CLOUDBASE_SECRET_KEY }}
+        run: npm run fetch:data

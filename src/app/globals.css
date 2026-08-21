@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+/* ============================================================
+   DESIGN TOKENS — 湖水蓝绿风 (Lake Teal)
+   唯一事实来源：ui标准.html
+   ============================================================ */
+@theme inline {
+  /* 品牌色 */
+  --color-primary: #3e9c8c;        /* 主色：湖水绿 */
+  --color-primary-hover: #34897b;
+  --color-primary-active: #2c7568;
+  --color-secondary: #5ba3c4;      /* 辅助：湖蓝 */
+  --color-tertiary: #9ccbbd;       /* 辅助：浅湖绿 */
+  --color-primary-light: #5ba3c4;  /* 兼容旧命名 → 湖蓝 */
+  --color-primary-soft: #9ccbbd;   /* 兼容旧命名 → 浅湖绿 */
+
+  /* 背景 / 中性 */
+  --color-bg: #eef6f4;             /* 背景：湖白 */
+  --color-bg-secondary: #ffffff;
+  --color-bg-soft: #dcefeb;
+  --color-stroke: #c6e2db;         /* 描边 */
+
+  /* 文字 */
+  --color-ink: #234b45;            /* 标题：深湖绿 */
+  --color-ink-soft: #45635c;       /* 正文 */
+  --color-caption: #7c9a93;        /* 说明文字 */
+
+  /* 状态色 */
+  --color-success: #5bab8e;
+  --color-warning: #d8b45e;
+  --color-error: #d97e72;
+  --color-info: #5ba3c4;
+
+  --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", -apple-system, "Segoe UI", system-ui, sans-serif;
+
+  /* 圆角 */
+  --radius-sm: 0.75rem;   /* 12px */
+  --radius-md: 1.25rem;   /* 20px */
+  --radius-lg: 1.75rem;   /* 28px */
+  --radius-card: 1.25rem;
+
+  /* 阴影（柔和绿色投影） */
+  --shadow-1: 0 4px 16px rgba(62, 156, 140, 0.1);
+  --shadow-2: 0 12px 30px rgba(62, 156, 140, 0.18);
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink-soft);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 轻玻璃卡片 */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--color-stroke);
+}
+
+.glass-dark {
+  background: rgba(35, 75, 69, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 渐变文字 */
+.text-gradient {
+  background: linear-gradient(120deg, var(--color-primary), var(--color-secondary) 60%, var(--color-tertiary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 细滚动条 */
+.scroll-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: rgba(62, 156, 140, 0.3);
+  border-radius: 9999px;
+}
+
+/* 标签小 chip */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+}
+
+/* 地图容器层级控制，避免筛选下拉被地图覆盖 */
+.leaflet-container {
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-sans);
+  border-radius: 1rem;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 0.75rem;
+}
+
+/* 弹层动画 */
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes overlayIn {
+  0% {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-up {
+  animation: 0.4s ease-out both fadeUp;
+}
+
+.animate-overlay {
+  animation: 0.25s ease-out both overlayIn;
+}
