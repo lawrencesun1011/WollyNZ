@@ -78,6 +78,12 @@ export async function pgSelect(
   table: string,
   query = ""
 ): Promise<Record<string, unknown>[]> {
+  if (!ENV_ID) {
+    throw new Error("[pg] CLOUDBASE_ENV_ID 为空，无法请求 PG 网关");
+  }
+  if (!PUBLISHABLE_KEY) {
+    throw new Error("[pg] CLOUDBASE_PUBLISHABLE_KEY 为空，鉴权会失败");
+  }
   const url = `${PG_GATEWAY_BASE}/${table}${query ? `?${query}` : ""}`;
   console.log("[pg] 请求:", url);
   const res = await fetch(url, {
