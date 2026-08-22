@@ -1,0 +1,32 @@
+{
+  "envId": "test-d3gqp6tfx48ae40f2",
+  "cloudrun": {
+    "name": "nz-study-site",
+    "type": "container",
+    "cpu": 0.25,
+    "mem": 0.5,
+    "minNum": 0,
+    "maxNum": 1,
+    "openAccessTypes": [
+      "PUBLIC"
+    ],
+    "port": 3000,
+    "envParams": {
+      "CLOUDBASE_ENV_ID": "test-d3gqp6tfx48ae40f2",
+      "CLOUDBASE_PUBLISHABLE_KEY": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjkxODIyNzFiLTU4MWUtNGZmMS04MDQyLTUxYTI5NjZhMGJmZCJ9.eyJpc3MiOiJodHRwczovL3Rlc3QtZDNncXA2dGZ4NDhhZTQwZjIuYXAtc2hhbmdoYWkudGNiLWFwaS50ZW5jZW50Y2xvdWRhcGkuY29tIiwic3ViIjoiYW5vbiIsImF1ZCI6InRlc3QtZDNncXA2dGZ4NDhhZTQwZjIiLCJleHAiOjQwOTA5OTA5MDYsImlhdCI6MTc4NzMwNzcwNiwibm9uY2UiOiJUTHFhb3pGYlFxS3A5MzBVTkpzTk5RIiwiYXRfaGFzaCI6IlRMcWFvekZiUXFLcDkzMFVOSnNOTlEiLCJuYW1lIjoiQW5vbnltb3VzIiwic2NvcGUiOiJhbm9ueW1vdXMiLCJwcm9qZWN0X2lkIjoidGVzdC1kM2dxcDZ0Zng4YWU0MGYyIiwibWV0YSI6eyJwbGF0Zm9ybSI6IlB1Ymxpc2hhYmxlS2V5In0sInJvbGUiOiJhbm9uIiwiaXNfYW5vbnltb3VzIjp0cnVlLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJhbm9ueW1vdXMiLCJwcm92aWRlcnMiOlsiYW5vbnltb3VzIl19LCJ1c2VyX21ldGFkYXRhIjp7Im5hbWUiOiJBbm9ueW1vdXMifSwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfdXNlciIsImlzX3N5c3RlbV9hZG1pbiI6ZmFsc2V9.M0HKgyOkaK3HdFxIGBskF--4ZWMg5FVcSs-Ja_SUb1UAlNh4Lm2qqWT_tcJPBCsaYzBXMV17NWBsxquV3ghIde_nGyHrlErQBGYMOC3qY-HaS4bvsGE--FrQiuOE_1FKPokyo8_aMkhaW9WNnDTsP_KqUBt6Q9-M9j3nt5Dga8i5vV39iBDlPBGiA1IndJRVqlnu-Q-Ha0MXn1C2S2eGIpQ_stTWdqOvTYSzEnIkYDs9_NP8cWHTjUiqitykzQfIWGzEbrWFsc9Gl1cpG7zgm_VTYUlIdfkWoTLKQPx6Zvs5GVBRLwXwoMceR3kr06S_iOo9ePB41pykcI3zzYNY_g",
+      "CLOUDBASE_API_KEY": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjkxODIyNzFiLTU4MWUtNGZmMS04MDQyLTUxYTI5NjZhMGJmZCJ9.eyJhdWQiOiJ0ZXN0LWQzZ3FwNnRmeDQ4YWU0MGYyIiwiZXhwIjoyNTM0MDIzMDA3OTksImlhdCI6MTc4NzM5MzY1NCwiYXRfaGFzaCI6IkhNYmhJVHdNUVltbEdPSmJpUHNZNkEiLCJwcm9qZWN0X2lkIjoidGVzdC1kM2dxcDZ0Zng4YWU0MGYyIiwibWV0YSI6eyJwbGF0Zm9ybSI6IkFwaUtleSJ9LCJyb2xlIjoic2VydmljZV9yb2xlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImFwaWtleSIsInByb3ZpZGVycyI6WyJhcGlrZXkiXX0sImFkbWluaXN0cmF0b3JfaWQiOiIyMDkwNzIzMTIzNjg2MDE0OTc2IiwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfc2VydmVyIiwiaXNfc3lzdGVtX2FkbWluIjp0cnVlfQ.t4PxMmoZiwHs1yMYnQmoLfUcSm8d7kgIK3xhrgiZaxrDKfVq3t6Hya4zM99B1ACy1MrTdKMidd-gwm0kuwcjgeZz6CrrFwkAQAQ-crT1H7m6Fnw0ngkfj8wElPlu5VogLyyNKcC"
+    },
+    "dockerfile": "Dockerfile",
+    "buildDir": "."
+  },
+  "functionRoot": "./functions",
+  "functions": [],
+  "ai": {
+    "defaultAgent": "{{env.AI_DEFAULT_AGENT}}",
+    "agents": {
+      "codebuddy": {
+        "type": "none"
+      }
+    }
+  }
+}
