@@ -212,7 +212,7 @@ export function levelColor(level: string): string {
     case "小学":
       return "#2e7ed4"; // 蓝
     case "初中":
-      return "#e0392b"; // 红
+      return "#F59E0B"; // 橙黄
     case "高中":
       return "#8e44ad"; // 紫
     case "贯通制":
@@ -246,7 +246,7 @@ export function levelShape(level: string): { shape: MarkerShape; color: string }
     case "小学":
       return { shape: "circle", color: "#2e7ed4" };
     case "初中":
-      return { shape: "diamond", color: "#2E9E8C" };
+      return { shape: "diamond", color: "#F59E0B" };
     case "高中":
       return { shape: "square", color: "#8e44ad" };
     case "贯通制":

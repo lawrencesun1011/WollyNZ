@@ -8,6 +8,8 @@ interface Props {
   schools: SchoolFrontend[];
   view: ViewMode;
   hoveredId: string | null;
+  /** 当前选中的学校（保持高亮） */
+  selectedId: string | null;
   onHover: (id: string | null) => void;
   onOpen: (id: string) => void;
   onDetail: (id: string) => void;
@@ -17,6 +19,7 @@ export function SchoolCardList({
   schools,
   view,
   hoveredId,
+  selectedId,
   onHover,
   onOpen,
   onDetail,
@@ -47,6 +50,7 @@ export function SchoolCardList({
           school={s}
           view={view}
           hovered={hoveredId === s.id}
+          selected={selectedId === s.id}
           onHover={onHover}
           onOpen={onOpen}
           onDetail={onDetail}

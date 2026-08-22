@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import type { SchoolFrontend } from "@/lib/types";
 import { cnGender } from "@/lib/labels";
 import { MapPin, Home, Check, Heart } from "lucide-react";
@@ -9,6 +10,8 @@ interface Props {
   school: SchoolFrontend;
   view: "grid" | "list";
   hovered: boolean;
+  /** 当前选中的学校（地图 popup / 卡片点击），保持高亮 */
+  selected: boolean;
   onHover: (id: string | null) => void;
   /** 点击卡片或"详情"外的区域时打开地图 popup */
   onOpen: (id: string) => void;
@@ -35,10 +38,19 @@ export function SchoolCard({
   school,
   view,
   hovered,
+  selected,
   onHover,
   onOpen,
   onDetail,
 }: Props) {
+  const cardRef = useRef<HTMLElement>(null);
+
+  // 当地图 marker 选中该校时，列表滚动到对应卡片
+  useEffect(() => {
+    if (selected && cardRef.current) {
+      cardRef.current.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [selected]);
   const { favoriteIds, toggleFavorite } = useFavorites();
   const { compareIds, toggleCompare } = useCompare();
   const inFavorite = favoriteIds.includes(school.id);
@@ -86,11 +98,12 @@ export function SchoolCard({
 
   return (
     <article
+      ref={cardRef}
       onClick={() => onOpen(school.id)}
       onMouseEnter={() => onHover(school.id)}
       onMouseLeave={() => onHover(null)}
       className={`group flex cursor-pointer rounded-2xl border bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
-        hovered ? "border-primary ring-1 ring-primary/30" : "border-primary/10"
+        hovered || selected ? "border-primary ring-1 ring-primary/30" : "border-primary/10"
       } ${view === "list" ? "flex-row items-center gap-4" : "flex-col gap-4"}`}
     >
       <div className={view === "list" ? "min-w-0 flex-1" : ""}>

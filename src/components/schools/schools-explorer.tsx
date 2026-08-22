@@ -128,6 +128,15 @@ export function SchoolsExplorer({
     setVisibleCount(PAGE_SIZE);
   }, [inBounds]);
 
+  // 选中的 marker 学校可能还在"加载更多"之外，自动展开分页以显示并高亮
+  useEffect(() => {
+    if (!popupId) return;
+    const idx = inBounds.findIndex((s) => s.id === popupId);
+    if (idx >= 0 && idx >= visibleCount) {
+      setVisibleCount(idx + 1);
+    }
+  }, [popupId, inBounds, visibleCount]);
+
   const visible = inBounds.slice(0, visibleCount);
   const detailSchool = detailId ? schools.find((s) => s.id === detailId) || null : null;
   const compareSchools = compareIds
@@ -170,6 +179,7 @@ export function SchoolsExplorer({
                 schools={visible}
                 view="list"
                 hoveredId={hoveredId}
+                selectedId={popupId}
                 onHover={setHoveredId}
                 onOpen={setPopupId}
                 onDetail={setDetailId}
@@ -197,6 +207,7 @@ export function SchoolsExplorer({
               hoveredId={hoveredId}
               activeId={popupId}
               onSelect={setPopupId}
+              onHover={setHoveredId}
               onDetail={setDetailId}
               onBoundsChange={setMapBounds}
               flyCities={favoritesOnly ? [] : flyCities}

@@ -40,6 +40,8 @@ interface Props {
   hoveredId: string | null;
   activeId: string | null;
   onSelect: (id: string | null) => void;
+  /** 悬停 marker / 卡片时联动高亮 */
+  onHover?: (id: string | null) => void;
   /** 打开学校详情（modal） */
   onDetail: (id: string) => void;
   /** 地图视野变化时上报当前范围 [south, west, north, east] */
@@ -113,6 +115,7 @@ export function SchoolMap({
   hoveredId,
   activeId,
   onSelect,
+  onHover,
   onDetail,
   onBoundsChange,
   flyCities,
@@ -131,6 +134,7 @@ export function SchoolMap({
   const baseLayersRef = useRef<Record<string, L.LayerGroup> | null>(null);
   const onSelectRef = useRef(onSelect);
   const onDetailRef = useRef(onDetail);
+  const onHoverRef = useRef(onHover);
   const onToggleCompareRef = useRef(toggleCompare);
   const onToggleFavoriteRef = useRef(toggleFavorite);
   const onBoundsChangeRef = useRef(onBoundsChange);
@@ -155,6 +159,7 @@ export function SchoolMap({
   useEffect(() => {
     onSelectRef.current = onSelect;
     onDetailRef.current = onDetail;
+    onHoverRef.current = onHover;
     onToggleCompareRef.current = toggleCompare;
     onToggleFavoriteRef.current = toggleFavorite;
     onBoundsChangeRef.current = onBoundsChange;
@@ -509,6 +514,16 @@ export function SchoolMap({
           </div>
         </div>`;
       marker.bindPopup(popupHtml);
+      // 鼠标悬停 marker 时显示学校名称
+      marker.bindTooltip(esc(s.name), {
+        direction: "top",
+        offset: [0, -12],
+        className: "map-pin-tooltip",
+        opacity: 1,
+      });
+      // 悬停 marker 时联动高亮（地图 pin + 列表卡片）
+      marker.on("mouseover", () => onHoverRef.current?.(s.id));
+      marker.on("mouseout", () => onHoverRef.current?.(null));
 
       marker.on("click", (e: L.LeafletMouseEvent) => {
         // 阻止冒泡到 map click，否则 map click 的 closePopup/onSelect(null)
@@ -737,7 +752,7 @@ export function SchoolMap({
         <div className="flex flex-col gap-1">
           {([
             ["小学", "circle", "#2e7ed4"],
-            ["初中", "diamond", "#2E9E8C"],
+            ["初中", "diamond", "#F59E0B"],
             ["高中", "square", "#8e44ad"],
             ["一贯制", "hexagon", "#9c6b3f"],
           ] as [string, MarkerShape, string][]).map(([label, shape, color]) => (
@@ -797,6 +812,20 @@ export function SchoolMap({
         }
         .leaflet-popup-content {
           margin: 12px 14px;
+        }
+        /* marker 悬停显示学校名称的 tooltip */
+        .map-pin-tooltip.leaflet-tooltip {
+          background: #2e9e8c;
+          color: #fff;
+          border: none;
+          border-radius: 8px;
+          padding: 4px 10px;
+          font-size: 12px;
+          font-weight: 600;
+          box-shadow: 0 4px 12px rgba(46,158,140,0.28);
+        }
+        .map-pin-tooltip.leaflet-tooltip-top:before {
+          border-top-color: #2e9e8c;
         }
         .popup-card {
           width: 260px;
