@@ -63,7 +63,7 @@ export function SchoolCard({
       {/* 标题 */}
       <div className="flex items-start gap-2.5">
         <Home className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-        <h3 className="line-clamp-2 text-base font-semibold text-ink">
+        <h3 className="line-clamp-2 text-base font-semibold text-black">
           {school.name}
         </h3>
       </div>

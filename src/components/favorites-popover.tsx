@@ -103,13 +103,19 @@ export function FavoritesPopover({ onClose }: Props) {
           </div>
         )}
 
-        {/* 底部清空 */}
+        {/* 底部操作 */}
         {favSchools.length > 0 && (
-          <div className="border-t border-stroke/70 px-3 py-2">
+          <div className="flex items-center gap-2 border-t border-stroke/70 px-3 py-2">
+            <button
+              type="button"
+              className="flex-1 rounded-lg bg-primary py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+            >
+              一键申请
+            </button>
             <button
               type="button"
               onClick={clearFavorites}
-              className="w-full rounded-lg py-2 text-sm text-ink-soft transition-colors hover:bg-error/5 hover:text-error"
+              className="rounded-lg px-3 py-2 text-sm text-ink-soft transition-colors hover:bg-error/5 hover:text-error"
             >
               清空心愿单
             </button>

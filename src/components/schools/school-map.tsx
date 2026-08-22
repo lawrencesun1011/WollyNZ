@@ -839,7 +839,7 @@ export function SchoolMap({
         .popup-card__title {
           font-size: 15px;
           font-weight: 600;
-          color: #1F2D2B;
+          color: #000;
           line-height: 1.4;
           flex: 1;
         }

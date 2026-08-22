@@ -472,7 +472,7 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
                       className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all ${
                         on
                           ? "border-primary bg-primary/10 text-primary"
-                          : "border-stroke bg-white text-ink-soft hover:border-primary/40 hover:text-primary"
+                          : "border-stroke bg-white text-black hover:border-primary/40 hover:text-primary"
                       }`}
                     >
                       {city}
@@ -501,7 +501,7 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
                       className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all ${
                         isOn
                           ? "border-primary bg-primary/10 text-primary"
-                          : "border-stroke bg-white text-ink-soft hover:border-primary/40 hover:text-primary"
+                          : "border-stroke bg-white text-black hover:border-primary/40 hover:text-primary"
                       }`}
                     >
                       {city}
