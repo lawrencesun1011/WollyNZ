@@ -13,14 +13,27 @@ export async function GET() {
 
   let list: unknown[] = [];
   let error: string | null = null;
+  let rawProbe: unknown = null;
+  let probeError: string | null = null;
   try {
     list = await getSchoolFrontendAll();
   } catch (e) {
     error = (e as Error).message;
   }
 
+  // 直接裸查 schools 表前 3 行，确认表是否存在、有无数据
+  try {
+    const probeUrl = `${PG_GATEWAY_BASE}/schools?limit=3`;
+    const r = await fetch(probeUrl, {
+      headers: { Authorization: `Bearer ${process.env.CLOUDBASE_PUBLISHABLE_KEY}` },
+    });
+    rawProbe = { status: r.status, body: r.status === 200 ? await r.json() : await r.text() };
+  } catch (e) {
+    probeError = (e as Error).message;
+  }
+
   return NextResponse.json(
-    { diag, count: list.length, error, sample: list.slice(0, 2) },
+    { diag, count: list.length, error, sample: list.slice(0, 2), rawProbe, probeError },
     { headers: { "Cache-Control": "no-store" } }
   );
 }
