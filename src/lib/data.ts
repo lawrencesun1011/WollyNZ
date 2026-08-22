@@ -20,8 +20,8 @@ function rowToSchoolFrontend(row: Record<string, unknown>): SchoolFrontend {
   return out as unknown as SchoolFrontend;
 }
 
-// 客户端挂载后/布局预热时，从 PG 拉全量（分页补全 2465 条，消除 limit=1000 截断）。
-// 带 60s 服务端缓存 + 客户端 localStorage 缓存，避免重复打网关。
+// SSR 首屏直接走 PG（带 60s 服务端缓存，避免每个请求都打网关）。
+// PG 失败时返回空数组，让客户端兜底展示空态，避免 SSR 整体 500。
 export async function getSchoolFrontendAll(): Promise<SchoolFrontend[]> {
   const cacheKey = "schools:all";
   const cached = getCached<SchoolFrontend[]>(cacheKey);
@@ -32,24 +32,13 @@ export async function getSchoolFrontendAll(): Promise<SchoolFrontend[]> {
     setCached(cacheKey, list);
     return list;
   } catch (e) {
-    console.warn("[data] PG 全量查询失败，回退本地文件:", (e as Error).message);
-    return await readLocalSchools();
+    console.error("[data] PG 查询失败:", (e as Error).message);
+    return [];
   }
 }
 
-async function readLocalSchools(): Promise<SchoolFrontend[]> {
-  const raw = await readFile(join(DATA_DIR, "schools-frontend.json"), "utf-8");
-  return JSON.parse(raw) as SchoolFrontend[];
-}
-
-// 首屏秒开：直接读本地兜底文件（~6ms），不阻塞首屏。
-// PG 数据由全局预热层（schools-store）在后台拉取并就绪后无缝替换。
-export async function getSchoolFrontendLocal(): Promise<SchoolFrontend[]> {
-  return readLocalSchools();
-}
-
 export async function getDataMeta(): Promise<DataMeta | null> {
-  // meta 由本地更新脚本生成（_meta.json），首屏直接读本地，不阻塞 PG。
+  // meta 由本地更新脚本生成（_meta.json），仅作为展示用元数据，不阻塞主流程。
   try {
     const raw = await readFile(join(DATA_DIR, "_meta.json"), "utf-8");
     return JSON.parse(raw) as DataMeta;

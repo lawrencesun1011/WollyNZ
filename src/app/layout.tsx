@@ -3,6 +3,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { SchoolsPreloader } from "@/components/schools-preloader";
+import { AuthProvider } from "@/components/auth-provider";
 
 export const metadata: Metadata = {
   title: "WollyNZ · 新西兰教育机构查询",
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="zh-CN">
       <body className="min-h-screen">
         <SchoolsPreloader />
+        <AuthProvider />
         <SiteHeader />
         <main className="pt-16">{children}</main>
         <SiteFooter />

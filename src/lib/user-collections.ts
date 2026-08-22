@@ -3,13 +3,16 @@
 // 心愿单与对比的全局客户端状态（跨组件、跨页面共享）。
 // 设计沿用项目既有的「模块级 pub/sub + localStorage」模式（见 favorites.ts / schools-store.ts），
 // 使右上角心愿单浮层、学校卡片、地图 popup、对比栏读取同一数据源，天然实时同步。
+// 登录后（currentUid 非空）读写改为云端同步，以云端为准。
 import { useEffect, useState } from "react";
 import {
+  applyCloudFavorites,
   getFavoriteIds,
+  setFavoritesUser,
+  subscribeFavorites,
   toggleFavorite,
   removeFavorite,
   clearFavorites,
-  subscribeFavorites,
 } from "./favorites";
 
 const COMPARE_LS_KEY = "wollyn:schools:compare";
@@ -24,6 +27,9 @@ const compareState: {
   ids: readCompareLocalStorage(),
   listeners: new Set(),
 };
+
+// 当前登录用户 uid；null 表示未登录态，此时对比走 localStorage。
+let currentUid: string | null = null;
 
 function readCompareLocalStorage(): string[] {
   if (typeof window === "undefined") return [];
@@ -50,13 +56,40 @@ function emitCompare() {
   for (const l of compareState.listeners) l(compareState.ids);
 }
 
-function subscribeCompare(cb: CompareListener): () => void {
+export function subscribeCompare(cb: CompareListener): () => void {
   compareState.listeners.add(cb);
   return () => compareState.listeners.delete(cb);
 }
 
-function getCompareIds(): string[] {
+export function getCompareIds(): string[] {
   return compareState.ids;
+}
+
+/** 供 favorites.ts 读取当前对比列表（用于云端合并）。 */
+export function readCompareLS(): string[] {
+  return compareState.ids;
+}
+
+/** 由 auth 层在登录态变化时调用：设置当前 uid。 */
+export function setCompareUser(uid: string | null) {
+  currentUid = uid;
+}
+
+/** 登录后由 auth 层调用：用云端数据覆盖本地内存与 localStorage。 */
+export function applyCloudCompare(ids: string[]) {
+  compareState.ids = ids;
+  writeCompareLocalStorage(ids);
+  emitCompare();
+}
+
+async function syncCloud(ids: string[]) {
+  if (!currentUid) return;
+  const { saveCloudCollections } = await import("./user-data");
+  await saveCloudCollections(currentUid, {
+    favorites: getFavoriteIds(),
+    compare: ids,
+  });
+  writeCompareLocalStorage(ids);
 }
 
 function toggleCompareState(id: string): void {
@@ -67,6 +100,7 @@ function toggleCompareState(id: string): void {
       : [...compareState.ids, id];
   writeCompareLocalStorage(compareState.ids);
   emitCompare();
+  void syncCloud(compareState.ids);
 }
 
 function removeCompareState(id: string): void {
@@ -74,6 +108,7 @@ function removeCompareState(id: string): void {
   compareState.ids = compareState.ids.filter((x) => x !== id);
   writeCompareLocalStorage(compareState.ids);
   emitCompare();
+  void syncCloud(compareState.ids);
 }
 
 function clearCompareState(): void {
@@ -81,6 +116,7 @@ function clearCompareState(): void {
   compareState.ids = [];
   writeCompareLocalStorage(compareState.ids);
   emitCompare();
+  void syncCloud(compareState.ids);
 }
 
 /** 订阅心愿单列表（id 数组），组件卸载自动退订。 */
@@ -131,3 +167,6 @@ export function useCompare(): {
     clearCompare: () => clearCompareState(),
   };
 }
+
+// 导出供 auth 初始化时绑定登录态切换入口
+export { setFavoritesUser, applyCloudFavorites } from "./favorites";

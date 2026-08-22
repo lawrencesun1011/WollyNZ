@@ -45,7 +45,7 @@ export type HomePageBackgrounds = {
 export const homePageBackgrounds: HomePageBackgrounds = {
   // 🎯 Hero 区域 - 探索新西兰优质教育机构
   hero: {
-    src: "/images/home/hero-bg.jpg",
+    src: "/images/home/hero-bg.webp",
     overlay: false, // 蒙层已移除，保留原图锐度
     // overlay: true, // 开启蒙层，避免背景抢戏文字
     // overlayDirection: "all", // 全局蒙层

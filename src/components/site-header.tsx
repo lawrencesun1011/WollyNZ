@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { GraduationCap, Heart, User } from "lucide-react";
+import { GraduationCap, Heart } from "lucide-react";
 import { useFavorites } from "@/lib/user-collections";
 import { FavoritesPopover } from "./favorites-popover";
+import { UserMenu } from "./auth/user-menu";
+import { LoginModal } from "./auth/login-modal";
 
 export function SiteHeader() {
   const { favoriteIds } = useFavorites();
   const [favOpen, setFavOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
 
   return (
     <header className="fixed inset-x-0 top-0 z-[800] border-b border-white/40 bg-bg/70 backdrop-blur-xl">
@@ -81,16 +84,10 @@ export function SiteHeader() {
               {favOpen && <FavoritesPopover onClose={() => setFavOpen(false)} />}
             </div>
 
-            <button
-              type="button"
-              disabled
-              aria-label="登录"
-              title="登录功能即将上线"
-              className="inline-flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-full border border-stroke text-caption"
-            >
-              <User className="h-[18px] w-[18px]" />
-            </button>
+            <UserMenu onLoginClick={() => setLoginOpen(true)} />
           </div>
+
+          <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
         </div>
       </div>
     </header>

@@ -10,6 +10,7 @@
     "fetch:data": "node src/scripts/fetch-data.mjs"
   },
   "dependencies": {
+    "@cloudbase/js-sdk": "^2.32.0",
     "@cloudbase/node-sdk": "^3.18.3",
     "chart.js": "4.4.3",
     "class-variance-authority": "0.7.0",
@@ -24,6 +25,7 @@
     "tailwind-merge": "2.5.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/leaflet": "1.9.12",
     "@types/node": "^20",
