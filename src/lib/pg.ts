@@ -28,6 +28,11 @@ const API_KEY = process.env.CLOUDBASE_API_KEY || "";
 
 export const PG_GATEWAY_BASE = `https://${ENV_ID}.api.tcloudbasegateway.com/v1/rdb/rest`;
 
+// 诊断日志：确认运行时环境变量是否注入
+console.log("[pg] ENV_ID =", JSON.stringify(ENV_ID));
+console.log("[pg] PUBLISHABLE_KEY 长度 =", PUBLISHABLE_KEY.length);
+console.log("[pg] PG_GATEWAY_BASE =", PG_GATEWAY_BASE);
+
 // snake_case 物理列 -> SchoolFrontend camelCase 的字段映射
 export const SCHOOL_COLUMN_MAP: Record<string, string> = {
   id: "id",
@@ -74,6 +79,7 @@ export async function pgSelect(
   query = ""
 ): Promise<Record<string, unknown>[]> {
   const url = `${PG_GATEWAY_BASE}/${table}${query ? `?${query}` : ""}`;
+  console.log("[pg] 请求:", url);
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${PUBLISHABLE_KEY}` },
   });
