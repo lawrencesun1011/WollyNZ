@@ -42,7 +42,7 @@ export interface DataMeta {
   >;
 }
 
-export type SortKey = "name" | "eqi" | "roll" | "city";
+export type SortKey = "name" | "eqi" | "roll";
 export type ViewMode = "grid" | "list";
 
 export interface Filters {

@@ -4,6 +4,8 @@ import { useMemo, useState, useRef, useEffect } from "react";
 import type { SchoolFrontend, Filters } from "@/lib/types";
 import { uniqueSorted } from "@/lib/filters";
 import { Search, X, ChevronDown } from "lucide-react";
+import { NorthIslandIcon } from "./north-island-icon";
+import { SouthIslandIcon } from "./south-island-icon";
 
 interface Props {
   schools: SchoolFrontend[];
@@ -145,7 +147,7 @@ const AUTHORITY_TREE: TreeNode[] = [
     value: "公立",
     children: [
       { label: "公立", value: "公立" },
-      { label: "公立融合", value: "公立整合" },
+      { label: "公立整合", value: "公立整合" },
     ],
   },
   {
@@ -170,7 +172,7 @@ function FilterHelpTip({ text }: { text: string }) {
       <span className="flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-stroke text-[10px] font-semibold text-caption transition-colors group-hover:border-primary group-hover:text-primary">
         ?
       </span>
-      <span className="pointer-events-none absolute bottom-full right-0 z-30 mb-2 hidden w-80 max-w-[80vw] whitespace-pre-line break-words rounded-lg bg-primary px-3.5 py-2.5 text-left text-[11px] leading-relaxed text-white shadow-lg group-hover:block">
+      <span className="pointer-events-none absolute bottom-full right-0 z-30 mb-2 hidden w-80 max-w-[80vw] whitespace-pre-line break-words rounded-lg bg-primary px-3.5 py-2.5 text-left text-[13px] leading-relaxed text-white shadow-lg group-hover:block">
         {text}
       </span>
     </span>
@@ -450,14 +452,18 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
   return (
     <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
       <div className="space-y-4">
-        {/* ── 热门地区（一行横排：北岛 + 南岛） ── */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        {/* ── 热门地区（北岛一行、南岛一行） ── */}
+        <div className="flex flex-col gap-4">
           {/* 北岛 */}
-          <div>
-            <p className="mb-2.5 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
-            {HOT_REGIONS.north.label}{" "}
-            <span className="font-normal normal-case tracking-normal text-caption">{HOT_REGIONS.north.labelEn}</span>
-            </p>
+          <div className="flex gap-3 sm:items-center">
+            <span className="hidden shrink-0 rounded-xl bg-primary/5 p-1.5 ring-1 ring-primary/10 sm:block">
+              <NorthIslandIcon size={40} />
+            </span>
+            <div className="min-w-0">
+              <p className="mb-2.5 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                {HOT_REGIONS.north.label}{" "}
+                <span className="font-normal normal-case tracking-normal text-caption">{HOT_REGIONS.north.labelEn}</span>
+              </p>
               <div className="flex flex-wrap gap-2">
                 {HOT_REGIONS.north.cities.map((city) => {
                   const on = activeHot === city;
@@ -475,15 +481,17 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
                 })}
               </div>
             </div>
+          </div>
 
-            {/* 分隔线 */}
-            <div className="hidden h-16 w-px shrink-0 bg-stroke sm:block" />
-
-            {/* 南岛 */}
-            <div>
+          {/* 南岛 */}
+          <div className="flex gap-3 sm:items-center">
+            <span className="hidden shrink-0 rounded-xl bg-primary/5 p-1.5 ring-1 ring-primary/10 sm:block">
+              <SouthIslandIcon size={40} />
+            </span>
+            <div className="min-w-0">
               <p className="mb-2.5 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
-              {HOT_REGIONS.south.label}{" "}
-              <span className="font-normal normal-case tracking-normal text-caption">{HOT_REGIONS.south.labelEn}</span>
+                {HOT_REGIONS.south.label}{" "}
+                <span className="font-normal normal-case tracking-normal text-caption">{HOT_REGIONS.south.labelEn}</span>
               </p>
               <div className="flex flex-wrap gap-2">
                 {HOT_REGIONS.south.cities.map((city) => {
@@ -502,6 +510,7 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
                 })}
               </div>
             </div>
+          </div>
         </div>
 
         {/* ── 筛选栏 ── */}
@@ -537,7 +546,7 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
               selected={filters.authorities}
               onChange={(vals) => setField("authorities", vals)}
               label="办学性质"
-              helpText="公立融合（State: Integrated）：原本是私立学校，通常具有宗教背景，或特殊教学理念，后来被整合进国家公立教育体系。"
+              helpText="公立整合（State: Integrated）：原本是私立学校，通常具有宗教背景，或特殊教学理念，后来被整合进国家公立教育体系。"
             />
 
             <FilterSelect
@@ -546,7 +555,7 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
               value={filters.eqi}
               onChange={(v) => setField("eqi", v)}
               onClear={() => setField("eqi", "")}
-              helpText="替代了以前的 Decile 10 分制。官方释义：学校公平指数（Schooling Equity Index，简称 EQI）是一个统计模型，用于估算学生在校取得学业成就时所面临的社会经济障碍程度。该模型提供的信息能够帮助教育部精准分配资源，从而减轻社会经济障碍带来的影响。它并非衡量学校质量的指标；相反，它是一种用于理解社会经济状况与学生学业成就之间关系的方式。注：仅对公立学校生效。"
+              helpText={"替代了以前的 Decile 10 分制，是一项依据学生经济情况得出的经费划拨参考指标，不等同于学校质量。\n注：仅对公立学校生效。"}
             />
 
             <FilterSelect
@@ -555,7 +564,7 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
               value={filters.isolation}
               onChange={(v) => setField("isolation", v)}
               onClear={() => setField("isolation", "")}
-              helpText={"根据学校距离最近的\"小型\"、\"中型\"和\"大型\"人口中心的距离计算得出，它不仅决定了学校是否具备获取学校运营额外补贴的资格，还决定了其能拿到的资金数额。注：仅对公立学校生效。"}
+              helpText={"根据学校和最近的\"小型\"、\"中型\"和\"大型\"人口中心的距离计算得出。\n注：仅对公立学校生效。"}
             />
 
             <FilterSelect label="国际生" options={INTL_OPTIONS} value={filters.intl} onChange={(v) => setField("intl", v)} onClear={() => setField("intl", "")} />
@@ -566,7 +575,7 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
               value={filters.boarding[0] || ""}
               onChange={(v) => setField("boarding", v ? [v] : [])}
               onClear={() => setField("boarding", [])}
-              helpText="学校自己拥有并管理的宿舍楼，学生住在校园内或学校专属宿舍区，并非寄宿家庭（Homestay）。"
+              helpText="学校自己有宿舍楼，学生住在校园内或学校专属宿舍区，并非寄宿家庭（Homestay）。"
             />
           </div>
         </div>

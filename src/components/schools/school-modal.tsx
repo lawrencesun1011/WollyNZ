@@ -188,7 +188,7 @@ export function SchoolDetailCard({
           }
         />
         <Field
-          label="偏远度指数"
+          label="偏远度"
           value={
             fmtNoneZero(school.isolation) +
             (isolationLabel(school.isolation)
@@ -208,7 +208,7 @@ export function SchoolDetailCard({
               <span className="flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-ink-soft/40 text-[10px] font-semibold text-ink-soft transition-colors group-hover:border-primary group-hover:text-primary">
                 ?
               </span>
-              <span className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 hidden w-80 max-w-[80vw] whitespace-pre-line break-words rounded-lg bg-primary px-3.5 py-2.5 text-left text-[11px] leading-relaxed text-white shadow-lg group-hover:block">
+              <span className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 hidden w-80 max-w-[80vw] whitespace-pre-line break-words rounded-lg bg-primary px-3.5 py-2.5 text-left text-[13px] leading-relaxed text-white shadow-lg group-hover:block">
                 新西兰教育部允许申报多重族裔，故统计人次高于在校总人数。
               </span>
             </span>

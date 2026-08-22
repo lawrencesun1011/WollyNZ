@@ -2,7 +2,7 @@
 
 import type { SchoolFrontend } from "@/lib/types";
 import { cnGender } from "@/lib/labels";
-import { MapPin, Home, Check, Star } from "lucide-react";
+import { MapPin, Home, Check, Heart } from "lucide-react";
 import { useFavorites, useCompare } from "@/lib/user-collections";
 
 interface Props {
@@ -110,12 +110,12 @@ export function SchoolCard({
           onClick={(e) => { e.stopPropagation(); toggleFavorite(school.id); }}
           className={`inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition-colors ${
             inFavorite
-              ? "border-amber-400 bg-amber-50 text-amber-500"
+              ? "border-[#EF4444] bg-[#fef2f2] text-[#EF4444]"
               : "border-primary/20 bg-white text-ink-soft hover:bg-primary/5 hover:text-primary"
           } ${view === "list" ? "h-9 w-full" : "flex-1 px-3 py-2"}`}
         >
-          <Star className={`h-3.5 w-3.5 ${inFavorite ? "fill-amber-400" : ""}`} />
-          <span>{inFavorite ? "已收藏" : "收藏"}</span>
+          <Heart className={`h-3.5 w-3.5 ${inFavorite ? "fill-[#EF4444] text-[#EF4444]" : ""}`} />
+          <span>{inFavorite ? "心愿单" : "心愿"}</span>
         </button>
 
         <button

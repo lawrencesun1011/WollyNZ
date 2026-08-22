@@ -172,8 +172,6 @@ export function applySort(
       return arr.sort((a, b) => (a.eqi || 9999) - (b.eqi || 9999));
     case "roll":
       return arr.sort((a, b) => (b.roll || 0) - (a.roll || 0));
-    case "city":
-      return arr.sort((a, b) => a.city.localeCompare(b.city));
     default:
       return arr;
   }
@@ -248,7 +246,7 @@ export function levelShape(level: string): { shape: MarkerShape; color: string }
     case "小学":
       return { shape: "circle", color: "#2e7ed4" };
     case "初中":
-      return { shape: "diamond", color: "#e0392b" };
+      return { shape: "diamond", color: "#2E9E8C" };
     case "高中":
       return { shape: "square", color: "#8e44ad" };
     case "贯通制":

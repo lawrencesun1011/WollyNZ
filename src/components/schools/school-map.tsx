@@ -24,7 +24,7 @@ const SVG_EXTERNAL =
 const SVG_CHECK =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 const SVG_FAV =
-  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
 
 function esc(s: string): string {
   // HTML 字符串里插值的简单转义，避免学校名/地址含特殊字符破坏 HTML
@@ -93,6 +93,12 @@ function pinSvg(shape: MarkerShape, color: string): string {
     inner = `<polygon class="shape" points="6,1.5 12,1.5 16.6,9 12,16.5 6,16.5 1.4,9" fill="${color}"/>`;
   }
   return `<svg width="26" height="26" viewBox="0 0 18 18" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round">${inner}</svg>`;
+}
+
+/** 加入心愿单后地图上的标记改为爱心（红色，与卡片 / 心愿单统一） */
+function heartSvg(color = "#EF4444"): string {
+  const inner = `<path class="shape" d="M12 20.5l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 20.5z" fill="${color}"/>`;
+  return `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.4" stroke-linejoin="round">${inner}</svg>`;
 }
 
 /* ── 图例 SVG（与地图 pin 一致：白描边 + 阴影） ── */
@@ -177,9 +183,9 @@ export function SchoolMap({
         if (!btn) return;
         const wasOn = btn.classList.contains("is-on");
         btn.classList.toggle("is-on");
-        // 切换文字：收藏 ↔ 已收藏
+        // 切换文字：心愿 ↔ 心愿单
         const label = btn.querySelector("span:last-child") as HTMLElement | null;
-        if (label) label.textContent = wasOn ? "收藏" : "已收藏";
+        if (label) label.textContent = wasOn ? "心愿" : "心愿单";
       },
     };
     return () => {
@@ -303,7 +309,7 @@ export function SchoolMap({
           const isOn = favSet.has(id);
           btn.classList.toggle("is-on", isOn);
           const label = btn.querySelector("span:last-child") as HTMLElement | null;
-          if (label) label.textContent = isOn ? "已收藏" : "收藏";
+          if (label) label.textContent = isOn ? "心愿单" : "心愿";
         });
       });
       reportBounds();
@@ -466,9 +472,12 @@ export function SchoolMap({
     for (const s of schools) {
       if (s.lat == null || s.lng == null) continue;
       const meta = levelShape(s.level);
+      const isFav = favoriteIdsRef.current.includes(s.id);
       const icon = L.divIcon({
         className: "",
-        html: `<div class="map-pin" data-id="${s.id}">${pinSvg(meta.shape, meta.color)}</div>`,
+        html: `<div class="map-pin" data-id="${s.id}">${
+          isFav ? heartSvg() : pinSvg(meta.shape, meta.color)
+        }</div>`,
         iconSize: [26, 26],
         iconAnchor: [13, 13],
         popupAnchor: [0, -14],
@@ -488,7 +497,7 @@ export function SchoolMap({
         `<span class="popup-chip">学生 ${s.roll ?? "—"}</span>`,
         `<span class="popup-chip">EQI ${s.eqi ?? "—"}</span>`,
       ].join("");
-      const favoriteHtml = `<button class="popup-btn popup-btn--favorite" data-id="${s.id}" onclick="window.__schoolMapActions.favorite('${s.id}')"><i class="popup-ic popup-ic--fav">${SVG_FAV}</i><span>收藏</span></button>`;
+      const favoriteHtml = `<button class="popup-btn popup-btn--favorite" data-id="${s.id}" onclick="window.__schoolMapActions.favorite('${s.id}')"><i class="popup-ic popup-ic--fav">${SVG_FAV}</i><span>心愿</span></button>`;
       const popupHtml = `<div class="popup-card">
           <div class="popup-card__head"><i class="popup-ic popup-ic--title">${SVG_HOUSE}</i><span class="popup-card__title">${nameEsc}</span></div>
           <div class="popup-card__loc"><i class="popup-ic popup-ic--loc">${SVG_MAPPIN}</i><span>${locEsc}</span></div>
@@ -533,6 +542,67 @@ export function SchoolMap({
     }
     syncAggregation();
   }, [schools]);
+
+  // 加入心愿单状态变化时：已渲染的 marker 图标实时切换为爱心 / 还原为原形状
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    for (const s of schools) {
+      const m = markersRef.current[s.id];
+      if (!m) continue;
+      const meta = levelShape(s.level);
+      const isFav = favoriteIds.includes(s.id);
+      m.setIcon(
+        L.divIcon({
+          className: "",
+          html: `<div class="map-pin" data-id="${s.id}">${
+            isFav ? heartSvg() : pinSvg(meta.shape, meta.color)
+          }</div>`,
+          iconSize: [26, 26],
+          iconAnchor: [13, 13],
+          popupAnchor: [0, -14],
+        }),
+      );
+    }
+    // 同步当前已打开的 popup 内收藏按钮视觉（处理从收藏夹浮层/卡片等外部
+    // 取消收藏的情况：popup 是纯 HTML，不会随全局状态自动重渲）。
+    const mapAny = map as L.Map & { _popup?: L.Popup };
+    const popup = mapAny._popup;
+    if (popup) {
+      const root = popup.getElement();
+      if (root) {
+        const favSet = new Set(favoriteIds);
+        root.querySelectorAll<HTMLElement>(".popup-btn--favorite").forEach((btn: HTMLElement) => {
+          const id = btn.dataset.id;
+          if (!id) return;
+          const isOn = favSet.has(id);
+          btn.classList.toggle("is-on", isOn);
+          const label = btn.querySelector("span:last-child") as HTMLElement | null;
+          if (label) label.textContent = isOn ? "心愿单" : "心愿";
+        });
+      }
+    }
+  }, [favoriteIds, schools]);
+
+  // 对比状态变化时：同步当前已打开的 popup 内对比按钮视觉（同上，处理外部切
+  // 换对比的情况，避免 popup 按钮卡在旧状态）。
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const mapAny = map as L.Map & { _popup?: L.Popup };
+    const popup = mapAny._popup;
+    if (popup) {
+      const root = popup.getElement();
+      if (root) {
+        const cmpSet = new Set(compareIds);
+        root.querySelectorAll<HTMLElement>(".popup-btn--compare").forEach((btn: HTMLElement) => {
+          const id = btn.dataset.id;
+          if (!id) return;
+          btn.classList.toggle("is-on", cmpSet.has(id));
+        });
+      }
+    }
+  }, [compareIds]);
 
   // 悬停高亮：地图视野平移到该点 + 金色描边
   useEffect(() => {
@@ -640,7 +710,7 @@ export function SchoolMap({
       <div ref={containerRef} className="h-full w-full" />
 
       {/* ── 底图切换开关（右上角）：街道在前、卫星在后，激活项文字为绿色 ── */}
-      <div className="absolute right-3 top-3 z-[500] flex overflow-hidden rounded-full border border-stroke bg-white shadow-sm">
+      <div className="absolute right-3 top-3 z-[100] flex overflow-hidden rounded-full border border-stroke bg-white shadow-sm">
         <button
           type="button"
           onClick={() => switchBase("街道")}
@@ -662,21 +732,21 @@ export function SchoolMap({
       </div>
 
       {/* ── 图例（左下角，对齐原项目 .map-legend） ── */}
-      <div className="absolute bottom-4 left-4 z-[500] rounded-2xl bg-white/90 px-5 py-3 shadow-sm backdrop-blur">
-        <p className="mb-2 text-sm font-semibold text-ink">学段图例</p>
-        <div className="flex flex-col gap-1.5">
+      <div className="absolute bottom-4 left-4 z-[500] rounded-2xl bg-white/90 px-4 py-2.5 shadow-sm backdrop-blur">
+        <p className="mb-1.5 text-xs font-semibold text-ink">学段图例</p>
+        <div className="flex flex-col gap-1">
           {([
             ["小学", "circle", "#2e7ed4"],
-            ["初中", "diamond", "#e0392b"],
+            ["初中", "diamond", "#2E9E8C"],
             ["高中", "square", "#8e44ad"],
             ["一贯制", "hexagon", "#9c6b3f"],
           ] as [string, MarkerShape, string][]).map(([label, shape, color]) => (
             <span
               key={label}
-              className="flex items-center gap-2 text-sm text-ink-soft"
+              className="flex items-center gap-2 text-xs text-ink-soft"
             >
               <span
-                className="flex h-[26px] w-[26px] items-center justify-center"
+                className="flex h-[22px] w-[22px] items-center justify-center"
                 dangerouslySetInnerHTML={{
                   __html: legendSvg(shape, color),
                 }}
@@ -858,23 +928,23 @@ export function SchoolMap({
           height: 15px;
           color: #6b7280;
         }
-        .popup-btn--favorite .popup-ic--fav svg polygon {
+        .popup-btn--favorite .popup-ic--fav svg path {
           stroke: #6b7280;
         }
         .popup-btn--favorite.is-on {
-          background: #fff7ed;
-          color: #f59e0b;
-          border-color: #f59e0b;
+          background: #fef2f2;
+          color: #EF4444;
+          border-color: #EF4444;
         }
         .popup-btn--favorite.is-on .popup-ic--fav {
-          fill: #f59e0b;
-          color: #f59e0b;
+          fill: #EF4444;
+          color: #EF4444;
         }
         .popup-btn--favorite.is-on .popup-ic--fav svg {
-          fill: #f59e0b !important;
+          fill: #EF4444 !important;
         }
-        .popup-btn--favorite.is-on .popup-ic--fav svg polygon {
-          stroke: #f59e0b;
+        .popup-btn--favorite.is-on .popup-ic--fav svg path {
+          stroke: #EF4444;
         }
         .popup-check {
           display: inline-flex;

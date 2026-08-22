@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import type { SchoolFrontend } from "@/lib/types";
 import { subscribeSchools, getSchoolsSnapshot } from "@/lib/schools-store";
-import { useFavorites, useCompare } from "@/lib/user-collections";
-import { Star, X, GitCompare, MapPin } from "lucide-react";
+import { useFavorites } from "@/lib/user-collections";
+import { Heart, X, MapPin } from "lucide-react";
 
 function useSchoolsList(): SchoolFrontend[] {
   const [list, setList] = useState<SchoolFrontend[]>(() => getSchoolsSnapshot() ?? []);
@@ -22,7 +22,6 @@ interface Props {
 /** 右上角全局收藏夹浮层：跨页面可见，与卡片 / 地图 popup 同源同步。 */
 export function FavoritesPopover({ onClose }: Props) {
   const { favoriteIds, removeFavorite, clearFavorites } = useFavorites();
-  const { toggleCompare } = useCompare();
   const schools = useSchoolsList();
 
   const favSchools = favoriteIds
@@ -42,10 +41,6 @@ export function FavoritesPopover({ onClose }: Props) {
     return () => document.removeEventListener("mousedown", onDocMouseDown);
   }, [onClose]);
 
-  const handleAddCompare = (id: string) => {
-    toggleCompare(id);
-  };
-
   return (
     <div
       data-fav-popover
@@ -54,9 +49,9 @@ export function FavoritesPopover({ onClose }: Props) {
       <div className="glass overflow-hidden rounded-2xl border border-white/60 shadow-xl">
         {/* 标题栏 */}
         <div className="flex items-center justify-between border-b border-stroke/70 px-4 py-3">
-          <div className="flex items-center gap-2 text-primary">
-            <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-            <span className="text-sm font-semibold">我的收藏（{favSchools.length}）</span>
+          <div className="flex items-center gap-2 text-[#EF4444]">
+            <Heart className="h-4 w-4 fill-[#EF4444] text-[#EF4444]" />
+            <span className="text-sm font-semibold text-ink">我的心愿单（{favSchools.length}）</span>
           </div>
           <button
             type="button"
@@ -71,10 +66,10 @@ export function FavoritesPopover({ onClose }: Props) {
         {/* 列表 */}
         {favSchools.length === 0 ? (
           <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
-            <Star className="h-8 w-8 text-primary/30" />
-            <p className="text-sm text-ink-soft">还没有收藏的学校</p>
+            <Heart className="h-8 w-8 text-[#EF4444]/30" />
+            <p className="text-sm text-ink-soft">还没有心愿的学校</p>
             <p className="text-xs text-ink-soft/80">
-              在学校卡片或地图弹窗中点击「收藏」即可加入这里
+              在学校卡片或地图弹窗中点击「心愿」即可加入这里
             </p>
           </div>
         ) : (
@@ -92,23 +87,12 @@ export function FavoritesPopover({ onClose }: Props) {
                       {[s.suburb, s.city].filter(Boolean).join(", ") || "—"}
                     </span>
                   </div>
-                  <span className="chip mt-1 inline-block bg-primary/8 text-primary">
-                    {s.level}
-                  </span>
                 </div>
                 <div className="flex shrink-0 flex-col items-center gap-1.5">
                   <button
                     type="button"
-                    onClick={() => handleAddCompare(s.id)}
-                    aria-label="加入对比"
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/20 text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary"
-                  >
-                    <GitCompare className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => removeFavorite(s.id)}
-                    aria-label="移除收藏"
+                    aria-label="移除心愿"
                     className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/20 text-ink-soft transition-colors hover:bg-error/5 hover:text-error"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -127,7 +111,7 @@ export function FavoritesPopover({ onClose }: Props) {
               onClick={clearFavorites}
               className="w-full rounded-lg py-2 text-sm text-ink-soft transition-colors hover:bg-error/5 hover:text-error"
             >
-              清空收藏
+              清空心愿单
             </button>
           </div>
         )}

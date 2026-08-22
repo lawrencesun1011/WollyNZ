@@ -1,8 +1,8 @@
 "use client";
 
-// 收藏与对比的全局客户端状态（跨组件、跨页面共享）。
+// 心愿单与对比的全局客户端状态（跨组件、跨页面共享）。
 // 设计沿用项目既有的「模块级 pub/sub + localStorage」模式（见 favorites.ts / schools-store.ts），
-// 使右上角收藏夹浮层、学校卡片、地图 popup、详情 modal、对比栏五方读取同一数据源，天然实时同步。
+// 使右上角心愿单浮层、学校卡片、地图 popup、对比栏读取同一数据源，天然实时同步。
 import { useEffect, useState } from "react";
 import {
   getFavoriteIds,
@@ -83,7 +83,7 @@ function clearCompareState(): void {
   emitCompare();
 }
 
-/** 订阅收藏列表（id 数组），组件卸载自动退订。 */
+/** 订阅心愿单列表（id 数组），组件卸载自动退订。 */
 export function useFavorites(): {
   favoriteIds: string[];
   toggleFavorite: (id: string) => void;

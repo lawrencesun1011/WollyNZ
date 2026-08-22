@@ -1,6 +1,6 @@
 "use client";
 
-// 收藏（我的学校）客户端状态：localStorage 持久化，跨会话保留。
+// 心愿单（我的学校）客户端状态：localStorage 持久化，跨会话保留。
 const LS_KEY = "wollyn:schools:favorites";
 
 type Listener = (ids: string[]) => void;

@@ -63,6 +63,9 @@ export function SchoolsExplorer({
   // 当前详情页（modal）对应的学校 ID，由卡片"详情"按钮触发
   const [detailId, setDetailId] = useState<string | null>(null);
   const { compareIds } = useCompare();
+  const { favoriteIds } = useFavorites();
+  // 仅显示心愿单学校开关
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
   // 是否打开横向对比视图（"查看对比"触发）
   const [compareView, setCompareView] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -76,6 +79,13 @@ export function SchoolsExplorer({
   const filtered = useMemo(
     () => applySort(applyFilters(schools, filters), sort),
     [schools, filters, sort]
+  );
+
+  // 心愿单筛选：仅在开启时，把已筛选结果收敛为收藏学校
+  const favSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
+  const base = useMemo(
+    () => (favoritesOnly ? filtered.filter((s) => favSet.has(s.id)) : filtered),
+    [filtered, favoritesOnly, favSet]
   );
 
   // 地图飞行目标：普通城市按城市名；奥克兰子区（北岸/中区/东区）携带 hotRegion
@@ -94,9 +104,9 @@ export function SchoolsExplorer({
   // 未搜索时：仅保留位于地图视野内的学校，使列表与地图保持一致。
   const hasKeyword = filters.keyword.trim() !== "";
   const inBounds = useMemo(() => {
-    if (hasKeyword || !mapBounds) return filtered;
+    if (hasKeyword || !mapBounds) return base;
     const [s, w, n, e] = mapBounds;
-    return filtered.filter(
+    return base.filter(
       (sc) =>
         sc.lat != null &&
         sc.lng != null &&
@@ -105,7 +115,13 @@ export function SchoolsExplorer({
         sc.lng >= w &&
         sc.lng <= e
     );
-  }, [filtered, mapBounds, hasKeyword]);
+  }, [base, mapBounds, hasKeyword]);
+
+  // 地图自适应 key：开启心愿单时按收藏学校位置缩放；否则沿用关键词搜索缩放
+  const fitKey = useMemo(() => {
+    if (favoritesOnly) return `fav-${base.length}`;
+    return filters.keyword.trim() || undefined;
+  }, [favoritesOnly, base.length, filters.keyword]);
 
   // 筛选或地图视野变化时，重置分页到首页
   useEffect(() => {
@@ -139,7 +155,15 @@ export function SchoolsExplorer({
           {/* 左侧列表 */}
           <section className="flex w-full flex-col overflow-hidden rounded-2xl border border-stroke bg-white shadow-sm lg:w-[420px] xl:w-[480px]">
             <div className="shrink-0 border-b border-stroke px-5 py-3">
-              <Toolbar total={inBounds.length} shown={visible.length} sort={sort} onSort={setSort} />
+              <Toolbar
+                total={inBounds.length}
+                shown={visible.length}
+                sort={sort}
+                onSort={setSort}
+                favoritesOnly={favoritesOnly}
+                onToggleFavoritesOnly={setFavoritesOnly}
+                favoriteCount={favoriteIds.length}
+              />
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto p-5 pt-3">
               <SchoolCardList
@@ -169,14 +193,14 @@ export function SchoolsExplorer({
           {/* 右侧地图 */}
           <section className="hidden min-h-0 flex-1 overflow-hidden rounded-2xl border border-stroke shadow-sm lg:block">
             <SchoolMap
-              schools={filtered}
+              schools={base}
               hoveredId={hoveredId}
               activeId={popupId}
               onSelect={setPopupId}
               onDetail={setDetailId}
               onBoundsChange={setMapBounds}
-              flyCities={flyCities}
-              fitSearchKey={filters.keyword.trim() || undefined}
+              flyCities={favoritesOnly ? [] : flyCities}
+              fitSearchKey={fitKey}
             />
           </section>
         </main>
