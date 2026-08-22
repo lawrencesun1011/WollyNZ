@@ -31,10 +31,12 @@ const AUTH_TOKEN = API_KEY || PUBLISHABLE_KEY;
 
 export const PG_GATEWAY_BASE = `https://${ENV_ID}.api.tcloudbasegateway.com/v1/rdb/rest`;
 
-// 诊断日志：确认运行时环境变量是否注入
-console.log("[pg] ENV_ID =", JSON.stringify(ENV_ID));
-console.log("[pg] PUBLISHABLE_KEY 长度 =", PUBLISHABLE_KEY.length);
-console.log("[pg] PG_GATEWAY_BASE =", PG_GATEWAY_BASE);
+// 启动期日志：确认 PG 网关配置是否就绪（便于控制台 debug）
+if (!ENV_ID) {
+  console.error("[pg] 警告: CLOUDBASE_ENV_ID 未设置，PG 网关不可用");
+} else {
+  console.log("[pg] PG 网关已初始化:", PG_GATEWAY_BASE, "鉴权方式:", API_KEY ? "API_KEY(service_role)" : "PUBLISHABLE_KEY(anon)");
+}
 
 // snake_case 物理列 -> SchoolFrontend camelCase 的字段映射
 export const SCHOOL_COLUMN_MAP: Record<string, string> = {
@@ -88,7 +90,6 @@ export async function pgSelect(
     throw new Error("[pg] 缺少 CLOUDBASE_API_KEY / PUBLISHABLE_KEY，鉴权会失败");
   }
   const url = `${PG_GATEWAY_BASE}/${table}${query ? `?${query}` : ""}`;
-  console.log("[pg] 请求:", url, "使用 token 长度:", AUTH_TOKEN.length);
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
   });
