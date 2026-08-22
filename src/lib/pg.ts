@@ -25,6 +25,9 @@ loadEnvLocal();
 export const ENV_ID = process.env.CLOUDBASE_ENV_ID || "";
 const PUBLISHABLE_KEY = process.env.CLOUDBASE_PUBLISHABLE_KEY || "";
 const API_KEY = process.env.CLOUDBASE_API_KEY || "";
+// PG 网关(PostgREST)需要 service_role 级密钥，publishable key(anon) 会 401。
+// 优先用 API_KEY，缺失时回退 publishable key。
+const AUTH_TOKEN = API_KEY || PUBLISHABLE_KEY;
 
 export const PG_GATEWAY_BASE = `https://${ENV_ID}.api.tcloudbasegateway.com/v1/rdb/rest`;
 
@@ -81,13 +84,13 @@ export async function pgSelect(
   if (!ENV_ID) {
     throw new Error("[pg] CLOUDBASE_ENV_ID 为空，无法请求 PG 网关");
   }
-  if (!PUBLISHABLE_KEY) {
-    throw new Error("[pg] CLOUDBASE_PUBLISHABLE_KEY 为空，鉴权会失败");
+  if (!AUTH_TOKEN) {
+    throw new Error("[pg] 缺少 CLOUDBASE_API_KEY / PUBLISHABLE_KEY，鉴权会失败");
   }
   const url = `${PG_GATEWAY_BASE}/${table}${query ? `?${query}` : ""}`;
-  console.log("[pg] 请求:", url);
+  console.log("[pg] 请求:", url, "使用 token 长度:", AUTH_TOKEN.length);
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${PUBLISHABLE_KEY}` },
+    headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
   });
   if (!res.ok) throw new Error(`PG 查询失败 ${res.status}: ${await res.text()}`);
   return (await res.json()) as Record<string, unknown>[];

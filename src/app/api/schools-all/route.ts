@@ -13,27 +13,42 @@ export async function GET() {
 
   let list: unknown[] = [];
   let error: string | null = null;
-  let rawProbe: unknown = null;
+  let probePub: unknown = null; // 用 publishable key 试
+  let probeApi: unknown = null; // 用 api key 试
   let probeError: string | null = null;
+
   try {
     list = await getSchoolFrontendAll();
   } catch (e) {
     error = (e as Error).message;
   }
 
-  // 直接裸查 schools 表前 3 行，确认表是否存在、有无数据
+  const probeUrl = `${PG_GATEWAY_BASE}/schools?limit=3`;
+  const pk = process.env.CLOUDBASE_PUBLISHABLE_KEY || "";
+  const ak = process.env.CLOUDBASE_API_KEY || "";
+
   try {
-    const probeUrl = `${PG_GATEWAY_BASE}/schools?limit=3`;
-    const r = await fetch(probeUrl, {
-      headers: { Authorization: `Bearer ${process.env.CLOUDBASE_PUBLISHABLE_KEY}` },
-    });
-    rawProbe = { status: r.status, body: r.status === 200 ? await r.json() : await r.text() };
+    const r = await fetch(probeUrl, { headers: { Authorization: `Bearer ${pk}` } });
+    probePub = { status: r.status, body: r.status === 200 ? await r.json() : await r.text() };
+  } catch (e) {
+    probeError = (e as Error).message;
+  }
+  try {
+    const r = await fetch(probeUrl, { headers: { Authorization: `Bearer ${ak}` } });
+    probeApi = { status: r.status, body: r.status === 200 ? await r.json() : await r.text() };
   } catch (e) {
     probeError = (e as Error).message;
   }
 
   return NextResponse.json(
-    { diag, count: list.length, error, sample: list.slice(0, 2), rawProbe, probeError },
+    {
+      diag: { ...diag, apiKeyLen: ak.length },
+      count: list.length,
+      error,
+      probePub,
+      probeApi,
+      probeError,
+    },
     { headers: { "Cache-Control": "no-store" } }
   );
 }
