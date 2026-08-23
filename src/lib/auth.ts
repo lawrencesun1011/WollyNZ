@@ -30,13 +30,20 @@ let auth: any = null;
 let initialized = false;
 let emailVerifyCtx: { verificationInfo: any; email: string } | null = null;
 
+/**
+ * 将 CloudBase loginState 映射为本项目的登录态。
+ * 口径：只有邮箱登录（user.email 存在且非匿名）才算「已登录」；
+ * 匿名态、或没有邮箱的态一律视为「未登录」(返回 null)，小人区不显示退出登录。
+ */
 function toAuthUser(loginState: any): AuthUser | null {
   const u = loginState?.user;
   if (!u) return null;
+  const isAnonymous = u.loginType === "ANONYMOUS" || !u.email;
+  if (isAnonymous) return null;
   return {
     uid: u.uid ?? u.openid ?? u.customUserId ?? "",
     email: u.email ?? null,
-    isAnonymous: u.loginType === "ANONYMOUS" || !u.email,
+    isAnonymous: false,
   };
 }
 
@@ -91,20 +98,11 @@ export function useAuthUser(): AuthUser | null {
   return user;
 }
 
-/** 进站匿名兜底：若未登录则自动匿名登录。 */
-export async function ensureAnonymous(): Promise<AuthUser | null> {
+/** 返回原始 loginState（未经 toAuthUser 过滤），供 auth-init 判断是否匿名残留。 */
+export function getLoginStateRaw(): Promise<any> {
   const a = getAuth();
-  if (!a) return null;
-  const state = await a.getLoginState();
-  if (state?.user) return toAuthUser(state);
-  try {
-    const { data, error } = await a.signInAnonymously();
-    if (error) throw error;
-    return toAuthUser(data);
-  } catch (e) {
-    console.warn("[auth] 匿名登录失败（可能未开启匿名登录方式）", e);
-    return null;
-  }
+  if (!a) return Promise.resolve(null);
+  return a.getLoginState().catch(() => null);
 }
 
 /** 发送邮箱验证码：调用 getVerification，缓存 verificationInfo 供后续登录/注册使用。 */
