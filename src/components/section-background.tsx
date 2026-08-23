@@ -59,7 +59,7 @@ export function SectionBackgroundLayer({
           src={bg.src}
           alt=""
           fill
-          priority={false}
+          priority
           className="object-cover"
           style={{ objectPosition: bg.position || "center" }}
           sizes="100vw"
