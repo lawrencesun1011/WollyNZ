@@ -109,7 +109,19 @@ export async function sendEmailCode(email: string): Promise<void> {
   const a = getAuth();
   if (!a) throw new Error("认证未初始化");
   const { data, error } = await a.signInWithOtp({ email });
-  if (error) throw new Error(error.message || "发送验证码失败");
+  if (error) {
+    console.error("[auth] sendEmailCode 失败:", {
+      message: error.message,
+      code: (error as any).code,
+      requestId: (error as any).requestId,
+      status: (error as any).status,
+      error,
+    });
+    throw new Error(
+      error.message ||
+        `发送验证码失败${(error as any).code ? ` (code=${(error as any).code})` : ""}`,
+    );
+  }
   pendingVerifyOtp = data.verifyOtp;
 }
 
@@ -119,13 +131,37 @@ export async function signInWithEmailCode(email: string, code: string): Promise<
   if (!a) throw new Error("认证未初始化");
   if (pendingVerifyOtp) {
     const { data, error } = await pendingVerifyOtp({ token: code });
-    if (error) throw new Error(error.message || "验证失败");
+    if (error) {
+      console.error("[auth] 验证码登录失败:", {
+        message: error.message,
+        code: (error as any).code,
+        requestId: (error as any).requestId,
+        status: (error as any).status,
+        error,
+      });
+      throw new Error(
+        error.message ||
+          `验证失败${(error as any).code ? ` (code=${(error as any).code})` : ""}`,
+      );
+    }
     pendingVerifyOtp = null;
     return;
   }
   // 若页面刷新后 pending 丢失，尝试直接 verifyOtp（依赖服务端 session）
   const { data, error } = await a.verifyOtp({ email, token: code });
-  if (error) throw new Error(error.message || "验证失败");
+  if (error) {
+    console.error("[auth] verifyOtp 失败:", {
+      message: error.message,
+      code: (error as any).code,
+      requestId: (error as any).requestId,
+      status: (error as any).status,
+      error,
+    });
+    throw new Error(
+      error.message ||
+        `验证失败${(error as any).code ? ` (code=${(error as any).code})` : ""}`,
+    );
+  }
 }
 
 /** 登出（匿名态也会清除）。 */
