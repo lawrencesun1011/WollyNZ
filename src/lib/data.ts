@@ -1,38 +1,42 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { SchoolFrontend, DataMeta } from "./types";
-import {
-  pgSelectAll,
-  getCached,
-  setCached,
-  SCHOOL_COLUMN_MAP,
-  SCHOOL_COLUMNS,
-} from "./pg";
 
 const DATA_DIR = join(process.cwd(), "data");
 
-// 将 PG 返回的 snake_case 行映射回 SchoolFrontend
-function rowToSchoolFrontend(row: Record<string, unknown>): SchoolFrontend {
-  const out: Record<string, unknown> = {};
-  for (const [col, key] of Object.entries(SCHOOL_COLUMN_MAP)) {
-    out[key] = row[col] ?? null;
-  }
-  return out as unknown as SchoolFrontend;
+// 服务端读取本地 JSON 数据文件（构建期由 fetch-data.mjs 生成并提交 git）。
+// 低频更新 + 小体量，直接读文件 + 内存缓存，避免每次请求读盘或打外部数据库。
+
+// 简单服务端内存缓存：避免每次请求都读盘（文件几 MB，读一次即可）。
+// 注意：Serverless 实例可能多副本/冷启动，缓存仅作加速。
+const _cache = new Map<string, { ts: number; data: unknown }>();
+const CACHE_TTL = 60_000; // 60s
+
+function getCached<T>(key: string): T | null {
+  const hit = _cache.get(key);
+  if (hit && Date.now() - hit.ts < CACHE_TTL) return hit.data as T;
+  return null;
+}
+function setCached<T>(key: string, data: T): void {
+  _cache.set(key, { ts: Date.now(), data });
 }
 
-// SSR 首屏直接走 PG（带 60s 服务端缓存，避免每个请求都打网关）。
-// PG 失败时返回空数组，让客户端兜底展示空态，避免 SSR 整体 500。
+async function readJson<T>(file: string): Promise<T> {
+  const raw = await readFile(join(DATA_DIR, file), "utf-8");
+  return JSON.parse(raw) as T;
+}
+
+// 中小学：直接读取已过滤好的前端 JSON（SchoolFrontend[]），无需运行时转换。
 export async function getSchoolFrontendAll(): Promise<SchoolFrontend[]> {
   const cacheKey = "schools:all";
   const cached = getCached<SchoolFrontend[]>(cacheKey);
   if (cached) return cached;
   try {
-    const rows = await pgSelectAll("schools", SCHOOL_COLUMNS, "name.asc");
-    const list = rows.map(rowToSchoolFrontend);
+    const list = await readJson<SchoolFrontend[]>("schools-frontend.json");
     setCached(cacheKey, list);
     return list;
   } catch (e) {
-    console.error("[data] PG 查询失败:", (e as Error).message);
+    console.error("[data] 读取 schools-frontend.json 失败:", (e as Error).message);
     return [];
   }
 }

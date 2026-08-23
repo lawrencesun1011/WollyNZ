@@ -29,15 +29,12 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 
-# 服务端运行所需的环境变量（容器启动时可被 CloudBase 环境变量覆盖）
-ENV CLOUDBASE_ENV_ID=""
-ENV CLOUDBASE_PUBLISHABLE_KEY=""
-ENV CLOUDBASE_API_KEY=""
-
 # Next.js standalone 产物
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+# 本地数据文件（学校库直接读取 data/ 下的 JSON，不再依赖 PostgreSQL）
+COPY --from=builder /app/data ./data
 
 EXPOSE 3000
 CMD ["node", "server.js"]

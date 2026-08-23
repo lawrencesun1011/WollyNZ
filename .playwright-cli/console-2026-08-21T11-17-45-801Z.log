@@ -5211,3 +5211,64 @@ All exports of the module are statically known (It doesn't have dynamic exports)
 [137982010ms] [LOG] [Fast Refresh] done in 38ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
 [137982103ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
 [137982243ms] [LOG] [Fast Refresh] done in 51ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[138536609ms] [ERROR] ./src/lib/data.ts:4:1
+Error: Module not found: Can't resolve './pg'
+   2 | import { join } from "node:path";
+   3 | import type { SchoolFrontend, DataMeta } from "./types";
+>  4 | import {
+     | ^^^^^^^
+>  5 |   pgSelectAll,
+     | ^^^^^^^^^^^^^^
+>  6 |   getCached,
+     | ^^^^^^^^^^^^
+>  7 |   setCached,
+     | ^^^^^^^^^^^^
+>  8 |   SCHOOL_COLUMN_MAP,
+     | ^^^^^^^^^^^^^^^^^^^^
+>  9 |   SCHOOL_COLUMNS,
+     | ^^^^^^^^^^^^^^^^^
+> 10 | } from "./pg";
+     | ^^^^^^^^^^^^^^
+  11 |
+  12 | const DATA_DIR = join(process.cwd(), "data");
+  13 |
+
+Import trace:
+  App Route:
+    ./src/lib/data.ts
+    ./src/app/api/schools-all/route.ts
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:1052
+[138536683ms] [ERROR] ./src/lib/data.ts:4:1
+Error: Module not found: Can't resolve './pg'
+   2 | import { join } from "node:path";
+   3 | import type { SchoolFrontend, DataMeta } from "./types";
+>  4 | import {
+     | ^^^^^^^
+>  5 |   pgSelectAll,
+     | ^^^^^^^^^^^^^^
+>  6 |   getCached,
+     | ^^^^^^^^^^^^
+>  7 |   setCached,
+     | ^^^^^^^^^^^^
+>  8 |   SCHOOL_COLUMN_MAP,
+     | ^^^^^^^^^^^^^^^^^^^^
+>  9 |   SCHOOL_COLUMNS,
+     | ^^^^^^^^^^^^^^^^^
+> 10 | } from "./pg";
+     | ^^^^^^^^^^^^^^
+  11 |
+  12 | const DATA_DIR = join(process.cwd(), "data");
+  13 |
+
+Import trace:
+  App Route:
+    ./src/lib/data.ts
+    ./src/app/api/schools-all/route.ts
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:1052
+[138548725ms] [LOG] [Fast Refresh] done in 566301ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[138597747ms] [LOG] [Fast Refresh] done in 566301ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[138642259ms] [LOG] [Fast Refresh] done in 566301ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[138667594ms] [LOG] [Fast Refresh] done in 566301ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[138679810ms] [LOG] [Fast Refresh] done in 566301ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
