@@ -5,9 +5,12 @@
  *
  * 适配本项目的 @cloudbase/js-sdk 版本：
  * - 监听登录态：auth.onLoginStateChanged(cb)
- * - 发码：auth.signInWithOtp({ email }) 返回 { data: { verifyOtp }, error }
- * - 验码：data.verifyOtp({ token })
+ * - 发码：auth.signInWithOtp({ email }) 发起邮箱验证码挑战
+ * - 验码：auth.verifyOtp({ email, token }) 完成登录/注册
  * - 匿名：auth.signInAnonymously() 返回 { data, error }
+ *
+ * 注意：邮箱验证码模板需在 CloudBase 控制台设为「发送验证码」模式；
+ * 若验码报 missing/invalid type，则 verifyOtp 需补 type 字段（如 type: 'EMAIL'）。
  */
 
 import { useEffect, useState } from "react";
@@ -25,7 +28,6 @@ export interface AuthUser {
 let app: any = null;
 let auth: any = null;
 let initialized = false;
-let pendingVerifyOtp: ((opts: { token: string }) => Promise<any>) | null = null;
 
 function toAuthUser(loginState: any): AuthUser | null {
   const u = loginState?.user;
@@ -73,7 +75,7 @@ export function onUserChanged(cb: (u: AuthUser | null) => void): () => void {
   const handler = (loginState: any) => cb(toAuthUser(loginState));
   a.onLoginStateChanged(handler);
   return () => {
-    // SDK 未提供明确 off，空实现
+    a.offLoginStateChanged?.(handler);
   };
 }
 
@@ -108,7 +110,7 @@ export async function ensureAnonymous(): Promise<AuthUser | null> {
 export async function sendEmailCode(email: string): Promise<void> {
   const a = getAuth();
   if (!a) throw new Error("认证未初始化");
-  const { data, error } = await a.signInWithOtp({ email });
+  const { error } = await a.signInWithOtp({ email });
   if (error) {
     console.error("[auth] sendEmailCode 失败:", {
       message: error.message,
@@ -122,33 +124,13 @@ export async function sendEmailCode(email: string): Promise<void> {
         `发送验证码失败${(error as any).code ? ` (code=${(error as any).code})` : ""}`,
     );
   }
-  pendingVerifyOtp = data.verifyOtp;
 }
 
 /** 用邮箱 + 验证码完成登录/注册。 */
 export async function signInWithEmailCode(email: string, code: string): Promise<void> {
   const a = getAuth();
   if (!a) throw new Error("认证未初始化");
-  if (pendingVerifyOtp) {
-    const { data, error } = await pendingVerifyOtp({ token: code });
-    if (error) {
-      console.error("[auth] 验证码登录失败:", {
-        message: error.message,
-        code: (error as any).code,
-        requestId: (error as any).requestId,
-        status: (error as any).status,
-        error,
-      });
-      throw new Error(
-        error.message ||
-          `验证失败${(error as any).code ? ` (code=${(error as any).code})` : ""}`,
-      );
-    }
-    pendingVerifyOtp = null;
-    return;
-  }
-  // 若页面刷新后 pending 丢失，尝试直接 verifyOtp（依赖服务端 session）
-  const { data, error } = await a.verifyOtp({ email, token: code });
+  const { error } = await a.verifyOtp({ email, token: code });
   if (error) {
     console.error("[auth] verifyOtp 失败:", {
       message: error.message,
