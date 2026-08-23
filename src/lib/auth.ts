@@ -1,16 +1,16 @@
 "use client";
 
 /**
- * CloudBase Auth v2 客户端认证封装（supabase-like 模式）。
+ * CloudBase Auth v2 客户端认证封装（邮箱验证码模式）。
  *
- * 适配本项目的 @cloudbase/js-sdk 版本：
+ * 适配本项目的 @cloudbase/js-sdk 版本（官方邮箱验证码登录文档）：
  * - 监听登录态：auth.onLoginStateChanged(cb)
- * - 发码：auth.signInWithOtp({ email }) 发起邮箱验证码挑战
- * - 验码：auth.verifyOtp({ email, token }) 完成登录/注册
+ * - 发码：auth.getVerification({ email }) → 返回 verificationInfo
+ * - 验码 + 登录/注册：auth.signInWithEmail({ verificationInfo, verificationCode, email })
+ *   内部按 verificationInfo.is_user 分支：已注册用户直接登录，新用户自动注册
  * - 匿名：auth.signInAnonymously() 返回 { data, error }
  *
- * 注意：邮箱验证码模板需在 CloudBase 控制台设为「发送验证码」模式；
- * 若验码报 missing/invalid type，则 verifyOtp 需补 type 字段（如 type: 'EMAIL'）。
+ * 控制台前置：身份认证/登录方式 开启「邮箱验证码」，并配置发件邮箱（SMTP 或零配置代发）。
  */
 
 import { useEffect, useState } from "react";
@@ -28,6 +28,7 @@ export interface AuthUser {
 let app: any = null;
 let auth: any = null;
 let initialized = false;
+let emailVerifyCtx: { verificationInfo: any; email: string } | null = null;
 
 function toAuthUser(loginState: any): AuthUser | null {
   const u = loginState?.user;
@@ -106,43 +107,59 @@ export async function ensureAnonymous(): Promise<AuthUser | null> {
   }
 }
 
-/** 发送邮箱验证码。 */
+/** 发送邮箱验证码：调用 getVerification，缓存 verificationInfo 供后续登录/注册使用。 */
 export async function sendEmailCode(email: string): Promise<void> {
   const a = getAuth();
   if (!a) throw new Error("认证未初始化");
-  const { error } = await a.signInWithOtp({ email });
-  if (error) {
+  try {
+    const res: any = await a.getVerification({ email });
+    if (res?.error) throw res.error;
+    emailVerifyCtx = { verificationInfo: res?.data ?? res, email };
+  } catch (e: any) {
     console.error("[auth] sendEmailCode 失败:", {
-      message: error.message,
-      code: (error as any).code,
-      requestId: (error as any).requestId,
-      status: (error as any).status,
-      error,
+      message: e?.message,
+      code: e?.code,
+      requestId: e?.requestId,
+      status: e?.status,
+      error: e,
     });
     throw new Error(
-      error.message ||
-        `发送验证码失败${(error as any).code ? ` (code=${(error as any).code})` : ""}`,
+      e?.message || `发送验证码失败${e?.code ? ` (code=${e.code})` : ""}`,
     );
   }
 }
 
-/** 用邮箱 + 验证码完成登录/注册。 */
+/**
+ * 用邮箱 + 验证码完成登录/注册。
+ * signInWithEmail 内部按 verificationInfo.is_user 自动分支：
+ * 已注册用户直接登录，新用户自动注册（注册成功即登录）。
+ */
 export async function signInWithEmailCode(email: string, code: string): Promise<void> {
   const a = getAuth();
   if (!a) throw new Error("认证未初始化");
-  const { error } = await a.verifyOtp({ email, token: code });
-  if (error) {
-    console.error("[auth] verifyOtp 失败:", {
-      message: error.message,
-      code: (error as any).code,
-      requestId: (error as any).requestId,
-      status: (error as any).status,
-      error,
+  if (!emailVerifyCtx || emailVerifyCtx.email !== email) {
+    throw new Error("请先获取验证码");
+  }
+  try {
+    const res: any = await a.signInWithEmail({
+      verificationInfo: emailVerifyCtx.verificationInfo,
+      verificationCode: code,
+      email,
+    });
+    if (res?.error) throw res.error;
+  } catch (e: any) {
+    console.error("[auth] 邮箱验证码登录失败:", {
+      message: e?.message,
+      code: e?.code,
+      requestId: e?.requestId,
+      status: e?.status,
+      error: e,
     });
     throw new Error(
-      error.message ||
-        `验证失败${(error as any).code ? ` (code=${(error as any).code})` : ""}`,
+      e?.message || `验证失败${e?.code ? ` (code=${e.code})` : ""}`,
     );
+  } finally {
+    emailVerifyCtx = null;
   }
 }
 
