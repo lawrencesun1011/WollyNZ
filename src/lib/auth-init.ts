@@ -1,5 +1,7 @@
 "use client";
 
+import { getSchoolsSnapshot } from "./schools-store";
+
 /**
  * Auth 桥接：在客户端挂载一次，打通「登录态 ↔ 云端集合 ↔ 本地 pub/sub」。
  *
@@ -57,7 +59,7 @@ export function useAuthBridge() {
         setFavoritesUser(user.uid);
         setCompareUser(user.uid);
         try {
-          const cloud = await mergeLocalToCloudOnLogin(user.uid);
+          const cloud = await mergeLocalToCloudOnLogin(user.uid, resolveSchoolName);
           if (cloud) {
             applyCloudFavorites(cloud.favorites);
             applyCloudCompare(cloud.compare);
@@ -77,4 +79,14 @@ export function useAuthBridge() {
       bridgeStarted = false;
     };
   }, []);
+}
+
+/** 从前端全量学校列表查询名字，供首登合并时补充到云端 {id,name}[]。 */
+function resolveSchoolName(id: string): string | undefined {
+  try {
+    const all = getSchoolsSnapshot() || [];
+    return all.find((s: { id: string; name: string }) => s.id === id)?.name;
+  } catch {
+    return undefined;
+  }
 }

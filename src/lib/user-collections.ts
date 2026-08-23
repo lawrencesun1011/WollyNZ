@@ -3,8 +3,9 @@
 // 心愿单与对比的全局客户端状态（跨组件、跨页面共享）。
 // 设计沿用项目既有的「模块级 pub/sub + localStorage」模式（见 favorites.ts / schools-store.ts），
 // 使右上角心愿单浮层、学校卡片、地图 popup、对比栏读取同一数据源，天然实时同步。
-// 登录后（currentUid 非空）读写改为云端同步，以云端为准。
+// 登录后（currentUid  ＃非空）读写改为云端同步，以云端为准。
 import { useEffect, useState } from "react";
+import { getSchoolsSnapshot } from "./schools-store";
 import {
   applyCloudFavorites,
   getFavoriteIds,
@@ -75,8 +76,9 @@ export function setCompareUser(uid: string | null) {
   currentUid = uid;
 }
 
-/** 登录后由 auth 层调用：用云端数据覆盖本地内存与 localStorage。 */
-export function applyCloudCompare(ids: string[]) {
+/** 登录后由 auth 层调用：用云端数据覆盖本地内存与 localStorage。云端传入 {id,name}[]，本地仅取 id。 */
+export function applyCloudCompare(items: { id: string; name?: string }[]) {
+  const ids = (items || []).map((x) => x.id).filter(Boolean);
   compareState.ids = ids;
   writeCompareLocalStorage(ids);
   emitCompare();
@@ -85,11 +87,27 @@ export function applyCloudCompare(ids: string[]) {
 async function syncCloud(ids: string[]) {
   if (!currentUid) return;
   const { saveCloudCollections } = await import("./user-data");
+  // 从全量学校数据补充名字，云端存储 {id,name}[] 供后台分析
+  const nameOf = buildCompareNameMap();
+  const toItems = (idList: string[]) =>
+    idList.map((id) => ({ id, name: nameOf.get(id) ?? "" }));
   await saveCloudCollections(currentUid, {
-    favorites: getFavoriteIds(),
-    compare: ids,
+    favorites: toItems(getFavoriteIds()),
+    compare: toItems(ids),
   });
   writeCompareLocalStorage(ids);
+}
+
+/** 从前端全量学校列表构建 id→name 映射。 */
+function buildCompareNameMap(): Map<string, string> {
+  try {
+    const all = getSchoolsSnapshot() || [];
+    const m = new Map<string, string>();
+    for (const s of all) m.set(s.id, s.name);
+    return m;
+  } catch {
+    return new Map();
+  }
 }
 
 function toggleCompareState(id: string): void {

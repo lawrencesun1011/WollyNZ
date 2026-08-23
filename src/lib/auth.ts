@@ -13,7 +13,7 @@
  * 控制台前置：身份认证/登录方式 开启「邮箱验证码」，并配置发件邮箱（SMTP 或零配置代发）。
  */
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import cloudbase from "@cloudbase/js-sdk";
 
 const ENV_ID = process.env.NEXT_PUBLIC_CLOUDBASE_ENV_ID!;
@@ -29,6 +29,35 @@ let app: any = null;
 let auth: any = null;
 let initialized = false;
 let emailVerifyCtx: { verificationInfo: any; email: string } | null = null;
+
+/**
+ * 全局登录态 store：所有组件共享同一份 user 状态，登录/登出即时广播。
+ * 避免「每个组件各自订阅 SDK」导致的实例不同步、事件错过（如登录后回首页首帧为 null）。
+ */
+let currentUser: AuthUser | null = null;
+const userListeners = new Set<(u: AuthUser | null) => void>();
+let storeStarted = false;
+
+function emitUser(next: AuthUser | null) {
+  // 浅比较，避免无变化时重复通知
+  if (currentUser?.uid === next?.uid && currentUser?.email === next?.email) {
+    if ((currentUser === null) === (next === null)) return;
+  }
+  currentUser = next;
+  userListeners.forEach((l) => l(next));
+}
+
+function startUserStore() {
+  const a = getAuth();
+  if (storeStarted || !a) return;
+  storeStarted = true;
+  // 同步当前态
+  a.getLoginState()
+    .then((state: any) => emitUser(toAuthUser(state)))
+    .catch(() => emitUser(null));
+  // 订阅后续变化
+  a.onLoginStateChanged((loginState: any) => emitUser(toAuthUser(loginState)));
+}
 
 /**
  * 将 CloudBase loginState 映射为本项目的登录态。
@@ -63,6 +92,7 @@ export function initCloudBase(): any {
   });
   auth = app.auth();
   initialized = true;
+  startUserStore();
   return auth;
 }
 
@@ -71,32 +101,30 @@ function getAuth(): any {
   return initCloudBase();
 }
 
-/** 监听登录态变化，返回取消订阅函数。 */
+/**
+ * 订阅登录态变化（基于全局 store）。返回取消订阅函数。
+ * 注意：全局 store 由 initCloudBase 启动一次；若尚未初始化，这里兜底启动。
+ */
 export function onUserChanged(cb: (u: AuthUser | null) => void): () => void {
-  const a = getAuth();
-  if (!a) return () => {};
-
-  // 先同步当前态
-  a.getLoginState()
-    .then((state: any) => cb(toAuthUser(state)))
-    .catch(() => cb(null));
-
-  const handler = (loginState: any) => cb(toAuthUser(loginState));
-  a.onLoginStateChanged(handler);
+  initCloudBase();
+  startUserStore();
+  cb(currentUser);
+  userListeners.add(cb);
   return () => {
-    a.offLoginStateChanged?.(handler);
+    userListeners.delete(cb);
   };
 }
 
-/** React hook：订阅当前用户态（首帧为空，挂载后同步）。 */
+/**
+ * React hook：订阅当前用户态。
+ * 基于 useSyncExternalStore，登录/登出即时同步（含 SSR 安全快照）。
+ */
 export function useAuthUser(): AuthUser | null {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  useEffect(() => {
-    initCloudBase();
-    const unsub = onUserChanged(setUser);
-    return unsub;
-  }, []);
-  return user;
+  return useSyncExternalStore(
+    (cb) => onUserChanged(() => cb()),
+    () => currentUser,
+    () => null, // SSR 快照：服务端无登录态
+  );
 }
 
 /** 返回原始 loginState（未经 toAuthUser 过滤），供 auth-init 判断是否匿名残留。 */
@@ -146,6 +174,14 @@ export async function signInWithEmailCode(email: string, code: string): Promise<
       email,
     });
     if (res?.error) throw res.error;
+    // 双保险：主动从 SDK 拉一次最新 loginState 并 emit，
+    // 保证即便 SDK 内部未及时触发 onLoginStateChanged，UI 也能立即更新到登录态。
+    try {
+      const state: any = await a.getLoginState();
+      emitUser(toAuthUser(state));
+    } catch (refreshErr) {
+      console.warn("[auth] post-login getLoginState failed:", refreshErr);
+    }
   } catch (e: any) {
     console.error("[auth] 邮箱验证码登录失败:", {
       message: e?.message,
@@ -166,16 +202,21 @@ export async function signInWithEmailCode(email: string, code: string): Promise<
 export async function signOut(): Promise<void> {
   const a = getAuth();
   if (!a) return;
-  await a.signOut();
+  try {
+    await a.signOut();
+  } finally {
+    // 兜底：确保即使 SDK 未触发 onLoginStateChanged，UI 也立即回到未登录
+    emitUser(null);
+  }
 }
 
 /** 获取当前登录用户的 access token（JWT），用于 PostgREST 网关鉴权（RLS）。 */
-export function getAccessToken(): string | null {
+export async function getAccessToken(): Promise<string | null> {
   const a = getAuth();
   if (!a) return null;
   try {
-    const info = a.getAccessToken();
-    return info?.accessToken ?? null;
+    const info = await a.getAccessToken();
+    return (info as any)?.accessToken ?? null;
   } catch (e) {
     console.warn("[auth] 获取 access token 失败", e);
     return null;

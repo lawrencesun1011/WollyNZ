@@ -24,9 +24,14 @@
 
 import { getAccessToken } from "./auth";
 
+export interface FavoriteItem {
+  id: string;
+  name: string;
+}
+
 export interface UserCollections {
-  favorites: string[];
-  compare: string[];
+  favorites: FavoriteItem[];
+  compare: FavoriteItem[];
 }
 
 const TABLE = "user_collections";
@@ -71,17 +76,41 @@ export async function fetchCloudCollections(uid: string): Promise<UserCollection
       console.warn("[user-data] 云端读取失败", res.status);
       return null;
     }
-    const rows = (await res.json()) as Array<{ favorites?: string[]; compare?: string[] }>;
-    const doc = rows[0];
+    const data = (await res.json()) as Array<{
+      favorites?: unknown;
+      compare?: unknown;
+    }>;
+    const doc = data[0];
     if (!doc) return null;
     return {
-      favorites: Array.isArray(doc.favorites) ? doc.favorites : [],
-      compare: Array.isArray(doc.compare) ? doc.compare : [],
+      favorites: normalizeItems(doc.favorites),
+      compare: normalizeItems(doc.compare),
     };
   } catch (e) {
     console.warn("[user-data] 云端读取异常", e);
     return null;
   }
+}
+
+/**
+ * 兼容旧数据：云端可能存的是 string[]（仅 id），也可能已经是 {id,name}[]。
+ * 统一规范化为 {id,name}[]；旧 id-only 数据 name 留空，下次写时会补回。
+ */
+function normalizeItems(raw: unknown): FavoriteItem[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((x): FavoriteItem | null => {
+      if (typeof x === "string") return { id: x, name: "" };
+      if (x && typeof x === "object" && "id" in x) {
+        const o = x as { id?: unknown; name?: unknown };
+        return {
+          id: String(o.id ?? ""),
+          name: typeof o.name === "string" ? o.name : "",
+        };
+      }
+      return null;
+    })
+    .filter((x): x is FavoriteItem => !!x && !!x.id);
 }
 
 /** 云端 upsert（按 owner 主键插入或更新）。 */
@@ -121,16 +150,22 @@ export async function saveCloudCollections(
  * - 云端为空 → 把本地 localStorage 心愿单/对比写入云端（首次即迁移）。
  * - 云端已有 → 用云端覆盖本地（以云端为准），返回云端数据供上层使用。
  */
-export async function mergeLocalToCloudOnLogin(uid: string): Promise<UserCollections | null> {
+export async function mergeLocalToCloudOnLogin(
+  uid: string,
+  resolveName?: (id: string) => string | undefined
+): Promise<UserCollections | null> {
   const cloud = await fetchCloudCollections(uid);
   const localFav = readLS(LS_FAV);
   const localCmp = readLS(LS_CMP);
 
+  const toItems = (ids: string[]): FavoriteItem[] =>
+    ids.map((id) => ({ id, name: resolveName?.(id) ?? "" }));
+
   if (!cloud) {
-    // 云端无文档：将本地数据上传
+    // 云端无文档：将本地数据上传（补充学校名字供后台分析）
     const merged: UserCollections = {
-      favorites: Array.from(new Set(localFav)),
-      compare: Array.from(new Set(localCmp)).slice(0, 4),
+      favorites: toItems(Array.from(new Set(localFav))),
+      compare: toItems(Array.from(new Set(localCmp)).slice(0, 4)),
     };
     if (localFav.length || localCmp.length) {
       await saveCloudCollections(uid, merged);
@@ -138,9 +173,9 @@ export async function mergeLocalToCloudOnLogin(uid: string): Promise<UserCollect
     return merged;
   }
 
-  // 云端有数据：以云端为准，回写本地镜像
-  writeLS(LS_FAV, cloud.favorites);
-  writeLS(LS_CMP, cloud.compare);
+  // 云端有数据：以云端为准，回写本地镜像（提取 id 数组）
+  writeLS(LS_FAV, cloud.favorites.map((x) => x.id));
+  writeLS(LS_CMP, cloud.compare.map((x) => x.id));
   return cloud;
 }
 

@@ -1,6 +1,8 @@
 "use client";
 
 // 心愿单（我的学校）客户端状态：localStorage 持久化兜底，登录后云端同步。
+import { getSchoolsSnapshot } from "./schools-store";
+
 const LS_KEY = "wollyn:schools:favorites";
 
 type Listener = (ids: string[]) => void;
@@ -44,8 +46,9 @@ export function setFavoritesUser(uid: string | null) {
   currentUid = uid;
 }
 
-/** 登录后由 auth 层调用：用云端数据覆盖本地内存与 localStorage。 */
-export function applyCloudFavorites(ids: string[]) {
+/** 登录后由 auth 层调用：用云端数据覆盖本地内存与 localStorage。云端传入 {id,name}[]，本地仅取 id。 */
+export function applyCloudFavorites(items: { id: string; name?: string }[]) {
+  const ids = (items || []).map((x) => x.id).filter(Boolean);
   state.ids = ids;
   writeLocalStorage(ids);
   emit();
@@ -53,12 +56,33 @@ export function applyCloudFavorites(ids: string[]) {
 
 async function syncCloud(ids: string[]) {
   if (!currentUid) return;
-  const { saveCloudCollections, userDataKeys } = await import("./user-data");
+  const { saveCloudCollections } = await import("./user-data");
   const { readCompareLS } = await import("./user-collections");
   const cmp = readCompareLS();
-  await saveCloudCollections(currentUid, { favorites: ids, compare: cmp });
-  // 同步更新本地镜像
+
+  // 从全量学校数据补充名字，云端存储 {id,name}[] 供后台分析
+  const nameOf = buildNameMap();
+  const toItems = (idList: string[]) =>
+    idList.map((id) => ({ id, name: nameOf.get(id) ?? "" }));
+
+  await saveCloudCollections(currentUid, {
+    favorites: toItems(ids),
+    compare: toItems(cmp),
+  });
+  // 同步更新本地镜像（本地仍只存 id）
   writeLocalStorage(ids);
+}
+
+/** 从前端全量学校列表构建 id→name 映射（轻量，数据已在客户端）。 */
+function buildNameMap(): Map<string, string> {
+  try {
+    const all = getSchoolsSnapshot() || [];
+    const m = new Map<string, string>();
+    for (const s of all) m.set(s.id, s.name);
+    return m;
+  } catch {
+    return new Map();
+  }
 }
 
 export function subscribeFavorites(cb: Listener): () => void {

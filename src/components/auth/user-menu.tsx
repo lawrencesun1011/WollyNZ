@@ -45,7 +45,7 @@ export function UserMenu() {
               <Link
                 href="/login"
                 onClick={() => setOpen(false)}
-                className="flex w-full items-center gap-2 rounded-[--radius-sm] bg-primary px-3 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-hover"
+                className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary"
               >
                 <Mail className="h-4 w-4" />
                 注册 / 登录
