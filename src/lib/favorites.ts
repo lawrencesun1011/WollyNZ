@@ -78,6 +78,7 @@ export function toggleFavorite(id: string): void {
   state.ids = state.ids.includes(id)
     ? state.ids.filter((x) => x !== id)
     : [...state.ids, id];
+  writeLocalStorage(state.ids);
   emit();
   void syncCloud(state.ids);
 }
@@ -85,6 +86,7 @@ export function toggleFavorite(id: string): void {
 export function removeFavorite(id: string): void {
   if (!state.ids.includes(id)) return;
   state.ids = state.ids.filter((x) => x !== id);
+  writeLocalStorage(state.ids);
   emit();
   void syncCloud(state.ids);
 }
@@ -92,6 +94,7 @@ export function removeFavorite(id: string): void {
 export function clearFavorites(): void {
   if (state.ids.length === 0) return;
   state.ids = [];
+  writeLocalStorage(state.ids);
   emit();
   void syncCloud(state.ids);
 }
