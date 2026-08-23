@@ -59,6 +59,7 @@ export function initCloudBase(): any {
   app = cloudbase.init({
     env: ENV_ID,
     accessKey: PUBLISHABLE_KEY,
+    region: "ap-shanghai",
   });
   auth = app.auth();
   initialized = true;

@@ -1,6 +1,4 @@
 // CloudBase 云函数（诊断版）：探测云端对 data.govt.nz 各端点的可达性。
-const { init } = require("@cloudbase/node-sdk");
-
 const RES = "bf9e3389-d5f5-4889-8be9-43d07cc98254";
 
 async function probe(name, url) {

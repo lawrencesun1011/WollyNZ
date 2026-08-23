@@ -10,16 +10,15 @@
     "fetch:data": "node src/scripts/fetch-data.mjs"
   },
   "dependencies": {
-    "@cloudbase/js-sdk": "^2.32.0",
-    "@cloudbase/node-sdk": "^3.18.3",
+    "@cloudbase/js-sdk": "^3.8.1",
     "chart.js": "4.4.3",
     "class-variance-authority": "0.7.0",
     "clsx": "2.1.1",
     "html-to-image": "^1.11.13",
     "leaflet": "1.9.4",
     "leaflet.markercluster": "1.5.3",
-    "lucide-react": "0.400.0",
-    "next": "16.3.1",
+    "lucide-react": "^0.544.0",
+    "next": "16.3.2",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "tailwind-merge": "2.5.5"
@@ -32,7 +31,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.1",
+    "eslint-config-next": "16.3.2",
     "tailwindcss": "^4",
     "tsx": "^4.20.6",
     "typescript": "^5"
