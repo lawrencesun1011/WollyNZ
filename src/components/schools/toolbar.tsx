@@ -11,6 +11,7 @@ interface Props {
   favoritesOnly: boolean;
   onToggleFavoritesOnly: (v: boolean) => void;
   favoriteCount: number;
+  eqiDesc?: boolean;
 }
 
 const SORT_LABELS: Record<SortKey, string> = {
@@ -27,7 +28,12 @@ export default function Toolbar({
   favoritesOnly,
   onToggleFavoritesOnly,
   favoriteCount,
+  eqiDesc = false,
 }: Props) {
+  const sortLabels: Record<SortKey, string> = {
+    ...SORT_LABELS,
+    eqi: eqiDesc ? "EQI（降序）" : "EQI（升序）",
+  };
   return (
     <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
       <p className="text-sm text-ink-soft">
@@ -60,9 +66,9 @@ export default function Toolbar({
             onChange={(e) => onSort(e.target.value as SortKey)}
             className="bg-transparent text-sm text-ink focus:outline-none"
           >
-            {(Object.keys(SORT_LABELS) as SortKey[]).map((k) => (
+            {(Object.keys(sortLabels) as SortKey[]).map((k) => (
               <option key={k} value={k}>
-                {SORT_LABELS[k]}
+                {sortLabels[k]}
               </option>
             ))}
           </select>

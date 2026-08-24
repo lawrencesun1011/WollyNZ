@@ -20,6 +20,38 @@ export const AUTHORITY_GROUPS = [
   { label: "公立整合", value: "Integrated", keywords: ["Integrated", "公立整合"] },
 ];
 
+/* ── ECE（幼儿园）专用筛选选项 ── */
+export const ECE_TYPE_GROUPS = [
+  { label: "Education & Care Service", value: "Education & Care Service", keywords: ["Education & Care Service"] },
+  { label: "Free Kindergarten", value: "Free Kindergarten", keywords: ["Free Kindergarten"] },
+];
+
+export const ECE_AUTHORITY_GROUPS = [
+  { label: "私立", value: "私立", keywords: ["私立", "Privately owned"] },
+  { label: "公立", value: "公立", keywords: ["公立", "Community based"] },
+];
+
+export const UNDER2_OPTIONS = [
+  { label: "接受 2 岁以下", value: "yes" },
+  { label: "不接受 2 岁以下", value: "no" },
+];
+
+/* ECE 学校类型 → 地图 marker 颜色 */
+export function eceTypeColor(type: string): string {
+  if (type.includes("Free Kindergarten")) return "#F59E0B"; // 橙黄
+  return "#2e7ed4"; // 蓝（Education & Care Service）
+}
+
+/* ECE 办学性质 → 地图 marker 配色与形状（私立蓝圆 / 公立紫方） */
+export function eceAuthStyle(authorityCN: string | undefined): {
+  color: string;
+  shape: "circle" | "square";
+} {
+  if (authorityCN === "私立") return { color: "#2e7ed4", shape: "circle" };
+  if (authorityCN === "公立") return { color: "#8e44ad", shape: "square" };
+  return { color: "#94A3B8", shape: "square" };
+}
+
 /* 判断学校 type 是否在选中列表中（支持精确值和关键字） */
 function typeMatches(s: SchoolFrontend, selectedTypes: string[]): boolean {
   return selectedTypes.some((t) => s.type === t || s.type.includes(t));
@@ -77,6 +109,7 @@ export function emptyFilters(): Filters {
     eqi: "",
     isolation: "",
     intl: "",
+    under2: "",
   };
 }
 
@@ -93,13 +126,19 @@ export function hasActiveFilters(f: Filters): boolean {
     f.languages.length > 0 ||
     f.eqi !== "" ||
     f.isolation !== "" ||
-    f.intl !== ""
+    f.intl !== "" ||
+    f.under2 !== ""
   );
 }
 
 /* ── 数值区间匹配（对齐原项目 passEqi / passIso 的档位） ── */
 function inRange(value: number | undefined, range: string): boolean {
   if (!range) return true;
+  // ECE 体系：不适用 / >5 / 精确档位
+  if (range === "na") return value == null;
+  if (range === "gt5") return value != null && value > 5;
+  if (range === "1" || range === "2" || range === "3" || range === "4")
+    return value === Number(range);
   if (value == null) return false;
   switch (range) {
     case "lte420":
@@ -150,6 +189,8 @@ function matches(s: SchoolFrontend, f: Filters): boolean {
   if (f.isolation && !inRange(s.isolation, f.isolation)) return false;
   if (f.intl === "yes" && (s.intl || 0) <= 0) return false;
   if (f.intl === "no" && (s.intl || 0) > 0) return false;
+  if (f.under2 === "yes" && !s.acceptsUnder2) return false;
+  if (f.under2 === "no" && s.acceptsUnder2) return false;
   return true;
 }
 
@@ -169,12 +210,22 @@ export function applySort(
     case "name":
       return arr.sort((a, b) => a.name.localeCompare(b.name));
     case "eqi":
-      return arr.sort((a, b) => (a.eqi || 9999) - (b.eqi || 9999));
+      return arr.sort((a, b) => (a.eqi ?? 9999) - (b.eqi ?? 9999));
     case "roll":
       return arr.sort((a, b) => (b.roll || 0) - (a.roll || 0));
     default:
       return arr;
   }
+}
+
+/* ECE 排序：默认沿用通用排序，但 EQI 为降序（越高越靠前） */
+export function applySortEce(
+  list: SchoolFrontend[],
+  sort: SortKey
+): SchoolFrontend[] {
+  if (sort !== "eqi") return applySort(list, sort);
+  const arr = [...list];
+  return arr.sort((a, b) => (b.eqi ?? -1) - (a.eqi ?? -1));
 }
 
 export const ETHNIC_FIELDS = [
@@ -225,10 +276,38 @@ export function levelColor(level: string): string {
 /* ── EQI / 偏远度 数值 → 中文释义（对齐筛选器档位标签） ── */
 export function eqiLabel(value: number | undefined): string | null {
   if (value == null) return null;
+  if (value < 10) {
+    // ECE 体系（1–5 档，数值越高资源越充足）
+    if (value > 5) return "资源充足";
+    if (value === 4) return "资源较充足";
+    if (value === 3) return "需要一定支持";
+    if (value === 2) return "需要较高支持";
+    if (value === 1) return "需要很高支持";
+    return null;
+  }
+  // 中小学体系（420–550 区间）
   if (value <= 420) return "资源较充足";
   if (value <= 480) return "需要一定支持";
   if (value <= 550) return "需要较高支持";
   return "需要很高支持";
+}
+
+/* ECE 公平指数展示文案（含档位与中文含义） */
+export function eceEqiText(value: number | undefined): string {
+  if (value == null) return "不适用";
+  if (value > 5) return ">5 · 资源充足";
+  if (value === 4) return "4 · 资源较充足";
+  if (value === 3) return "3 · 需要一定支持";
+  if (value === 2) return "2 · 需要较高支持";
+  if (value === 1) return "1 · 需要很高支持";
+  return String(value);
+}
+
+/* ECE 机构类型中文展示 */
+export function eceTypeCN(type: string | undefined): string {
+  if (type === "Education & Care Service") return "日托幼教中心";
+  if (type === "Free Kindergarten") return "公立幼儿园";
+  return type || "—";
 }
 
 export function isolationLabel(value: number | undefined): string | null {

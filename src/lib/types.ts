@@ -32,6 +32,11 @@ export interface SchoolFrontend {
   lng: number;
   website: string;
   url: string;
+
+  // ECE（幼儿园）专用字段，中小学忽略
+  maxChildren?: number; // All_Children：最大人数
+  maxUnder2?: number; // Under_2s：最大 2 岁以下人数
+  acceptsUnder2?: boolean; // Under_2s > 0：是否接受 2 岁以下
 }
 
 export interface DataMeta {
@@ -59,4 +64,5 @@ export interface Filters {
   eqi: string;
   isolation: string;
   intl: string;
+  under2: string; // ECE：接受 2 岁以下，"yes" | "no"
 }

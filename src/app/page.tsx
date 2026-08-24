@@ -66,10 +66,10 @@ export default function HomePage() {
             <h3 className="mt-6 text-2xl font-bold text-ink">幼儿园</h3>
             <p className="mt-1 text-sm font-medium text-ink-soft">Early Childhood Services</p>
             <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-              新西兰早期儿童服务机构，含托儿所、幼儿园、家庭日托等，数据接入中。
+              新西兰早期儿童服务机构，含托儿所、幼儿园、家庭日托等，支持城市、学校类型、办学性质、EQI 与接受 2 岁以下筛选。
             </p>
             <span className="mt-6 flex items-center gap-1 text-sm font-medium text-primary transition-all group-hover:gap-2">
-              敬请期待
+              进入幼儿园库
               <ArrowRight className="h-4 w-4" />
             </span>
           </Link>

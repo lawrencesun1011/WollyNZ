@@ -1,33 +1,17 @@
-import { Baby, Loader2 } from "lucide-react";
+import type { Metadata } from "next";
+import { getEceFrontendAll } from "@/lib/data";
+import { EceExplorer } from "@/components/ece/ece-explorer";
 
-export const metadata = {
-  title: "幼儿园学校库 · WollyNZ",
+export const metadata: Metadata = {
+  title: "幼儿园库 · WollyNZ",
+  description:
+    "按城市、学校类型、办学性质、公平指数 EQI 与是否接受 2 岁以下等条件筛选新西兰幼儿园，支持地图与对比。",
 };
 
-export default function EcePage() {
-  return (
-    <div className="mx-auto max-w-7xl px-5 py-16">
-      <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-light text-white shadow-sm">
-          <Baby className="h-6 w-6" />
-        </span>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-ink">
-            幼儿园学校库
-          </h1>
-          <p className="text-sm text-ink-soft">
-            Early Childhood Services · 数据接入中
-          </p>
-        </div>
-      </div>
+// 幼儿园（ECE）库页面：服务端读取本地预清洗 JSON，SSR 首屏直出。
+export const dynamic = "force-dynamic";
 
-      <div className="mt-10 flex flex-col items-center justify-center rounded-2xl border border-dashed border-primary/20 bg-white/50 py-20 text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-base font-medium text-ink">数据接入中</p>
-        <p className="mt-2 max-w-md text-sm text-ink-soft">
-          幼儿园（早期儿童服务机构）列表与筛选功能正在开发，后续将基于 data.govt.nz 官方数据每日同步。
-        </p>
-      </div>
-    </div>
-  );
+export default async function EcePage() {
+  const all = await getEceFrontendAll();
+  return <EceExplorer initialSchools={all} />;
 }

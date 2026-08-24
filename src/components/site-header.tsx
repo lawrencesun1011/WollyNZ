@@ -34,7 +34,7 @@ export function SiteHeader() {
               首页
             </Link>
             <Link
-              href="#"
+              href="/guide"
               className="text-base font-medium text-ink-soft transition-colors hover:text-primary"
             >
               游学攻略
@@ -52,7 +52,7 @@ export function SiteHeader() {
               中小学
             </Link>
             <Link
-              href="#"
+              href="/community"
               className="text-base font-medium text-ink-soft transition-colors hover:text-primary"
             >
               加入社群

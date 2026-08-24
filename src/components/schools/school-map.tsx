@@ -155,7 +155,7 @@ export function SchoolMap({
   const fromMapClickRef = useRef<boolean>(false);
   // 同步当前对比列表，供 popupopen 监听同步 popup 按钮视觉
   const compareIdsRef = useRef<string[]>(compareIds);
-  const favoriteIdsRef = useRef<string[]>(favoriteIds);
+  const favoriteIdsRef = useRef<{ id: string; kind: "school" | "ece" }[]>(favoriteIds);
   useEffect(() => {
     onSelectRef.current = onSelect;
     onDetailRef.current = onDetail;
@@ -180,7 +180,7 @@ export function SchoolMap({
         if (btn) btn.classList.toggle("is-on");
       },
       favorite: (id: string) => {
-        onToggleFavoriteRef.current(id);
+        onToggleFavoriteRef.current(id, "school");
         // 同步更新当前 popup 内的收藏按钮视觉（Leaflet 不会自动重渲 popup）
         const btn = document.querySelector(
           `.popup-btn--favorite[data-id="${CSS.escape(id)}"]`
@@ -307,7 +307,9 @@ export function SchoolMap({
           if (!id) return;
           btn.classList.toggle("is-on", cmpSet.has(id));
         });
-        const favSet = new Set(favoriteIdsRef.current);
+        const favSet = new Set(
+          favoriteIdsRef.current.filter((e) => e.kind === "school").map((e) => e.id)
+        );
         root.querySelectorAll<HTMLElement>(".popup-btn--favorite").forEach((btn) => {
           const id = btn.dataset.id;
           if (!id) return;
@@ -477,7 +479,7 @@ export function SchoolMap({
     for (const s of schools) {
       if (s.lat == null || s.lng == null) continue;
       const meta = levelShape(s.level);
-      const isFav = favoriteIdsRef.current.includes(s.id);
+      const isFav = favoriteIdsRef.current.some((e) => e.id === s.id && e.kind === "school");
       const icon = L.divIcon({
         className: "",
         html: `<div class="map-pin" data-id="${s.id}">${
@@ -566,7 +568,7 @@ export function SchoolMap({
       const m = markersRef.current[s.id];
       if (!m) continue;
       const meta = levelShape(s.level);
-      const isFav = favoriteIds.includes(s.id);
+      const isFav = favoriteIds.some((e) => e.id === s.id && e.kind === "school");
       m.setIcon(
         L.divIcon({
           className: "",
@@ -586,7 +588,9 @@ export function SchoolMap({
     if (popup) {
       const root = popup.getElement();
       if (root) {
-        const favSet = new Set(favoriteIds);
+        const favSet = new Set(
+          favoriteIds.filter((e) => e.kind === "school").map((e) => e.id)
+        );
         root.querySelectorAll<HTMLElement>(".popup-btn--favorite").forEach((btn: HTMLElement) => {
           const id = btn.dataset.id;
           if (!id) return;

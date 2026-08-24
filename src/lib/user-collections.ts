@@ -91,8 +91,13 @@ async function syncCloud(ids: string[]) {
   const nameOf = buildCompareNameMap();
   const toItems = (idList: string[]) =>
     idList.map((id) => ({ id, name: nameOf.get(id) ?? "" }));
+  const favItems = getFavoriteIds().map((e) => ({
+    id: e.id,
+    kind: e.kind,
+    name: nameOf.get(e.id) ?? "",
+  }));
   await saveCloudCollections(currentUid, {
-    favorites: toItems(getFavoriteIds()),
+    favorites: favItems,
     compare: toItems(ids),
   });
   writeCompareLocalStorage(ids);
@@ -137,16 +142,16 @@ function clearCompareState(): void {
   void syncCloud(compareState.ids);
 }
 
-/** 订阅心愿单列表（id 数组），组件卸载自动退订。 */
+/** 订阅心愿单列表（{id,kind} 数组），组件卸载自动退订。 */
 export function useFavorites(): {
-  favoriteIds: string[];
-  toggleFavorite: (id: string) => void;
-  removeFavorite: (id: string) => void;
+  favoriteIds: { id: string; kind: "school" | "ece" }[];
+  toggleFavorite: (id: string, kind: "school" | "ece") => void;
+  removeFavorite: (id: string, kind: "school" | "ece") => void;
   clearFavorites: () => void;
 } {
   // 首帧统一为空，避免 SSR / 客户端首渲染不一致导致 hydration 报错；
   // 客户端挂载后由下面的 effect 从全局状态同步真实收藏列表。
-  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<{ id: string; kind: "school" | "ece" }[]>([]);
 
   useEffect(() => {
     setFavoriteIds(getFavoriteIds());
@@ -155,8 +160,8 @@ export function useFavorites(): {
 
   return {
     favoriteIds,
-    toggleFavorite: (id: string) => toggleFavorite(id),
-    removeFavorite: (id: string) => removeFavorite(id),
+    toggleFavorite: (id: string, kind: "school" | "ece") => toggleFavorite(id, kind),
+    removeFavorite: (id: string, kind: "school" | "ece") => removeFavorite(id, kind),
     clearFavorites: () => clearFavorites(),
   };
 }

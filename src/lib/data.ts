@@ -41,6 +41,23 @@ export async function getSchoolFrontendAll(): Promise<SchoolFrontend[]> {
   }
 }
 
+// 幼儿园（ECE）：读取 ece-frontend.json，字段结构与 SchoolFrontend 对齐
+// （ECE 用不到的字段以占位/0 填充），并额外携带 maxChildren / maxUnder2 /
+// acceptsUnder2 等 ECE 专用字段。
+export async function getEceFrontendAll(): Promise<SchoolFrontend[]> {
+  const cacheKey = "ece:all";
+  const cached = getCached<SchoolFrontend[]>(cacheKey);
+  if (cached) return cached;
+  try {
+    const list = await readJson<SchoolFrontend[]>("ece-frontend.json");
+    setCached(cacheKey, list);
+    return list;
+  } catch (e) {
+    console.error("[data] 读取 ece-frontend.json 失败:", (e as Error).message);
+    return [];
+  }
+}
+
 export async function getDataMeta(): Promise<DataMeta | null> {
   // meta 由本地更新脚本生成（_meta.json），仅作为展示用元数据，不阻塞主流程。
   try {

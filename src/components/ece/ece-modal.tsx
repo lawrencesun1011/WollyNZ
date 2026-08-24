@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toPng } from "html-to-image";
 import type { SchoolFrontend } from "@/lib/types";
-import { cnGender, cnLanguage } from "@/lib/labels";
-import { eqiLabel, isolationLabel } from "@/lib/filters";
+import { eceEqiText, eceTypeCN } from "@/lib/filters";
 import { X, MapPin, Check, ExternalLink } from "lucide-react";
 
 interface Props {
@@ -12,46 +11,21 @@ interface Props {
   onClose: () => void;
 }
 
-/* ── 学段 → 学校类型描述（带年级范围） ── */
-function levelTypeDesc(level: string): string {
-  switch (level) {
-    case "小学":
-      return "小学（1-6 年级）";
-    case "初中":
-      return "初中（7-8 年级）";
-    case "高中":
-      return "高中（9-13 年级）";
-    case "贯通制":
-      return "一贯制学校（1-13 年级）";
-    default:
-      return level || "—";
-  }
-}
-
-/* ── 数值字段：0 或空 → "不适用"，否则按字符串展示 ── */
 function fmtNoneZero(v: number | undefined | null): string {
   if (v == null || v === 0) return "不适用";
   return String(v);
 }
 
-/* ── ERO 报告链接：https://www.ero.govt.nz/institution/{id}/{name-slug} ── */
 function eroUrl(school: SchoolFrontend): string {
   const slug = school.name
     .toLowerCase()
-    .replace(/[()]/g, "") // 去掉括号
-    .replace(/[^a-z0-9]+/g, "-") // 空格、标点等 → 连字符
-    .replace(/^-+|-+$/g, ""); // 去掉首尾连字符
+    .replace(/[()]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
   return `https://www.ero.govt.nz/institution/${school.id}/${slug}`;
 }
 
-/* ── 单个字段小卡片（左上小标签 + 加粗值） ── */
-function Field({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number;
-}) {
+function Field({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-2xl bg-primary/5 p-2.5">
       <p className="text-xs text-ink-soft">{label}</p>
@@ -60,7 +34,6 @@ function Field({
   );
 }
 
-/* ── 族裔展示配置（排除国际生，共 6 类） ── */
 const ETHNIC_DISPLAY = [
   { key: "european", label: "欧洲裔", color: "#5BA3C4" },
   { key: "maori", label: "毛利裔", color: "#3E9C8C" },
@@ -72,14 +45,11 @@ const ETHNIC_DISPLAY = [
 
 interface DetailProps {
   school: SchoolFrontend;
-  /** 渲染在顶部渐变栏右上角的额外按钮（如关闭/移除） */
   closeButton?: ReactNode;
-  /** 学校名不换行（用于横向对比视图） */
   noWrapTitle?: boolean;
 }
 
-/** 单所学校详情卡片（可被单个详情页与横向对比视图共用） */
-export function SchoolDetailCard({
+export function EceDetailCard({
   school,
   closeButton,
   noWrapTitle,
@@ -103,14 +73,12 @@ export function SchoolDetailCard({
   }));
   const ethnicTotal = ethnicRows.reduce((a, r) => a + r.value, 0);
 
-  // 弹提示（2.5s 后自动消失）
   function showToast(msg: string) {
     setToast(msg);
     if (toastTimer.current) window.clearTimeout(toastTimer.current);
     toastTimer.current = window.setTimeout(() => setToast(null), 2500);
   }
 
-  // 分享卡片：把详情卡片转为 PNG 复制到剪贴板
   async function handleShare() {
     if (!cardRef.current) return;
     try {
@@ -120,13 +88,10 @@ export function SchoolDetailCard({
       });
       const blob = await (await fetch(dataUrl)).blob();
       if (navigator.clipboard && typeof ClipboardItem !== "undefined") {
-        await navigator.clipboard.write([
-          new ClipboardItem({ "image/png": blob }),
-        ]);
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
         showToast("已成功复制，分享到微信 / 朋友圈 / 邮件");
       } else {
-        // 浏览器不支持写图片：降级为复制文字摘要
-        const text = `${school.name}\n${address || "新西兰"}\n办学性质：${school.authorityCN || "—"}\n学生性别：${cnGender(school.gender, school.genderCN)}\n在校人数：${school.roll || 0}\n来源：wollynz.com`;
+        const text = `${school.name}\n${address || "新西兰"}\n学校类型：${eceTypeCN(school.type)}\n办学性质：${school.authorityCN || "—"}\n在读人数：${school.roll || 0}\n来源：wollynz.com`;
         await navigator.clipboard.writeText(text);
         showToast("已成功复制文字，分享到微信 / 朋友圈");
       }
@@ -143,7 +108,6 @@ export function SchoolDetailCard({
           {toast}
         </div>
       )}
-      {/* ── 顶部学校信息条（青色渐变） ── */}
       <div className="relative shrink-0 bg-gradient-to-r from-primary to-secondary p-5 text-white">
         {closeButton}
         <h2
@@ -159,42 +123,18 @@ export function SchoolDetailCard({
         </div>
       </div>
 
-      {/* ── 字段网格（2 列灰底卡片） ── */}
       <div className="shrink-0 grid grid-cols-2 gap-3 px-6 pt-4">
-        <Field label="学校类型" value={levelTypeDesc(school.level)} />
+        <Field label="学校类型" value={eceTypeCN(school.type)} />
         <Field label="办学性质" value={school.authorityCN || "—"} />
-        <Field
-          label="学生性别"
-          value={cnGender(school.gender, school.genderCN)}
-        />
-        <Field label="授课语言" value={cnLanguage(school.language)} />
-        <Field
-          label="在校人数"
-          value={`${school.roll || 0}（国际生 ${school.intl || 0}）`}
-        />
-        <Field
-          label="寄宿设施"
-          value={school.boarding === "Yes" ? "有" : "无"}
-        />
+        <Field label="在读人数" value={`${school.roll || 0}`} />
         <Field
           label="公平指数（EQI）"
-          value={
-            fmtNoneZero(school.eqi) +
-            (eqiLabel(school.eqi) ? `（${eqiLabel(school.eqi)}）` : "")
-          }
+          value={eceEqiText(school.eqi)}
         />
-        <Field
-          label="偏远度"
-          value={
-            fmtNoneZero(school.isolation) +
-            (isolationLabel(school.isolation)
-              ? `（${isolationLabel(school.isolation)}）`
-              : "")
-          }
-        />
+        <Field label="最大容纳人数" value={`${school.maxChildren || 0}`} />
+        <Field label="最大容纳人数（2岁以下）" value={`${school.maxUnder2 || 0}`} />
       </div>
 
-      {/* ── 族裔分布卡片 ── */}
       <div className="mx-6 mt-3 shrink-0 rounded-2xl border border-primary/10 bg-white p-4">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-primary">族裔分布</h3>
@@ -224,8 +164,7 @@ export function SchoolDetailCard({
                   className="h-full rounded-full transition-all duration-500"
                   style={{
                     width: `${r.pct}%`,
-                    backgroundImage:
-                      "linear-gradient(to right, #3e9c8c, #5ba3c4)",
+                    backgroundImage: "linear-gradient(to right, #3e9c8c, #5ba3c4)",
                   }}
                 />
               </div>
@@ -234,7 +173,6 @@ export function SchoolDetailCard({
         </div>
       </div>
 
-      {/* ── 操作区 ── */}
       <div className="shrink-0 px-6 pb-2 pt-4">
         <div className="grid grid-cols-3 gap-3">
           {school.website ? (
@@ -270,18 +208,17 @@ export function SchoolDetailCard({
             分享卡片
           </button>
         </div>
-        </div>
+      </div>
 
-        {/* ── 底部装饰 ── */}
-        <div className="mt-auto shrink-0 pb-4 pt-3 text-center">
-          <div className="mx-auto mb-1.5 h-1 w-12 rounded-full bg-gradient-to-r from-primary to-secondary" />
-          <p className="text-xs text-ink-soft">wollynz.com · 一键查校 · 免费申请</p>
-        </div>
+      <div className="mt-auto shrink-0 pb-4 pt-3 text-center">
+        <div className="mx-auto mb-1.5 h-1 w-12 rounded-full bg-gradient-to-r from-primary to-secondary" />
+        <p className="text-xs text-ink-soft">wollynz.com · 一键查校 · 免费申请</p>
+      </div>
     </div>
   );
 }
 
-export function SchoolModal({ school, onClose }: Props) {
+export function EceModal({ school, onClose }: Props) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -298,7 +235,7 @@ export function SchoolModal({ school, onClose }: Props) {
         className="animate-fade-up relative max-h-[90vh] w-[420px] max-w-full overflow-y-auto rounded-3xl bg-white shadow-2xl scroll-thin"
         onClick={(e) => e.stopPropagation()}
       >
-        <SchoolDetailCard
+        <EceDetailCard
           school={school}
           closeButton={
             <button

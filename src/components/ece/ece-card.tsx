@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { SchoolFrontend } from "@/lib/types";
-import { cnGender } from "@/lib/labels";
+import { eceTypeCN } from "@/lib/filters";
 import { MapPin, Home, Check, Heart } from "lucide-react";
 import { useFavorites, useCompare } from "@/lib/user-collections";
 
@@ -10,31 +10,13 @@ interface Props {
   school: SchoolFrontend;
   view: "grid" | "list";
   hovered: boolean;
-  /** 当前选中的学校（地图 popup / 卡片点击），保持高亮 */
   selected: boolean;
   onHover: (id: string | null) => void;
-  /** 点击卡片或"详情"外的区域时打开地图 popup */
   onOpen: (id: string) => void;
-  /** 点击"详情"按钮时打开详情页（modal） */
   onDetail: (id: string) => void;
 }
 
-function levelYears(level: string) {
-  switch (level) {
-    case "小学":
-      return "1-6 年级";
-    case "初中":
-      return "7-8 年级";
-    case "高中":
-      return "9-13 年级";
-    case "贯通制":
-      return "1-13 年级";
-    default:
-      return "";
-  }
-}
-
-export function SchoolCard({
+export function EceCard({
   school,
   view,
   hovered,
@@ -45,7 +27,6 @@ export function SchoolCard({
 }: Props) {
   const cardRef = useRef<HTMLElement>(null);
 
-  // 当地图 marker 选中该校时，列表滚动到对应卡片
   useEffect(() => {
     if (selected && cardRef.current) {
       cardRef.current.scrollIntoView({ block: "nearest", behavior: "smooth" });
@@ -53,14 +34,12 @@ export function SchoolCard({
   }, [selected]);
   const { favoriteIds, toggleFavorite } = useFavorites();
   const { compareIds, toggleCompare } = useCompare();
-  const inFavorite = favoriteIds.some((e) => e.id === school.id && e.kind === "school");
+  const inFavorite = favoriteIds.some((e) => e.id === school.id && e.kind === "ece");
   const inCompare = compareIds.includes(school.id);
   const location = [school.suburb, school.city].filter(Boolean).join(", ");
-  const years = levelYears(school.level);
 
   const cardBody = (
     <>
-      {/* 标题 */}
       <div className="flex items-start gap-2.5">
         <Home className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
         <h3 className="line-clamp-2 text-base font-semibold text-black">
@@ -68,29 +47,17 @@ export function SchoolCard({
         </h3>
       </div>
 
-      {/* 地址 */}
       <div className="mt-1.5 flex items-center gap-1.5 text-sm text-ink-soft">
         <MapPin className="h-3.5 w-3.5 shrink-0" />
         <span className="truncate">{location || "—"}</span>
       </div>
 
-      {/* 标签 */}
       <div className="mt-2.5 flex flex-wrap gap-2">
+        <span className="chip bg-primary/8 text-primary">{school.authorityCN}</span>
+        <span className="chip bg-primary/8 text-primary">{eceTypeCN(school.type)}</span>
+        <span className="chip bg-primary/8 text-primary">学生 {school.roll ?? "—"}</span>
         <span className="chip bg-primary/8 text-primary">
-          {school.authorityCN}
-        </span>
-        <span className="chip bg-primary/8 text-primary">
-          {school.level}
-          {years && `（${years}）`}
-        </span>
-        <span className="chip bg-primary/8 text-primary">
-          {cnGender(school.gender, school.genderCN)}
-        </span>
-        <span className="chip bg-primary/8 text-primary">
-          学生 {school.roll ?? "—"}
-        </span>
-        <span className="chip bg-primary/8 text-primary">
-          EQI {school.eqi ?? "—"}
+          EQI {school.eqi == null ? "不适用" : school.eqi > 5 ? ">5" : school.eqi}
         </span>
       </div>
     </>
@@ -106,11 +73,8 @@ export function SchoolCard({
         hovered || selected ? "border-primary ring-1 ring-primary/30" : "border-primary/10"
       } ${view === "list" ? "flex-row items-center gap-4" : "flex-col gap-4"}`}
     >
-      <div className={view === "list" ? "min-w-0 flex-1" : ""}>
-        {cardBody}
-      </div>
+      <div className={view === "list" ? "min-w-0 flex-1" : ""}>{cardBody}</div>
 
-      {/* 操作区 */}
       <div
         className={`shrink-0 ${
           view === "list"
@@ -120,7 +84,7 @@ export function SchoolCard({
       >
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); toggleFavorite(school.id, "school"); }}
+          onClick={(e) => { e.stopPropagation(); toggleFavorite(school.id, "ece"); }}
           className={`inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition-colors ${
             inFavorite
               ? "border-[#EF4444] bg-[#fef2f2] text-[#EF4444]"
@@ -152,9 +116,7 @@ export function SchoolCard({
         >
           <span
             className={`flex h-3.5 w-3.5 items-center justify-center rounded border ${
-              inCompare
-                ? "border-primary bg-primary text-white"
-                : "border-ink-soft/30"
+              inCompare ? "border-primary bg-primary text-white" : "border-ink-soft/30"
             }`}
           >
             {inCompare && <Check className="h-2.5 w-2.5" />}

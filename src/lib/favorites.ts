@@ -1,124 +1,186 @@
 "use client";
 
-// 心愿单（我的学校）客户端状态：localStorage 持久化兜底，登录后云端同步。
+import { useCallback, useEffect, useState } from "react";
 import { getSchoolsSnapshot } from "./schools-store";
+import { getEceSnapshot } from "./ece-store";
+import { readCompareLS } from "./user-collections";
+import { saveCloudCollections } from "./user-data";
+
+export type FavoriteKind = "school" | "ece";
+export interface FavoriteEntry {
+  id: string;
+  kind: FavoriteKind;
+}
 
 const LS_KEY = "wollyn:schools:favorites";
+export const FAV_TOPIC = "favorites";
 
-type Listener = (ids: string[]) => void;
+const favSubs = new Set<(ids: FavoriteEntry[]) => void>();
+let favState: { ids: FavoriteEntry[] } = { ids: [] };
 
-const state: {
-  ids: string[];
-  listeners: Set<Listener>;
-} = {
-  ids: readLocalStorage(),
-  listeners: new Set(),
-};
+function favKey(e: FavoriteEntry): string {
+  return `${e.kind}:${e.id}`;
+}
 
-// 当前登录用户 uid；null 表示未登录（含匿名未登录态），此时走 localStorage。
-let currentUid: string | null = null;
-
-function readLocalStorage(): string[] {
+// 兼容旧 string[] 与新 {id,kind}[] 两种格式
+function readLocalStorage(): FavoriteEntry[] {
+  if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(LS_KEY);
+    const raw = window.localStorage.getItem(LS_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((x) => typeof x === "string") : [];
+    if (!Array.isArray(parsed)) return [];
+    const out: FavoriteEntry[] = [];
+    for (const it of parsed) {
+      if (typeof it === "string") out.push({ id: it, kind: "school" });
+      else if (it && typeof it.id === "string")
+        out.push({ id: it.id, kind: it.kind === "ece" ? "ece" : "school" });
+    }
+    return out;
   } catch {
     return [];
   }
 }
 
-function writeLocalStorage(ids: string[]) {
+function writeLocalStorage(entries: FavoriteEntry[]) {
+  if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(LS_KEY, JSON.stringify(ids));
+    window.localStorage.setItem(LS_KEY, JSON.stringify(entries));
   } catch {
-    // 忽略隐私模式等写入失败
+    /* ignore */
   }
 }
 
 function emit() {
-  for (const l of state.listeners) l(state.ids);
+  for (const cb of favSubs) cb(favState.ids);
+  if (typeof window !== "undefined")
+    window.dispatchEvent(new Event(FAV_TOPIC));
 }
 
-/** 由 auth 层在登录态变化时调用：设置当前 uid（null=未登录）。 */
+export function subscribeFavorites(cb: (ids: FavoriteEntry[]) => void): () => void {
+  favSubs.add(cb);
+  return () => favSubs.delete(cb);
+}
+
+// 登录态变化：替换当前登录用户，并应用云端收藏（如有）
 export function setFavoritesUser(uid: string | null) {
-  currentUid = uid;
-}
-
-/** 登录后由 auth 层调用：用云端数据覆盖本地内存与 localStorage。云端传入 {id,name}[]，本地仅取 id。 */
-export function applyCloudFavorites(items: { id: string; name?: string }[]) {
-  const ids = (items || []).map((x) => x.id).filter(Boolean);
-  state.ids = ids;
-  writeLocalStorage(ids);
-  emit();
-}
-
-async function syncCloud(ids: string[]) {
-  if (!currentUid) return;
-  const { saveCloudCollections } = await import("./user-data");
-  const { readCompareLS } = await import("./user-collections");
-  const cmp = readCompareLS();
-
-  // 从全量学校数据补充名字，云端存储 {id,name}[] 供后台分析
-  const nameOf = buildNameMap();
-  const toItems = (idList: string[]) =>
-    idList.map((id) => ({ id, name: nameOf.get(id) ?? "" }));
-
-  await saveCloudCollections(currentUid, {
-    favorites: toItems(ids),
-    compare: toItems(cmp),
-  });
-  // 同步更新本地镜像（本地仍只存 id）
-  writeLocalStorage(ids);
-}
-
-/** 从前端全量学校列表构建 id→name 映射（轻量，数据已在客户端）。 */
-function buildNameMap(): Map<string, string> {
+  if (typeof window === "undefined") return;
   try {
-    const all = getSchoolsSnapshot() || [];
-    const m = new Map<string, string>();
-    for (const s of all) m.set(s.id, s.name);
-    return m;
+    window.localStorage.setItem("wollyn:auth:uid", JSON.stringify(uid));
   } catch {
-    return new Map();
+    /* ignore */
   }
 }
 
-export function subscribeFavorites(cb: Listener): () => void {
-  state.listeners.add(cb);
-  return () => state.listeners.delete(cb);
+function currentUid(): string | null {
+  try {
+    const raw = window.localStorage.getItem("wollyn:auth:uid");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 }
 
-export function getFavoriteIds(): string[] {
-  return state.ids;
+async function syncCloud(entries: FavoriteEntry[]) {
+  if (typeof window === "undefined") return;
+  if ((window as unknown as { __wollyFavUploading?: boolean }).__wollyFavUploading)
+    return;
+  (window as unknown as { __wollyFavUploading?: boolean }).__wollyFavUploading = true;
+  try {
+    const nameOf = new Map<string, string>();
+    for (const s of getSchoolsSnapshot() || []) nameOf.set(s.id, s.name);
+    for (const s of getEceSnapshot() || []) nameOf.set(s.id, s.name);
+    const favorites = entries.map((e) => ({
+      id: e.id,
+      kind: e.kind,
+      name: nameOf.get(e.id) ?? "",
+    }));
+    const compare = readCompareLS().map((id) => ({
+      id,
+      name: nameOf.get(id) ?? "",
+    }));
+    const uid = currentUid();
+    if (uid) await saveCloudCollections(uid, { favorites, compare });
+  } finally {
+    (window as unknown as { __wollyFavUploading?: boolean }).__wollyFavUploading = false;
+  }
 }
 
-export function isFavorite(id: string): boolean {
-  return state.ids.includes(id);
-}
-
-export function toggleFavorite(id: string): void {
-  state.ids = state.ids.includes(id)
-    ? state.ids.filter((x) => x !== id)
-    : [...state.ids, id];
-  writeLocalStorage(state.ids);
+export function toggleFavorite(id: string, kind: FavoriteKind) {
+  const idx = favState.ids.findIndex((e) => e.id === id && e.kind === kind);
+  const next =
+    idx >= 0
+      ? favState.ids.filter((_, i) => i !== idx)
+      : [...favState.ids, { id, kind }];
+  favState.ids = next;
+  writeLocalStorage(next);
   emit();
-  void syncCloud(state.ids);
+  void syncCloud(next);
 }
 
-export function removeFavorite(id: string): void {
-  if (!state.ids.includes(id)) return;
-  state.ids = state.ids.filter((x) => x !== id);
-  writeLocalStorage(state.ids);
+export function removeFavorite(id: string, kind: FavoriteKind) {
+  const next = favState.ids.filter((e) => !(e.id === id && e.kind === kind));
+  favState.ids = next;
+  writeLocalStorage(next);
   emit();
-  void syncCloud(state.ids);
+  void syncCloud(next);
 }
 
-export function clearFavorites(): void {
-  if (state.ids.length === 0) return;
-  state.ids = [];
-  writeLocalStorage(state.ids);
+export function clearFavorites() {
+  favState.ids = [];
+  writeLocalStorage([]);
   emit();
-  void syncCloud(state.ids);
+  void syncCloud([]);
+}
+
+/** 清空某一类（中小学 / 幼儿园）的心愿单，不影响另一类。 */
+export function removeFavoritesByKind(kind: FavoriteKind) {
+  const next = favState.ids.filter((e) => e.kind !== kind);
+  favState.ids = next;
+  writeLocalStorage(next);
+  emit();
+  void syncCloud(next);
+}
+
+export function isFavorite(id: string, kind: FavoriteKind): boolean {
+  return favState.ids.some((e) => e.id === id && e.kind === kind);
+}
+
+export function getFavoriteIds(): FavoriteEntry[] {
+  return favState.ids;
+}
+
+// 从云端数据覆盖（登录 / 合并后）
+export function applyCloudFavorites(items?: unknown) {
+  const arr = Array.isArray(items) ? items : [];
+  const entries: FavoriteEntry[] = [];
+  for (const it of arr) {
+    if (typeof it === "string") entries.push({ id: it, kind: "school" });
+    else if (it && typeof it.id === "string")
+      entries.push({ id: it.id, kind: it.kind === "ece" ? "ece" : "school" });
+  }
+  favState.ids = entries;
+  writeLocalStorage(entries);
+  emit();
+}
+
+// 初始化：从本地读取
+if (typeof window !== "undefined") {
+  favState.ids = readLocalStorage();
+}
+
+export function useFavorites() {
+  const [ids, setIds] = useState<FavoriteEntry[]>(favState.ids);
+  useEffect(() => subscribeFavorites(setIds), []);
+  const toggle = useCallback((id: string, kind: FavoriteKind) => toggleFavorite(id, kind), []);
+  const remove = useCallback((id: string, kind: FavoriteKind) => removeFavorite(id, kind), []);
+  const clear = useCallback(() => clearFavorites(), []);
+  const check = useCallback((id: string, kind: FavoriteKind) => isFavorite(id, kind), []);
+  return {
+    favoriteIds: ids,
+    toggleFavorite: toggle,
+    removeFavorite: remove,
+    clearFavorites: clear,
+    isFavorite: check,
+  };
 }

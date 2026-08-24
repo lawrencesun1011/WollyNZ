@@ -1,0 +1,1 @@
+ALTER TABLE public.user_collections ADD COLUMN IF NOT EXISTS applications jsonb NOT NULL DEFAULT '[]'::jsonb;

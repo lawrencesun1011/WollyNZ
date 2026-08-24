@@ -23,10 +23,12 @@
  */
 
 import { getAccessToken } from "./auth";
+import type { ApplicationItem } from "./applications";
 
 export interface FavoriteItem {
   id: string;
-  name: string;
+  name?: string;
+  kind?: "school" | "ece";
 }
 
 export interface UserCollections {
@@ -100,12 +102,13 @@ function normalizeItems(raw: unknown): FavoriteItem[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .map((x): FavoriteItem | null => {
-      if (typeof x === "string") return { id: x, name: "" };
+      if (typeof x === "string") return { id: x, name: "", kind: "school" };
       if (x && typeof x === "object" && "id" in x) {
-        const o = x as { id?: unknown; name?: unknown };
+        const o = x as { id?: unknown; name?: unknown; kind?: unknown };
         return {
           id: String(o.id ?? ""),
           name: typeof o.name === "string" ? o.name : "",
+          kind: o.kind === "ece" ? "ece" : "school",
         };
       }
       return null;
@@ -155,17 +158,20 @@ export async function mergeLocalToCloudOnLogin(
   resolveName?: (id: string) => string | undefined
 ): Promise<UserCollections | null> {
   const cloud = await fetchCloudCollections(uid);
-  const localFav = readLS(LS_FAV);
+  const localFav = readFavLS();
   const localCmp = readLS(LS_CMP);
 
-  const toItems = (ids: string[]): FavoriteItem[] =>
-    ids.map((id) => ({ id, name: resolveName?.(id) ?? "" }));
+  // 兼容旧 string[] 与新 {id,kind}[]：统一为 FavoriteItem[]（缺 kind 默认 school）
+  const favItems = (entries: { id: string; kind?: "school" | "ece" }[]): FavoriteItem[] =>
+    entries.map((e) => ({ id: e.id, kind: e.kind ?? "school", name: resolveName?.(e.id) ?? "" }));
 
   if (!cloud) {
     // 云端无文档：将本地数据上传（补充学校名字供后台分析）
     const merged: UserCollections = {
-      favorites: toItems(Array.from(new Set(localFav))),
-      compare: toItems(Array.from(new Set(localCmp)).slice(0, 4)),
+      favorites: favItems(localFav),
+      compare: Array.from(new Set(localCmp))
+        .slice(0, 4)
+        .map((id) => ({ id, name: resolveName?.(id) ?? "" })),
     };
     if (localFav.length || localCmp.length) {
       await saveCloudCollections(uid, merged);
@@ -177,6 +183,171 @@ export async function mergeLocalToCloudOnLogin(
   writeLS(LS_FAV, cloud.favorites.map((x) => x.id));
   writeLS(LS_CMP, cloud.compare.map((x) => x.id));
   return cloud;
+}
+
+/** 读取本地心愿单，兼容旧 string[] 与新 {id,kind}[] 两种 localStorage 格式。 */
+function readFavLS(): { id: string; kind?: "school" | "ece" }[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(LS_FAV);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+    const out: { id: string; kind?: "school" | "ece" }[] = [];
+    for (const it of parsed) {
+      if (typeof it === "string") out.push({ id: it, kind: "school" });
+      else if (it && typeof it === "object" && "id" in it) {
+        const o = it as { id?: unknown; kind?: unknown };
+        out.push({ id: String(o.id ?? ""), kind: o.kind === "ece" ? "ece" : "school" });
+      }
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * 申请存于独立明细表 public.applications（每条申请一行，便于审核后台
+ * 按 owner/status 筛选并精准 UPDATE 单条状态）。
+ *   id text PK, owner text, category text, status text, data jsonb, created_at, updated_at
+ * RLS：owner = auth.uid()。
+ * 未登录（匿名）时取不到 token，径直走 localStorage。
+ */
+
+export interface CloudApplicationRow {
+  id: string;
+  owner: string;
+  category: string;
+  status: string;
+  data: ApplicationItem;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/** 拉取当前用户全部申请（独立表）。 */
+export async function fetchCloudApplications(
+  uid: string
+): Promise<ApplicationItem[] | null> {
+  const token = await getAccessToken();
+  if (!token) return null;
+  try {
+    const res = await fetch(
+      `${gatewayBase()}/applications?owner=eq.${encodeURIComponent(uid)}&select=*`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!res.ok) {
+      console.warn("[user-data] 申请云端读取失败", res.status);
+      return null;
+    }
+    const rows = (await res.json()) as CloudApplicationRow[];
+    return rows
+      .map((r) => r.data)
+      .filter((d): d is ApplicationItem => !!d && !!d.id);
+  } catch (e) {
+    console.warn("[user-data] 申请云端读取异常", e);
+    return null;
+  }
+}
+
+/** 云端 upsert 单条申请（按 id 主键 merge）。owner 必须显式传入，RLS with-check 才会放行。 */
+export async function saveCloudApplication(
+  item: ApplicationItem,
+  owner: string
+): Promise<boolean> {
+  const token = await getAccessToken();
+  if (!token) return false;
+  try {
+    const row = {
+      id: item.id,
+      owner,
+      category: item.category,
+      status: item.status,
+      data: item,
+    };
+    const res = await fetch(`${gatewayBase()}/applications`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Prefer: "resolution=merge-duplicates",
+      },
+      body: JSON.stringify(row),
+    });
+    if (!res.ok) {
+      console.error("[user-data] 申请云端写入失败", res.status, await res.text());
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("[user-data] 申请云端写入异常，降级 localStorage", e);
+    return false;
+  }
+}
+
+/** 云端删除单条申请。 */
+export async function deleteCloudApplication(id: string): Promise<boolean> {
+  const token = await getAccessToken();
+  if (!token) return false;
+  try {
+    const res = await fetch(
+      `${gatewayBase()}/applications?id=eq.${encodeURIComponent(id)}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return res.ok;
+  } catch (e) {
+    console.error("[user-data] 申请云端删除异常", e);
+    return false;
+  }
+}
+
+/**
+ * 用户档案（省份/城市等默认填充项），存于 user_collections.profile jsonb。
+ * 提交申请时回写最后一次的省份/城市，下次表单自动预填（用户可改）。
+ */
+export interface UserProfile {
+  province?: string;
+  city?: string;
+}
+
+/** 读取用户 profile（省份/城市）。 */
+export async function fetchCloudProfile(uid: string): Promise<UserProfile | null> {
+  const token = await getAccessToken();
+  if (!token) return null;
+  try {
+    const res = await fetch(
+      `${gatewayBase()}/user_collections?owner=eq.${encodeURIComponent(uid)}&select=profile`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!res.ok) return null;
+    const rows = (await res.json()) as Array<{ profile?: UserProfile }>;
+    return rows[0]?.profile ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** 回写用户 profile（省份/城市）。 */
+export async function saveCloudProfile(uid: string, profile: UserProfile): Promise<boolean> {
+  const token = await getAccessToken();
+  if (!token) return false;
+  try {
+    const res = await fetch(`${gatewayBase()}/user_collections`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Prefer: "resolution=merge-duplicates",
+      },
+      body: JSON.stringify({ owner: uid, profile }),
+    });
+    return res.ok;
+  } catch (e) {
+    console.error("[user-data] profile 云端写入异常", e);
+    return false;
+  }
 }
 
 export const userDataKeys = { LS_FAV, LS_CMP };
