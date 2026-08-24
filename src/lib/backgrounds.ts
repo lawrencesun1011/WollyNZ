@@ -29,6 +29,8 @@ export type SectionBackground = {
   overlayStrength?: "light" | "medium" | "strong";
   /** 图片定位：center / top / bottom / left / right */
   position?: string;
+  /** 可选：动图背景（视频），替代静态图作为动态背景；src 仍作为首帧 poster 兜底 */
+  videoSrc?: string;
   /** 图片缩放：cover（铺满）/ contain（完整显示） */
   fit?: "cover" | "contain";
   /** 是否为暗色主题（用于切换文字颜色） */
@@ -45,7 +47,8 @@ export type HomePageBackgrounds = {
 export const homePageBackgrounds: HomePageBackgrounds = {
   // 🎯 Hero 区域 - 探索新西兰优质教育机构
   hero: {
-    src: "/images/home/hero-bg.webp",
+    src: "/images/home/hero-bg.webp", // 静态图同时作为视频首帧 poster（防白屏）
+    videoSrc: "/images/home/hero-bg.mp4", // 动图背景（静音自动循环播放）
     overlay: false, // 蒙层已移除，保留原图锐度
     // overlay: true, // 开启蒙层，避免背景抢戏文字
     // overlayDirection: "all", // 全局蒙层
