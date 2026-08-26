@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { Loader2, Mail, Heart, Layers, X, Plus } from "lucide-react";
+import { Loader2, Mail, Heart, Layers, Save, Send, X, Plus } from "lucide-react";
 import {
   addApplication,
   updateApplication,
@@ -808,8 +808,9 @@ export function ApplicationForm({
           type="button"
           onClick={handleSaveDraft}
           disabled={locked || submitting}
-          className="rounded-xl border border-primary/30 px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5 disabled:opacity-60"
+          className="flex items-center gap-2 rounded-xl border border-primary/30 px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5 disabled:opacity-60"
         >
+          <Save className="h-4 w-4" />
           保存草稿
         </button>
         <button
@@ -818,7 +819,11 @@ export function ApplicationForm({
           disabled={locked || submitting}
           className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
-          {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+          {submitting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
           生成邮件模板
         </button>
       </div>

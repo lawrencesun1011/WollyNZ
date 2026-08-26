@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Loader2, Mail, MapPin, Save, Send } from "lucide-react";
+import { CalendarDays, Check, Loader2, Mail, MapPin, Save, Send } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useAuthUser, sendEmailCode, signInWithEmailCode } from "@/lib/auth";
+import type { ExactDate } from "@/lib/applications";
+import { DateRangeCalendar } from "@/components/applications/date-range-calendar";
 import {
   ACCOMMODATION_NEEDS_OPTIONS,
   addAccommodation,
@@ -90,6 +92,31 @@ function SectionTitle({
   );
 }
 
+function todayDate(): ExactDate {
+  const t = new Date();
+  return { year: t.getFullYear(), month: t.getMonth() + 1, day: t.getDate() };
+}
+
+function isoToExact(s: string): ExactDate {
+  if (!s || !s.includes("-")) return todayDate();
+  const [y, m, d] = s.split("-").map(Number);
+  return { year: y || todayDate().year, month: m || 1, day: d || 1 };
+}
+
+function exactToIso(e: ExactDate): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${e.year}-${p(e.month)}-${p(e.day)}`;
+}
+
+function fmtExact(e: ExactDate): string {
+  return `${e.year}年${e.month}月${e.day}日`;
+}
+
+function nextDay(d: ExactDate): ExactDate {
+  const n = new Date(d.year, d.month - 1, d.day + 1);
+  return { year: n.getFullYear(), month: n.getMonth() + 1, day: n.getDate() };
+}
+
 function formatDate(d: string) {
   if (!d) return "";
   const t = new Date(d);
@@ -171,6 +198,19 @@ export function AccommodationForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [calOpen, setCalOpen] = useState(false);
+  const [calRange, setCalRange] = useState<{ start: ExactDate; end: ExactDate }>({
+    start: { year: 0, month: 0, day: 0 },
+    end: { year: 0, month: 0, day: 0 },
+  });
+
+  function openCal() {
+    const t = todayDate();
+    const start = form.moveInDate ? isoToExact(form.moveInDate) : t;
+    const end = form.moveOutDate ? isoToExact(form.moveOutDate) : nextDay(t);
+    setCalRange({ start, end });
+    setCalOpen(true);
+  }
 
   // 邮箱验证（注册 / 登录）
   const [email, setEmail] = useState("");
@@ -517,26 +557,61 @@ export function AccommodationForm({
           </Field>
 
           {/* 入住 / 退房时间 */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="入住时间" required error={errors.moveInDate}>
-              <input
-                type="date"
-                value={form.moveInDate}
+          <Field
+            label="入住 - 退房时间"
+            required
+            error={errors.moveInDate || errors.moveOutDate}
+          >
+            <div className="relative">
+              <button
+                type="button"
                 disabled={locked}
-                onChange={(e) => setField("moveInDate", e.target.value)}
-                className={inputCls(errors.moveInDate)}
-              />
-            </Field>
-            <Field label="退房时间" required error={errors.moveOutDate}>
-              <input
-                type="date"
-                value={form.moveOutDate}
-                disabled={locked}
-                onChange={(e) => setField("moveOutDate", e.target.value)}
-                className={inputCls(errors.moveOutDate)}
-              />
-            </Field>
-          </div>
+                onClick={openCal}
+                className={cn(
+                  inputCls(errors.moveInDate || errors.moveOutDate ? "border-error" : ""),
+                  "flex items-center justify-between text-left"
+                )}
+              >
+                <span>
+                  {form.moveInDate && form.moveOutDate ? (
+                    `${fmtExact(isoToExact(form.moveInDate))} — ${fmtExact(isoToExact(form.moveOutDate))}`
+                  ) : (
+                    <span className="text-ink-soft">选择入住 - 退房时间</span>
+                  )}
+                </span>
+                <CalendarDays className="h-4 w-4 shrink-0 text-ink-soft" />
+              </button>
+
+              {calOpen && !locked && (
+                <div className="absolute left-0 right-0 z-30 mt-2">
+                  <div
+                    className="fixed inset-0 z-20"
+                    onClick={() => setCalOpen(false)}
+                  />
+                  <div className="relative z-30 rounded-2xl border border-stroke bg-white p-4 shadow-xl">
+                    <DateRangeCalendar
+                      start={calRange.start}
+                      end={calRange.end}
+                      onChange={(r) => {
+                        setCalRange(r);
+                        setField("moveInDate", exactToIso(r.start));
+                        setField("moveOutDate", exactToIso(r.end));
+                      }}
+                    />
+                    <div className="mt-3 flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setCalOpen(false)}
+                        className="rounded-xl border border-stroke px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-primary/5"
+                      >
+                        确定
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Field>
 
           {/* 成人数 / 儿童数 */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -644,33 +719,28 @@ export function AccommodationForm({
           {/* 预算范围 */}
           <div className="space-y-2.5">
             <SectionTitle title="预算范围（周租金 NZD）" required />
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <input
-                  type="number"
-                  min={0}
-                  value={form.budgetMin}
-                  disabled={locked}
-                  onChange={(e) =>
-                    setField("budgetMin", Number(e.target.value))
-                  }
-                  placeholder="下限"
-                  className={inputCls(errors.budget)}
-                />
-              </div>
-              <div>
-                <input
-                  type="number"
-                  min={0}
-                  value={form.budgetMax}
-                  disabled={locked}
-                  onChange={(e) =>
-                    setField("budgetMax", Number(e.target.value))
-                  }
-                  placeholder="上限"
-                  className={inputCls(errors.budgetMax || errors.budget)}
-                />
-              </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="number"
+                min={0}
+                step={50}
+                value={form.budgetMin}
+                disabled={locked}
+                onChange={(e) => setField("budgetMin", e.target.value)}
+                placeholder="下限"
+                className={inputCls(errors.budget)}
+              />
+              <span className="shrink-0 text-ink-soft">—</span>
+              <input
+                type="number"
+                min={0}
+                step={50}
+                value={form.budgetMax}
+                disabled={locked}
+                onChange={(e) => setField("budgetMax", e.target.value)}
+                placeholder="上限"
+                className={inputCls(errors.budgetMax || errors.budget)}
+              />
             </div>
             {(errors.budget || errors.budgetMax) && (
               <p className="text-xs text-error">

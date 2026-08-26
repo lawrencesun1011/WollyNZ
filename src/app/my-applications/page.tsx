@@ -3,8 +3,8 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, Sparkles, Inbox, Pencil, Mail } from "lucide-react";
-import { useApplications, removeApplication, type ApplicationCategory } from "@/lib/applications";
+import { Plus, Sparkles, Inbox, Pencil, Mail, History } from "lucide-react";
+import { useApplications, removeApplication, getEffectiveStatus, type ApplicationCategory } from "@/lib/applications";
 import { ApplicationCard } from "@/components/applications/application-card";
 
 type Tab = ApplicationCategory;
@@ -14,10 +14,6 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "ece", label: "幼儿园" },
   { key: "school", label: "中小学" },
 ];
-
-function isGenerated(status: string) {
-  return status !== "draft";
-}
 
 function MyApplicationsInner() {
   const searchParams = useSearchParams();
@@ -33,8 +29,9 @@ function MyApplicationsInner() {
     () => all.filter((a) => a.category === tab),
     [all, tab]
   );
-  const drafts = filtered.filter((a) => a.status === "draft");
-  const generated = filtered.filter((a) => isGenerated(a.status));
+  const drafts = filtered.filter((a) => getEffectiveStatus(a) === "draft");
+  const generated = filtered.filter((a) => getEffectiveStatus(a) === "generated");
+  const history = filtered.filter((a) => getEffectiveStatus(a) === "closed");
 
   const ecePlaceholder = false;
 
@@ -88,7 +85,7 @@ function MyApplicationsInner() {
       {/* 列表 / 空态 */}
       {!mounted ? null : (
         <div className="mt-6 space-y-8">
-          {filtered.length === 0 || (drafts.length === 0 && generated.length === 0) ? (
+          {filtered.length === 0 || (drafts.length === 0 && generated.length === 0 && history.length === 0) ? (
             <EmptyState tab={tab} onAdd={handleAdd} />
           ) : (
             <>
@@ -108,8 +105,8 @@ function MyApplicationsInner() {
                 </Section>
               )}
 
-              {/* 已生成邮件模板 */}
-              <Section title={`已生成邮件模板（${generated.length}）`} icon={<Mail className="h-4 w-4" />}>
+              {/* 已提交 */}
+              <Section title={`已提交（${generated.length}）`} icon={<Mail className="h-4 w-4" />}>
                 {generated.length === 0 ? (
                   <p className="text-sm text-ink-soft">暂无已生成的申请</p>
                 ) : (
@@ -120,6 +117,17 @@ function MyApplicationsInner() {
                   </Grid>
                 )}
               </Section>
+
+              {/* 历史（已结束） */}
+              {history.length > 0 && (
+                <Section title={`历史（${history.length}）`} icon={<History className="h-4 w-4" />}>
+                  <Grid>
+                    {history.map((a) => (
+                      <ApplicationCard key={a.id} item={a} onRemove={removeApplication} onEdit={handleEdit} />
+                    ))}
+                  </Grid>
+                </Section>
+              )}
             </>
           )}
         </div>

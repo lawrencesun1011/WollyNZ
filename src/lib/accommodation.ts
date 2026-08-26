@@ -2,27 +2,32 @@
 
 import { saveCloudAccommodation, fetchCloudAccommodation, deleteCloudAccommodation } from "./user-data";
 
-export type AccommodationStatus =
-  | "draft"
-  | "submitted"
-  | "matching"
-  | "recommended"
-  | "closed";
+export type AccommodationStatus = "draft" | "submitted" | "closed";
 
 export const ACCOMMODATION_STATUS_META: Record<
   AccommodationStatus,
   { label: string; className: string }
 > = {
   draft: { label: "草稿", className: "bg-ink/10 text-ink-soft" },
-  submitted: { label: "已提交", className: "bg-primary/10 text-primary" },
-  matching: { label: "匹配中", className: "bg-amber-100 text-amber-700" },
-  recommended: { label: "已推荐房源", className: "bg-emerald-100 text-emerald-700" },
-  closed: { label: "已结束", className: "bg-ink/10 text-ink-soft" },
+  submitted: { label: "已提交", className: "bg-blue-100 text-blue-700" },
+  closed: { label: "已结束", className: "bg-red-100 text-red-700" },
 };
 
-/** 是否为“进行中”状态（参与匹配/已推荐）。 */
+/** 已提交后超过入住开始时间 30 天视为已结束。 */
+export function getEffectiveStatus(item: AccommodationItem): AccommodationStatus {
+  if (item.status === "submitted") {
+    const start = item.moveInDate
+      ? new Date(item.moveInDate).getTime()
+      : new Date(item.appliedAt).getTime();
+    const expiredAt = start + 30 * 24 * 60 * 60 * 1000;
+    if (Date.now() > expiredAt) return "closed";
+  }
+  return item.status;
+}
+
+/** 是否为“进行中”（已提交且未过期）。 */
 export function isActiveAccommodation(s: AccommodationStatus): boolean {
-  return s === "submitted" || s === "matching" || s === "recommended";
+  return s === "submitted";
 }
 
 export const ACCOMMODATION_NEEDS_OPTIONS = [

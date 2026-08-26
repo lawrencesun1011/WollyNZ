@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Home, Mail, MapPin, Pencil, Trash2, X } from "lucide-react";
+import { Baby, Bath, Bed, CalendarDays, CircleDollarSign, Home, Mail, Pencil, Trash2, Users, X } from "lucide-react";
 import {
   ACCOMMODATION_STATUS_META,
+  getEffectiveStatus,
   type AccommodationItem,
 } from "@/lib/accommodation";
 
@@ -21,48 +22,61 @@ interface Props {
 
 export function AccommodationCard({ item, onRemove, onEdit }: Props) {
   const [detail, setDetail] = useState(false);
-  const status = ACCOMMODATION_STATUS_META[item.status];
+  const status = ACCOMMODATION_STATUS_META[getEffectiveStatus(item)];
 
   return (
     <>
       <div className="animate-fade-up glass flex flex-col rounded-2xl border border-white/60 p-4 shadow-[--shadow-1]">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-1.5">
-              {item.area ? (
-                <span className="chip truncate max-w-[200px]">
-                  <MapPin className="mr-1 h-3 w-3" />
-                  {item.area}
-                </span>
-              ) : (
-                <span className="chip">区域未定</span>
-              )}
-              {item.bedrooms && <span className="chip">{item.bedrooms} 卧室</span>}
-              {item.bathrooms && <span className="chip">{item.bathrooms} 洗手间</span>}
-              {item.budgetMin != null && item.budgetMax != null && (
-                <span className="chip">${item.budgetMin}-${item.budgetMax}/周</span>
-              )}
-            </div>
-            <p className="mt-2 text-sm text-ink-soft">
-              {item.moveInDate && item.moveOutDate
-                ? `${formatDate(item.moveInDate)} — ${formatDate(item.moveOutDate)}`
-                : "入住时间未填"}
-              {item.adults != null ? ` · ${item.adults} 成人` : ""}
-              {item.children != null ? ` · ${item.children} 儿童` : ""}
-            </p>
-          </div>
-          <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${status.className}`}>
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="truncate text-base font-semibold text-ink">
+            {item.name || "未填写称呼"}
+          </h3>
+          <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${status.className}`}>
             {status.label}
           </span>
         </div>
 
-        <div className="mt-3 flex items-center gap-1.5 text-xs text-ink-soft">
-          <Mail className="h-3.5 w-3.5 shrink-0" />
-          {item.email || "—"}
+        <div className="mt-3 flex items-center gap-2 text-sm text-ink-soft">
+          <Mail className="h-4 w-4 shrink-0" />
+          <span className="truncate">{item.email || "—"}</span>
+        </div>
+
+        <div className="mt-2 flex items-center gap-2 text-sm text-ink-soft">
+          <CalendarDays className="h-4 w-4 shrink-0" />
+          <span>
+            {item.moveInDate && item.moveOutDate
+              ? `${formatDate(item.moveInDate)} — ${formatDate(item.moveOutDate)}`
+              : "入住时间未填"}
+          </span>
+        </div>
+
+        <div className="mt-2 flex items-center gap-2 text-sm text-ink-soft">
+          <Users className="h-4 w-4 shrink-0" />
+          <span>{item.adults ?? "—"} 成人</span>
+          <span>·</span>
+          <Baby className="h-4 w-4 shrink-0" />
+          <span>{item.children ?? "—"} 儿童</span>
+        </div>
+
+        <div className="mt-2 flex items-center gap-3 text-sm text-ink-soft">
+          <span className="flex items-center gap-2">
+            <Bed className="h-4 w-4 shrink-0" />
+            {item.bedrooms || "—"} 卧室
+          </span>
+          <span>·</span>
+          <span className="flex items-center gap-2">
+            <Bath className="h-4 w-4 shrink-0" />
+            {item.bathrooms || "—"} 洗手间
+          </span>
+        </div>
+
+        <div className="mt-2 flex items-center gap-2 text-sm text-ink-soft">
+          <CircleDollarSign className="h-4 w-4 shrink-0" />
+          <span>${item.budgetMin ?? "—"}-${item.budgetMax ?? "—"}/周</span>
         </div>
 
         <div className="mt-3 flex items-center gap-2 border-t border-stroke/60 pt-3">
-          {item.status === "draft" && onEdit ? (
+          {getEffectiveStatus(item) === "draft" && onEdit ? (
             <button
               type="button"
               onClick={() => onEdit(item.id)}

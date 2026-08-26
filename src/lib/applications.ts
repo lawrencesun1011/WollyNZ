@@ -20,8 +20,34 @@ import {
 
 export type ApplicationCategory = "school" | "ece";
 
-/** 状态：draft 为草稿（尚未生成邮件模板），generated 为已生成邮件模板。无审核/进行中等中间态。 */
-export type ApplicationStatus = "draft" | "generated";
+/** 状态：draft 草稿（尚未生成邮件模板），generated 已生成邮件模板。游学开始时间已过则视为 closed（已结束）。 */
+export type ApplicationStatus = "draft" | "generated" | "closed";
+
+/** 游学开始时间（ms），无法解析时返回 null。exact 用 start；fuzzy 用 fuzzyStart 的中旬近似。 */
+function studyStartMs(item: ApplicationItem): number | null {
+  const p = item.studyPeriod;
+  if (!p) return null;
+  if (p.mode === "exact") {
+    const s = p.start;
+    if (s?.year) return new Date(s.year, (s.month || 1) - 1, s.day || 1).getTime();
+  } else {
+    const f = p.fuzzyStart;
+    if (f?.year) {
+      const off = f.tense === "early" ? 1 : f.tense === "mid" ? 15 : 28;
+      return new Date(f.year, (f.month || 1) - 1, off).getTime();
+    }
+  }
+  return null;
+}
+
+/** 已生成且游学开始时间已过 → 已结束；否则返回原状态。 */
+export function getEffectiveStatus(item: ApplicationItem): ApplicationStatus {
+  if (item.status === "generated") {
+    const ms = studyStartMs(item);
+    if (ms != null && Date.now() > ms) return "closed";
+  }
+  return item.status;
+}
 
 export type StudyTimeMode = "exact" | "fuzzy";
 

@@ -17,7 +17,7 @@ const STEPS = [
   {
     icon: Search,
     title: "填写意向",
-    desc: "告诉我们您期望的城市、预算、户型与入住时间等需求。",
+    desc: "告诉我们您期望的区域、预算、户型与入住时间等需求。",
   },
   {
     icon: Building2,
@@ -41,7 +41,7 @@ export default function AccommodationPage() {
             <Building2 className="h-3.5 w-3.5" />
             合作物业 · 免费匹配
           </span>
-          <h1 className="text-3xl font-bold text-ink sm:text-4xl">找住宿</h1>
+          <h1 className="text-3xl font-bold text-ink sm:text-4xl">找住宿（内测中）</h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-ink-soft">
             GoalNZ 与多家新西兰本地物业公司合作。提交您的住宿需求，
             <span className="font-medium text-ink">如有合适房源，我们会主动联系您</span>

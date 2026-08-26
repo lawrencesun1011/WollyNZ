@@ -2,11 +2,11 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Inbox, Pencil } from "lucide-react";
+import { Plus, Inbox, Pencil, Mail, History } from "lucide-react";
 import { useAuthBridge } from "@/lib/auth-init";
 import {
   getAccommodation,
-  isActiveAccommodation,
+  getEffectiveStatus,
   removeAccommodation,
   subscribeAccommodation,
   type AccommodationItem,
@@ -24,9 +24,9 @@ function MyAccommodationsInner() {
     return subscribeAccommodation(sync);
   }, []);
 
-  const drafts = useMemo(() => items.filter((i) => i.status === "draft"), [items]);
-  const active = useMemo(() => items.filter((i) => isActiveAccommodation(i.status)), [items]);
-  const history = useMemo(() => items.filter((i) => i.status === "closed"), [items]);
+  const drafts = useMemo(() => items.filter((i) => getEffectiveStatus(i) === "draft"), [items]);
+  const active = useMemo(() => items.filter((i) => getEffectiveStatus(i) === "submitted"), [items]);
+  const history = useMemo(() => items.filter((i) => getEffectiveStatus(i) === "closed"), [items]);
   const hasAny = items.length > 0;
 
   function handleAdd() {
@@ -73,18 +73,21 @@ function MyAccommodationsInner() {
             </Section>
           )}
 
-          {active.length > 0 && (
-            <Section title={`进行中（${active.length}）`} icon={<Inbox className="h-4 w-4" />}>
+          {/* 已提交 */}
+          <Section title={`已提交（${active.length}）`} icon={<Mail className="h-4 w-4" />}>
+            {active.length === 0 ? (
+              <p className="text-sm text-ink-soft">暂无已提交的意向</p>
+            ) : (
               <Grid>
                 {active.map((it) => (
                   <AccommodationCard key={it.id} item={it} onRemove={(id) => removeAccommodation(id)} />
                 ))}
               </Grid>
-            </Section>
-          )}
+            )}
+          </Section>
 
           {history.length > 0 && (
-            <Section title={`历史（${history.length}）`} icon={<Inbox className="h-4 w-4" />}>
+            <Section title={`历史（${history.length}）`} icon={<History className="h-4 w-4" />}>
               <Grid>
                 {history.map((it) => (
                   <AccommodationCard key={it.id} item={it} onRemove={(id) => removeAccommodation(id)} />
