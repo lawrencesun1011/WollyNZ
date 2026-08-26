@@ -1,7 +1,7 @@
-import { MessageCircle, Users } from "lucide-react";
+import { Users } from "lucide-react";
 
 export const metadata = {
-  title: "加入社群 · WollyNZ",
+  title: "加入社群 · GoalNZ",
 };
 
 // 二维码占位置：后续把 src 换成真实二维码图片即可（建议放在 /public 下）
@@ -32,14 +32,8 @@ const CARDS = [
   {
     icon: Users,
     title: "家长社群",
-    desc: "扫码加入 WollyNZ 家长社群，和正在为孩子选校的爸妈们一起交流择校经验、学区动态与游学攻略，第一时间获取学校库更新提醒。",
+    desc: "扫码加入 GoalNZ 家长社群，和正在为孩子选校的爸妈们一起交流择校经验、学区动态与游学攻略，第一时间获取学校库更新提醒。",
     qrNote: "长按或扫码加入社群",
-  },
-  {
-    icon: MessageCircle,
-    title: "在线客服",
-    desc: "有任何关于学校查询、数据纠错或网站使用的疑问，扫码联系我们的在线客服，工作日通常会在数小时内回复。",
-    qrNote: "扫码联系客服",
   },
 ];
 
@@ -58,7 +52,7 @@ export default function CommunityPage() {
         </div>
       </div>
 
-      <div className="mt-10 grid gap-6 sm:grid-cols-2">
+      <div className="mx-auto mt-10 grid max-w-md gap-6 sm:grid-cols-1">
         {CARDS.map(({ icon: Icon, title, desc, qrNote }) => (
           <div
             key={title}
@@ -86,7 +80,7 @@ export default function CommunityPage() {
       </div>
 
       <p className="mt-10 text-center text-xs text-ink-soft">
-        二维码为占位图，正式上线前请替换为真实的社群 / 客服二维码。
+        二维码为占位图，正式上线前请替换为真实的家长社群二维码。
       </p>
     </div>
   );

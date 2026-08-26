@@ -96,7 +96,7 @@ async function syncCloud(ids: string[]) {
     kind: e.kind,
     name: nameOf.get(e.id) ?? "",
   }));
-  await saveCloudCollections(currentUid, {
+  await saveCloudCollections({
     favorites: favItems,
     compare: toItems(ids),
   });

@@ -20,13 +20,8 @@ import {
 
 export type ApplicationCategory = "school" | "ece";
 
-/** 状态：draft 为用户存草稿，其余由系统驱动。 */
-export type ApplicationStatus =
-  | "draft" // 草稿（用户保存，未提交）
-  | "submitted" // 待审核（刚提交）
-  | "reviewing" // 审核中
-  | "accepted" // 已录取
-  | "rejected"; // 未通过
+/** 状态：draft 为草稿（尚未生成邮件模板），generated 为已生成邮件模板。无审核/进行中等中间态。 */
+export type ApplicationStatus = "draft" | "generated";
 
 export type StudyTimeMode = "exact" | "fuzzy";
 
@@ -58,17 +53,17 @@ export interface IntendedSchool {
   id?: string;
   name: string;
   city?: string;
+  email?: string; // 学校邮箱，用于邮件模板收件人
 }
 
 export interface ApplicationForm {
   email: string;
-  birthDate?: ExactDate | null;
+  parentTitle?: string; // 家长称呼，用于和学校沟通
+  birthDates?: (ExactDate | null)[]; // 学生1..n 出生日期，至少 1 个
   province?: string;
   city?: string;
   studyPeriod?: StudyPeriod;
   intendedSchools: IntendedSchool[];
-  assists: string[];
-  notes?: string;
 }
 
 export interface ApplicationItem extends ApplicationForm {
@@ -83,28 +78,6 @@ export const CATEGORY_META: Record<ApplicationCategory, { label: string }> = {
   school: { label: "中小学" },
   ece: { label: "幼儿园" },
 };
-
-export const STATUS_META: Record<
-  ApplicationStatus,
-  { label: string; className: string }
-> = {
-  draft: { label: "草稿", className: "bg-ink/10 text-ink-soft" },
-  submitted: { label: "待审核", className: "bg-info/15 text-info" },
-  reviewing: { label: "审核中", className: "bg-warning/15 text-warning" },
-  accepted: { label: "已录取", className: "bg-success/15 text-success" },
-  rejected: { label: "未通过", className: "bg-error/15 text-error" },
-};
-
-/** 协助选项（多选）。 */
-export const ASSIST_OPTIONS = [
-  "签证办理",
-  "住宿安排",
-  "接机服务",
-  "行程规划",
-  "课程/选校咨询",
-  "语言衔接",
-  "其它",
-];
 
 export const TENSE_LABEL: Record<Tense, string> = {
   early: "上旬",
@@ -146,12 +119,25 @@ let items: ApplicationItem[] = loadLS();
 let uid: string | null = null;
 const subs = new Set<(v: ApplicationItem[]) => void>();
 
+function normalizeApplication(raw: unknown): ApplicationItem | null {
+  if (!raw || typeof raw !== "object") return null;
+  const item = raw as Record<string, unknown>;
+  if (!item.id || typeof item.id !== "string") return null;
+  const category =
+    item.category === "ece" ? "ece" : item.category === "school" ? "school" : null;
+  if (!category) return null;
+  const status: ApplicationStatus = item.status === "draft" ? "draft" : "generated";
+  return { ...item, category, status } as ApplicationItem;
+}
+
 function loadLS(): ApplicationItem[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(LS_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
+    return (Array.isArray(parsed) ? parsed : [])
+      .map(normalizeApplication)
+      .filter((a): a is ApplicationItem => a !== null);
   } catch {
     return [];
   }
@@ -200,11 +186,11 @@ export function getSavedProfile(): UserProfile {
   return profileCache;
 }
 
-/** 新增一条申请。status 默认 submitted（提交），可传 draft（草稿）。 */
+/** 新增一条申请。status 默认 generated（已生成邮件模板），可传 draft（草稿）。 */
 export function addApplication(
   category: ApplicationCategory,
   form: ApplicationForm,
-  status: ApplicationStatus = "submitted"
+  status: ApplicationStatus = "generated"
 ): ApplicationItem {
   const now = new Date().toISOString();
   const item: ApplicationItem = {
@@ -221,7 +207,7 @@ export function addApplication(
   if (status !== "draft" && form.province && form.city) {
     profileCache = { province: form.province, city: form.city };
     if (uid) {
-      saveCloudProfile(uid, profileCache).catch(() => {});
+      saveCloudProfile(profileCache).catch(() => {});
     } else if (typeof window !== "undefined") {
       try {
         window.localStorage.setItem(
@@ -233,7 +219,7 @@ export function addApplication(
       }
     }
   }
-  if (uid) saveCloudApplication(item, uid).catch(() => {});
+  if (uid) saveCloudApplication(item).catch(() => {});
   return item;
 }
 
@@ -251,9 +237,9 @@ export function updateApplication(id: string, patch: Partial<ApplicationItem>): 
   persist();
   if (updated.status !== "draft" && updated.province && updated.city) {
     profileCache = { province: updated.province, city: updated.city };
-    if (uid) saveCloudProfile(uid, profileCache).catch(() => {});
+    if (uid) saveCloudProfile(profileCache).catch(() => {});
   }
-  if (uid) saveCloudApplication(updated, uid).catch(() => {});
+  if (uid) saveCloudApplication(updated).catch(() => {});
   return updated;
 }
 
@@ -267,13 +253,16 @@ export function removeApplication(id: string) {
 export function setApplicationsUser(next: string | null) {
   uid = next;
   if (!next) return;
-  Promise.all([fetchCloudApplications(next), fetchCloudProfile(next)])
+  Promise.all([fetchCloudApplications(), fetchCloudProfile()])
     .then(([cloud, profile]) => {
       if (cloud && cloud.length > 0) {
-        items = cloud;
+        items = cloud
+          .map(normalizeApplication)
+          .filter((a): a is ApplicationItem => a !== null);
+        persist();
         subs.forEach((cb) => cb(items));
       } else if (items.length > 0) {
-        items.forEach((it) => saveCloudApplication(it, next).catch(() => {}));
+        items.forEach((it) => saveCloudApplication(it).catch(() => {}));
       }
       if (profile) profileCache = profile;
       else {

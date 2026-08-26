@@ -3,7 +3,7 @@ import { getEceFrontendAll } from "@/lib/data";
 import { EceExplorer } from "@/components/ece/ece-explorer";
 
 export const metadata: Metadata = {
-  title: "幼儿园库 · WollyNZ",
+  title: "幼儿园库 · GoalNZ",
   description:
     "按城市、学校类型、办学性质、公平指数 EQI 与是否接受 2 岁以下等条件筛选新西兰幼儿园，支持地图与对比。",
 };

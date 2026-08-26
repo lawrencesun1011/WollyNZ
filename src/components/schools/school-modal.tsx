@@ -126,7 +126,7 @@ export function SchoolDetailCard({
         showToast("已成功复制，分享到微信 / 朋友圈 / 邮件");
       } else {
         // 浏览器不支持写图片：降级为复制文字摘要
-        const text = `${school.name}\n${address || "新西兰"}\n办学性质：${school.authorityCN || "—"}\n学生性别：${cnGender(school.gender, school.genderCN)}\n在校人数：${school.roll || 0}\n来源：wollynz.com`;
+        const text = `${school.name}\n${address || "新西兰"}\n办学性质：${school.authorityCN || "—"}\n学生性别：${cnGender(school.gender, school.genderCN)}\n在校人数：${school.roll || 0}\n来源：goalnz.com`;
         await navigator.clipboard.writeText(text);
         showToast("已成功复制文字，分享到微信 / 朋友圈");
       }
@@ -275,7 +275,7 @@ export function SchoolDetailCard({
         {/* ── 底部装饰 ── */}
         <div className="mt-auto shrink-0 pb-4 pt-3 text-center">
           <div className="mx-auto mb-1.5 h-1 w-12 rounded-full bg-gradient-to-r from-primary to-secondary" />
-          <p className="text-xs text-ink-soft">wollynz.com · 一键查校 · 免费申请</p>
+          <p className="text-xs text-ink-soft">goalnz.com · 一键查校 · 免费申请</p>
         </div>
     </div>
   );

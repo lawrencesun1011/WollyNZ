@@ -568,15 +568,6 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
             />
 
             <FilterSelect label="国际生" options={INTL_OPTIONS} value={filters.intl} onChange={(v) => setField("intl", v)} onClear={() => setField("intl", "")} />
-
-            <FilterSelect
-              label="寄宿设施"
-              options={[{ value: "", label: "全部" }, { value: "Yes", label: "有寄宿" }, { value: "No", label: "无寄宿" }]}
-              value={filters.boarding[0] || ""}
-              onChange={(v) => setField("boarding", v ? [v] : [])}
-              onClear={() => setField("boarding", [])}
-              helpText="学校自己有宿舍楼，学生住在校园内或学校专属宿舍区，并非寄宿家庭（Homestay）。"
-            />
           </div>
         </div>
       </div>

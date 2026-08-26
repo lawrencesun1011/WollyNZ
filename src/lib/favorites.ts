@@ -72,15 +72,6 @@ export function setFavoritesUser(uid: string | null) {
   }
 }
 
-function currentUid(): string | null {
-  try {
-    const raw = window.localStorage.getItem("wollyn:auth:uid");
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
 async function syncCloud(entries: FavoriteEntry[]) {
   if (typeof window === "undefined") return;
   if ((window as unknown as { __wollyFavUploading?: boolean }).__wollyFavUploading)
@@ -99,8 +90,7 @@ async function syncCloud(entries: FavoriteEntry[]) {
       id,
       name: nameOf.get(id) ?? "",
     }));
-    const uid = currentUid();
-    if (uid) await saveCloudCollections(uid, { favorites, compare });
+    await saveCloudCollections({ favorites, compare });
   } finally {
     (window as unknown as { __wollyFavUploading?: boolean }).__wollyFavUploading = false;
   }

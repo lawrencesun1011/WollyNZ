@@ -33,6 +33,7 @@ import {
   applyCloudCompare,
 } from "./user-collections";
 import { setApplicationsUser } from "./applications";
+import { setAccommodationUser } from "./accommodation";
 import { mergeLocalToCloudOnLogin } from "./user-data";
 
 let bridgeStarted = false;
@@ -60,8 +61,9 @@ export function useAuthBridge() {
         setFavoritesUser(user.uid);
         setCompareUser(user.uid);
         setApplicationsUser(user.uid);
+        setAccommodationUser(user.uid);
         try {
-          const cloud = await mergeLocalToCloudOnLogin(user.uid, resolveSchoolName);
+          const cloud = await mergeLocalToCloudOnLogin(resolveSchoolName);
           if (cloud) {
             applyCloudFavorites(cloud.favorites);
             applyCloudCompare(cloud.compare);
@@ -74,6 +76,7 @@ export function useAuthBridge() {
         setFavoritesUser(null);
         setCompareUser(null);
         setApplicationsUser(null);
+        setAccommodationUser(null);
       }
     });
 

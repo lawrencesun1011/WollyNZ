@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 export const metadata = {
-  title: "新西兰低龄插班游学攻略 · WollyNZ",
+  title: "新西兰低龄插班游学攻略 · GoalNZ",
 };
 
 /* 图片占位块 */

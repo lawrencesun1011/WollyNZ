@@ -98,7 +98,7 @@ export default function LoginPage() {
         <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light text-white shadow-sm">
           <GraduationCap className="h-5 w-5" />
         </span>
-        <span className="text-xl font-bold tracking-tight text-ink">WollyNZ</span>
+        <span className="text-xl font-bold tracking-tight text-ink">GoalNZ</span>
       </Link>
 
       <div className="glass w-full max-w-md rounded-[--radius-md] p-7 shadow-[--shadow-2] animate-fade-up">

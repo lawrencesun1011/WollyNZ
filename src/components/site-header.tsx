@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { GraduationCap, Heart } from "lucide-react";
+import { GraduationCap, Heart, ChevronDown } from "lucide-react";
 import { useFavorites } from "@/lib/user-collections";
 import { FavoritesPopover } from "./favorites-popover";
 import { UserMenu } from "./auth/user-menu";
@@ -21,7 +21,7 @@ export function SiteHeader() {
               <GraduationCap className="h-5 w-5" />
             </span>
             <span className="text-lg font-bold tracking-tight text-ink">
-              WollyNZ
+              GoalNZ
             </span>
           </Link>
 
@@ -39,17 +39,38 @@ export function SiteHeader() {
             >
               游学攻略
             </Link>
+            {/* 找学校：下拉包含幼儿园与中小学 */}
+            <div className="group relative">
+              <button
+                type="button"
+                className="flex items-center gap-1 text-base font-medium text-ink-soft transition-colors hover:text-primary"
+              >
+                找学校
+                <ChevronDown className="h-4 w-4 transition-transform group-hover:rotate-180" />
+              </button>
+              <div className="absolute left-1/2 top-full hidden -translate-x-1/2 pt-2 group-hover:block">
+                <div className="flex w-36 flex-col overflow-hidden rounded-xl border border-white/60 bg-bg/90 p-1 shadow-lg backdrop-blur-xl">
+                  <Link
+                    href="/ece"
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary"
+                  >
+                    幼儿园
+                  </Link>
+                  <Link
+                    href="/schools"
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary"
+                  >
+                    中小学
+                  </Link>
+                </div>
+              </div>
+            </div>
+            {/* 找住宿 */}
             <Link
-              href="/ece"
+              href="/accommodation"
               className="text-base font-medium text-ink-soft transition-colors hover:text-primary"
             >
-              幼儿园
-            </Link>
-            <Link
-              href="/schools"
-              className="text-base font-medium text-ink-soft transition-colors hover:text-primary"
-            >
-              中小学
+              找住宿
             </Link>
             <Link
               href="/community"

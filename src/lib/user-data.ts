@@ -56,22 +56,22 @@ function readLS(key: string): string[] {
   }
 }
 
-function writeLS(key: string, ids: string[]) {
+function writeLS(key: string, value: unknown) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(key, JSON.stringify(ids));
+    window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
     /* 忽略 */
   }
 }
 
-/** 从云端拉取当前用户集合；返回 null 表示无云端数据/未登录/失败。 */
-export async function fetchCloudCollections(uid: string): Promise<UserCollections | null> {
+/** 从云端拉取当前用户集合；owner 由 RLS 过滤，无需前端传 uid。返回 null 表示无云端数据/未登录/失败。 */
+export async function fetchCloudCollections(): Promise<UserCollections | null> {
   const token = await getAccessToken();
   if (!token) return null;
   try {
     const res = await fetch(
-      `${gatewayBase()}/${TABLE}?owner=eq.${encodeURIComponent(uid)}&select=favorites,compare`,
+      `${gatewayBase()}/${TABLE}?select=favorites,compare`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (!res.ok) {
@@ -116,9 +116,8 @@ function normalizeItems(raw: unknown): FavoriteItem[] {
     .filter((x): x is FavoriteItem => !!x && !!x.id);
 }
 
-/** 云端 upsert（按 owner 主键插入或更新）。 */
+/** 云端 upsert（按 owner 主键插入或更新）。owner 由服务端 RLS 默认值 auth.uid() 注入。 */
 export async function saveCloudCollections(
-  uid: string,
   data: UserCollections
 ): Promise<boolean> {
   const token = await getAccessToken();
@@ -132,7 +131,6 @@ export async function saveCloudCollections(
         Prefer: "resolution=merge-duplicates",
       },
       body: JSON.stringify({
-        owner: uid,
         favorites: data.favorites,
         compare: data.compare,
       }),
@@ -154,10 +152,9 @@ export async function saveCloudCollections(
  * - 云端已有 → 用云端覆盖本地（以云端为准），返回云端数据供上层使用。
  */
 export async function mergeLocalToCloudOnLogin(
-  uid: string,
   resolveName?: (id: string) => string | undefined
 ): Promise<UserCollections | null> {
-  const cloud = await fetchCloudCollections(uid);
+  const cloud = await fetchCloudCollections();
   const localFav = readFavLS();
   const localCmp = readLS(LS_CMP);
 
@@ -174,13 +171,18 @@ export async function mergeLocalToCloudOnLogin(
         .map((id) => ({ id, name: resolveName?.(id) ?? "" })),
     };
     if (localFav.length || localCmp.length) {
-      await saveCloudCollections(uid, merged);
+      await saveCloudCollections(merged);
     }
     return merged;
   }
 
-  // 云端有数据：以云端为准，回写本地镜像（提取 id 数组）
-  writeLS(LS_FAV, cloud.favorites.map((x) => x.id));
+  // 云端有数据：以云端为准，回写本地镜像。
+  // 注意：必须保留 kind，否则本地被写成纯 id 数组后重新读取时
+  // 所有项都会默认成 "school"，导致幼儿园心愿单被错分到「中小学」分组。
+  writeLS(
+    LS_FAV,
+    cloud.favorites.map((x) => ({ id: x.id, kind: x.kind === "ece" ? "ece" : "school" }))
+  );
   writeLS(LS_CMP, cloud.compare.map((x) => x.id));
   return cloud;
 }
@@ -224,15 +226,13 @@ export interface CloudApplicationRow {
   updated_at?: string;
 }
 
-/** 拉取当前用户全部申请（独立表）。 */
-export async function fetchCloudApplications(
-  uid: string
-): Promise<ApplicationItem[] | null> {
+/** 拉取当前用户全部申请（独立表）。owner 由 RLS(owner=auth.uid()) 过滤，无需前端传 uid。 */
+export async function fetchCloudApplications(): Promise<ApplicationItem[] | null> {
   const token = await getAccessToken();
   if (!token) return null;
   try {
     const res = await fetch(
-      `${gatewayBase()}/applications?owner=eq.${encodeURIComponent(uid)}&select=*`,
+      `${gatewayBase()}/applications?select=*`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (!res.ok) {
@@ -249,17 +249,19 @@ export async function fetchCloudApplications(
   }
 }
 
-/** 云端 upsert 单条申请（按 id 主键 merge）。owner 必须显式传入，RLS with-check 才会放行。 */
+/**
+ * 云端 upsert 单条申请（按 id 主键 merge）。
+ * owner 不从前端口传，由服务端 RLS 默认值 auth.uid() 注入，
+ * 保证 owner 与网关解析出的 auth.uid() 一致，RLS with-check 才会放行。
+ */
 export async function saveCloudApplication(
-  item: ApplicationItem,
-  owner: string
+  item: ApplicationItem
 ): Promise<boolean> {
   const token = await getAccessToken();
   if (!token) return false;
   try {
     const row = {
       id: item.id,
-      owner,
       category: item.category,
       status: item.status,
       data: item,
@@ -312,13 +314,13 @@ export interface UserProfile {
   city?: string;
 }
 
-/** 读取用户 profile（省份/城市）。 */
-export async function fetchCloudProfile(uid: string): Promise<UserProfile | null> {
+/** 读取用户 profile（省份/城市）。owner 由 RLS 过滤。 */
+export async function fetchCloudProfile(): Promise<UserProfile | null> {
   const token = await getAccessToken();
   if (!token) return null;
   try {
     const res = await fetch(
-      `${gatewayBase()}/user_collections?owner=eq.${encodeURIComponent(uid)}&select=profile`,
+      `${gatewayBase()}/user_collections?select=profile`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (!res.ok) return null;
@@ -329,8 +331,8 @@ export async function fetchCloudProfile(uid: string): Promise<UserProfile | null
   }
 }
 
-/** 回写用户 profile（省份/城市）。 */
-export async function saveCloudProfile(uid: string, profile: UserProfile): Promise<boolean> {
+/** 回写用户 profile（省份/城市）。owner 由服务端 RLS 默认值 auth.uid() 注入。 */
+export async function saveCloudProfile(profile: UserProfile): Promise<boolean> {
   const token = await getAccessToken();
   if (!token) return false;
   try {
@@ -341,7 +343,7 @@ export async function saveCloudProfile(uid: string, profile: UserProfile): Promi
         "Content-Type": "application/json",
         Prefer: "resolution=merge-duplicates",
       },
-      body: JSON.stringify({ owner: uid, profile }),
+      body: JSON.stringify({ profile }),
     });
     return res.ok;
   } catch (e) {
@@ -351,3 +353,69 @@ export async function saveCloudProfile(uid: string, profile: UserProfile): Promi
 }
 
 export const userDataKeys = { LS_FAV, LS_CMP };
+
+// ---- 住宿意向（独立表 accommodation_applications）----
+import type { AccommodationItem } from "./accommodation";
+
+/** 拉取当前用户全部住宿意向（owner 由 RLS 过滤）。 */
+export async function fetchCloudAccommodation(): Promise<AccommodationItem[] | null> {
+  const token = await getAccessToken();
+  if (!token) return null;
+  try {
+    const res = await fetch(
+      `${gatewayBase()}/accommodation_applications?select=*`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!res.ok) {
+      console.error("[user-data] 住宿云端读取失败", res.status, await res.text());
+      return null;
+    }
+    const rows = (await res.json()) as { data: AccommodationItem }[];
+    return rows.map((r) => r.data);
+  } catch (e) {
+    console.error("[user-data] 住宿云端读取异常", e);
+    return null;
+  }
+}
+
+/** 云端 upsert 单条住宿意向（按 id 主键 merge）。owner 由服务端 RLS 默认值 auth.uid() 注入。 */
+export async function saveCloudAccommodation(item: AccommodationItem): Promise<boolean> {
+  const token = await getAccessToken();
+  if (!token) return false;
+  try {
+    const row = { id: item.id, status: item.status, data: item };
+    const res = await fetch(`${gatewayBase()}/accommodation_applications`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Prefer: "resolution=merge-duplicates",
+      },
+      body: JSON.stringify(row),
+    });
+    if (!res.ok) {
+      console.error("[user-data] 住宿云端写入失败", res.status, await res.text());
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("[user-data] 住宿云端写入异常", e);
+    return false;
+  }
+}
+
+/** 云端删除单条住宿意向。 */
+export async function deleteCloudAccommodation(id: string): Promise<boolean> {
+  const token = await getAccessToken();
+  if (!token) return false;
+  try {
+    const res = await fetch(
+      `${gatewayBase()}/accommodation_applications?id=eq.${encodeURIComponent(id)}`,
+      { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }
+    );
+    return res.ok || res.status === 404;
+  } catch (e) {
+    console.error("[user-data] 住宿云端删除异常", e);
+    return false;
+  }
+}

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { User, LogOut, Mail, FileText } from "lucide-react";
+import { User, LogOut, Mail, FileText, BedDouble } from "lucide-react";
 import { signOut, useAuthUser } from "@/lib/auth";
 
 interface Props {
@@ -65,7 +65,15 @@ export function UserMenu() {
             className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary"
           >
             <FileText className="h-4 w-4" />
-            我的申请
+            学校申请
+          </Link>
+          <Link
+            href="/my-accommodations"
+            onClick={() => setOpen(false)}
+            className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary"
+          >
+            <BedDouble className="h-4 w-4" />
+            住宿意向
           </Link>
 
           {user && (

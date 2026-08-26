@@ -5,7 +5,7 @@ export function SiteFooter() {
     <footer className="mt-24 border-t border-primary/10 bg-primary/[0.04]">
       <div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-12 md:flex-row md:items-start md:justify-between">
         <div className="max-w-sm space-y-2">
-          <p className="text-base font-bold text-ink">WollyNZ</p>
+          <p className="text-base font-bold text-ink">GoalNZ</p>
           <p className="text-sm leading-relaxed text-ink-soft">
             面向中国游学家庭的新西兰优质教育机构查询平台，帮助您按地区、类型、语言等条件筛选合适的学校。
           </p>
@@ -39,7 +39,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-primary/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-1 px-5 py-4 text-xs text-ink-soft sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 WollyNZ · 仅供信息参考</p>
+          <p>© 2026 GoalNZ · 仅供信息参考</p>
           <p>数据来源：data.govt.nz（CC BY 4.0）· 新西兰教育机构目录</p>
         </div>
       </div>

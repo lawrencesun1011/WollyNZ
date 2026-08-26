@@ -105,6 +105,29 @@ body {
   line-height: 1.25rem;
 }
 
+/* 表单控件（与湖水绿设计体系一致） */
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-stroke);
+  background: #fff;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input::placeholder {
+  color: var(--color-caption);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(62, 156, 140, 0.15);
+}
+textarea.input {
+  resize: vertical;
+}
+
 /* 地图容器层级控制，避免筛选下拉被地图覆盖 */
 .leaflet-container {
   z-index: 0;

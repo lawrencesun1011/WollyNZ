@@ -1,21 +1,21 @@
 "use client";
 
 import { Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, Sparkles } from "lucide-react";
-import { ApplicationForm } from "@/components/applications/application-form";
-import type { ApplicationCategory } from "@/lib/applications";
+import { useAuthBridge } from "@/lib/auth-init";
+import { AccommodationForm } from "@/components/accommodations/accommodation-form";
 
-function ApplyInner() {
+function ApplyAccommodationInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const raw = params.get("category");
-  const editId = params.get("editId") ?? undefined;
-  const category: ApplicationCategory = raw === "ece" ? "ece" : "school";
-  const title = editId ? "编辑申请" : category === "ece" ? "幼儿园申请" : "中小学申请";
+  const draftId = params.get("draft") || undefined;
+  useAuthBridge();
+
+  const title = draftId ? "编辑住宿意向" : "填写住宿意向";
 
   function back() {
-    router.push(`/my-applications?tab=${category}`);
+    router.push("/my-accommodations");
   }
 
   return (
@@ -32,15 +32,17 @@ function ApplyInner() {
             className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-primary/10 hover:text-primary"
           >
             <ChevronLeft className="h-4 w-4" />
-            返回学校申请
+            返回住宿意向
           </button>
         </div>
 
         <div className="rounded-2xl border border-stroke bg-white p-6 shadow-sm md:p-10">
-          <ApplicationForm
-            category={category}
-            editId={editId}
-            onDone={() => back()}
+          <p className="mb-6 rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm text-ink-soft">
+            提交您的需求后，我们会匹配合作的物业公司资源；如有合适房源，将主动与您联系。
+          </p>
+          <AccommodationForm
+            draftId={draftId}
+            onSubmitted={() => router.push("/my-accommodations")}
             onCancel={back}
           />
         </div>
@@ -49,10 +51,10 @@ function ApplyInner() {
   );
 }
 
-export default function ApplyPage() {
+export default function ApplyAccommodationPage() {
   return (
     <Suspense fallback={null}>
-      <ApplyInner />
+      <ApplyAccommodationInner />
     </Suspense>
   );
 }
