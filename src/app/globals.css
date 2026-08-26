@@ -6,10 +6,10 @@
    ============================================================ */
 @theme inline {
   /* 品牌色 */
-  --color-primary: #3e9c8c;        /* 主色：湖水绿 */
-  --color-primary-hover: #34897b;
-  --color-primary-active: #2c7568;
-  --color-secondary: #5ba3c4;      /* 辅助：湖蓝 */
+  --color-primary: #287e6e;        /* 主色：更沉稳的湖水绿 */
+  --color-primary-hover: #206b5d;
+  --color-primary-active: #19594d;
+  --color-secondary: #4e90af;      /* 辅助：湖蓝 */
   --color-tertiary: #9ccbbd;       /* 辅助：浅湖绿 */
   --color-primary-light: #5ba3c4;  /* 兼容旧命名 → 湖蓝 */
   --color-primary-soft: #9ccbbd;   /* 兼容旧命名 → 浅湖绿 */
@@ -18,12 +18,12 @@
   --color-bg: #eef6f4;             /* 背景：湖白 */
   --color-bg-secondary: #ffffff;
   --color-bg-soft: #dcefeb;
-  --color-stroke: #c6e2db;         /* 描边 */
+  --color-stroke: #bdd8d1;         /* 描边 */
 
   /* 文字 */
-  --color-ink: #234b45;            /* 标题：深湖绿 */
-  --color-ink-soft: #45635c;       /* 正文 */
-  --color-caption: #7c9a93;        /* 说明文字 */
+  --color-ink: #193a35;            /* 标题：深湖绿 */
+  --color-ink-soft: #35544d;       /* 正文：提升对比度 */
+  --color-caption: #617a72;        /* 说明文字：保持可读 */
 
   /* 状态色 */
   --color-success: #5bab8e;
@@ -33,6 +33,14 @@
 
   --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", -apple-system, "Segoe UI", system-ui, sans-serif;
 
+  /* 全站正文基准：保留紧凑感，但避免 12–14px 文字显得吃力 */
+  --text-xs: 0.8125rem;            /* 13px */
+  --text-xs--line-height: 1.25rem;
+  --text-sm: 0.9375rem;            /* 15px */
+  --text-sm--line-height: 1.45rem;
+  --text-base: 1rem;               /* 16px */
+  --text-base--line-height: 1.7rem;
+
   /* 圆角 */
   --radius-sm: 0.75rem;   /* 12px */
   --radius-md: 1.25rem;   /* 20px */
@@ -40,8 +48,8 @@
   --radius-card: 1.25rem;
 
   /* 阴影（柔和绿色投影） */
-  --shadow-1: 0 4px 16px rgba(62, 156, 140, 0.1);
-  --shadow-2: 0 12px 30px rgba(62, 156, 140, 0.18);
+  --shadow-1: 0 4px 16px rgba(40, 126, 110, 0.1);
+  --shadow-2: 0 12px 30px rgba(40, 126, 110, 0.18);
 }
 
 :root {
@@ -56,6 +64,9 @@ body {
   background: var(--color-bg);
   color: var(--color-ink-soft);
   font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.7;
+  letter-spacing: 0.005em;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -89,7 +100,7 @@ body {
 }
 
 .scroll-thin::-webkit-scrollbar-thumb {
-  background: rgba(62, 156, 140, 0.3);
+  background: rgba(40, 126, 110, 0.3);
   border-radius: 9999px;
 }
 
@@ -99,10 +110,10 @@ body {
   align-items: center;
   gap: 0.25rem;
   border-radius: 9999px;
-  padding: 0.125rem 0.625rem;
-  font-size: 0.75rem;
+  padding: 0.1875rem 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  line-height: 1.25rem;
+  line-height: 1.3rem;
 }
 
 /* 表单控件（与湖水绿设计体系一致） */
@@ -112,7 +123,8 @@ body {
   border: 1px solid var(--color-stroke);
   background: #fff;
   padding: 0.625rem 0.875rem;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
   color: var(--color-ink);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -122,7 +134,7 @@ body {
 .input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(62, 156, 140, 0.15);
+  box-shadow: 0 0 0 3px rgba(40, 126, 110, 0.15);
 }
 textarea.input {
   resize: vertical;
@@ -168,4 +180,85 @@ textarea.input {
 
 .animate-overlay {
   animation: 0.25s ease-out both overlayIn;
+}
+
+/* 轻量服务页模板：住宿、社群等转化型页面共用同一版式语言 */
+.service-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 8% 18%, rgba(156, 203, 189, 0.26), transparent 22rem),
+    radial-gradient(circle at 92% 34%, rgba(91, 163, 196, 0.14), transparent 24rem),
+    var(--color-bg);
+}
+
+.service-page::before {
+  position: absolute;
+  top: 7rem;
+  left: 50%;
+  z-index: 0;
+  width: min(58rem, 100%);
+  height: 24rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.38);
+  content: "";
+  filter: blur(2px);
+  transform: translateX(-50%);
+}
+
+.service-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.service-eyebrow {
+  border: 1px solid rgba(40, 126, 110, 0.14);
+  background: rgba(255, 255, 255, 0.64);
+  color: var(--color-primary);
+}
+
+.service-panel {
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow-1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.service-panel-hover {
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.service-panel-hover:hover {
+  border-color: rgba(40, 126, 110, 0.26);
+  box-shadow: var(--shadow-2);
+  transform: translateY(-3px);
+}
+
+/* 长文攻略：延续服务页的色彩，但以稳定阅读体验为先 */
+.guide-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% 16%, rgba(156, 203, 189, 0.2), transparent 22rem),
+    radial-gradient(circle at 92% 38%, rgba(91, 163, 196, 0.1), transparent 24rem),
+    var(--color-bg);
+}
+
+.guide-article,
+.guide-toc {
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: var(--shadow-1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.guide-toc a {
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.guide-toc a:hover {
+  background: rgba(40, 126, 110, 0.08);
 }

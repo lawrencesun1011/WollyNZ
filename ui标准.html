@@ -9,19 +9,19 @@
    DESIGN TOKENS — 湖水蓝绿风 (Lake Teal)
    ============================================================ */
 :root{
-  --color-primary:        #3E9C8C;   /* 主色：湖水绿 */
-  --color-primary-hover:  #34897B;
-  --color-primary-active: #2C7568;
-  --color-secondary:      #5BA3C4;   /* 辅助：湖蓝 */
+  --color-primary:        #287E6E;   /* 主色：更沉稳的湖水绿 */
+  --color-primary-hover:  #206B5D;
+  --color-primary-active: #19594D;
+  --color-secondary:      #4E90AF;   /* 辅助：湖蓝 */
   --color-tertiary:       #9CCBBD;   /* 辅助：浅湖绿 */
 
   --color-bg-primary:     #EEF6F4;   /* 背景：湖白 */
   --color-bg-secondary:   #FFFFFF;
   --color-bg-soft:        #DCEFEB;
-  --color-headline:       #234B45;   /* 标题：深湖绿 */
-  --color-paragraph:      #45635C;
-  --color-caption:        #7C9A93;
-  --color-stroke:         #C6E2DB;
+  --color-headline:       #193A35;   /* 标题：深湖绿 */
+  --color-paragraph:      #35544D;
+  --color-caption:        #617A72;
+  --color-stroke:         #BDD8D1;
 
   --color-success:#5BAB8E; --color-warning:#D8B45E; --color-error:#D97E72; --color-info:#5BA3C4;
 
@@ -36,11 +36,11 @@
   --sp-1:4px; --sp-2:8px; --sp-3:16px; --sp-4:24px; --sp-5:32px; --sp-6:48px;
 
   --radius-sm:12px; --radius-md:20px; --radius-lg:28px;
-  --shadow-1:0 4px 16px rgba(62,156,140,.10);
-  --shadow-2:0 12px 30px rgba(62,156,140,.18);
+  --shadow-1:0 4px 16px rgba(40,126,110,.10);
+  --shadow-2:0 12px 30px rgba(40,126,110,.18);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:var(--font-family);color:var(--color-paragraph);background:var(--color-bg-primary);line-height:var(--lh-body)}
+body{font-family:var(--font-family);color:var(--color-paragraph);background:var(--color-bg-primary);font-size:16px;line-height:var(--lh-body)}
 a{text-decoration:none;color:inherit}
 .container{max-width:1180px;margin:0 auto;padding:0 var(--grid-margin)}
 
@@ -90,7 +90,7 @@ a{text-decoration:none;color:inherit}
 .field{display:flex;flex-direction:column;gap:6px}
 .field label{font-size:var(--fs-caption);font-weight:600;color:var(--color-headline)}
 .input{border:1px solid var(--color-stroke);border-radius:var(--radius-sm);padding:12px 14px;font-size:var(--fs-body);background:#fff}
-.input:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(62,156,140,.18)}
+.input:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(40,126,110,.18)}
 .input.error{border-color:var(--color-error)}
 .err-msg{font-size:var(--fs-caption);color:var(--color-error)}
 
@@ -116,11 +116,11 @@ footer{padding:var(--sp-5) 0;text-align:center;color:var(--color-caption);font-s
   <div class="spec-inner">
     <div><h4>Color Tokens</h4>
       <div class="swatches">
-        <span class="sw" style="background:#3E9C8C"></span>
+        <span class="sw" style="background:#287E6E"></span>
         <span class="sw" style="background:#5BA3C4"></span>
         <span class="sw" style="background:#9CCBBD"></span>
         <span class="sw" style="background:#EEF6F4"></span>
-        <span class="sw" style="background:#234B45"></span>
+        <span class="sw" style="background:#193A35"></span>
         <span class="sw" style="background:#5BAB8E"></span>
         <span class="sw" style="background:#D97E72"></span>
       </div>

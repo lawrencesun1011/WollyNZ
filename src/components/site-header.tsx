@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { GraduationCap, Heart, ChevronDown } from "lucide-react";
+import { Heart, ChevronDown } from "lucide-react";
 import { useFavorites } from "@/lib/user-collections";
 import { FavoritesPopover } from "./favorites-popover";
 import { UserMenu } from "./auth/user-menu";
@@ -17,11 +18,16 @@ export function SiteHeader() {
         <div className="mx-auto relative flex h-16 max-w-[1400px] items-center justify-center">
           {/* 左侧：Logo */}
           <Link href="/" className="absolute left-0 flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light text-white shadow-sm">
-              <GraduationCap className="h-5 w-5" />
-            </span>
-            <span className="text-lg font-bold tracking-tight text-ink">
-              GoalNZ
+            <Image
+              src="/images/brand/goalnz-map-pin.png"
+              alt=""
+              width={40}
+              height={40}
+              priority
+              className="h-10 w-10 object-contain mix-blend-multiply"
+            />
+            <span className="text-lg font-bold tracking-tight">
+              <span className="text-[#062754]">Goal</span><span className="text-primary">NZ</span>
             </span>
           </Link>
 

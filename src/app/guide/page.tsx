@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { BookOpen, Clock3, MapPin } from "lucide-react";
 
 export const metadata = {
   title: "新西兰低龄插班游学攻略 · GoalNZ",
@@ -100,22 +101,27 @@ const TOC = [
 
 export default function GuidePage() {
   return (
-    <div className="mx-auto max-w-6xl px-5 py-12">
+    <main className="guide-page">
+      <div className="mx-auto max-w-6xl px-5 py-12 sm:py-16">
       <div className="grid gap-10 lg:grid-cols-[1fr_220px]">
         {/* 主内容 */}
-        <article className="min-w-0">
+        <article className="guide-article min-w-0 rounded-3xl p-6 sm:p-10">
           {/* Hero */}
-          <header>
-            <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+          <header className="border-b border-stroke/70 pb-8">
+            <span className="service-eyebrow chip inline-flex items-center gap-1.5 px-3 py-1 text-xs">
+              <BookOpen className="h-3.5 w-3.5" />
               低龄留学 · 游学攻略
             </span>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
               新西兰低龄全真插班游学｜DIY完整攻略
             </h1>
             <p className="mt-3 text-[15px] leading-7 text-ink-soft">
               拒绝走马观花夏令营，真正进入本地公立学校上课，沉浸式体验新西兰校园教育，适合想要提前试水海外教育的亲子家庭。
             </p>
-            <ImgPlaceholder label="封面图占位：亲子插班主题" />
+            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-caption">
+              <span className="inline-flex items-center gap-1.5"><Clock3 className="h-3.5 w-3.5 text-primary" />提前 5–6 个月准备</span>
+              <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-primary" />面向新西兰中小学插班家庭</span>
+            </div>
           </header>
 
           {/* 一 */}
@@ -343,8 +349,8 @@ export default function GuidePage() {
 
         {/* 右侧目录（桌面端 sticky） */}
         <aside className="hidden lg:block">
-          <div className="sticky top-24">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-caption">目录</p>
+          <div className="guide-toc sticky top-24 rounded-2xl p-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-caption">阅读目录</p>
             <nav className="space-y-2 text-sm">
               {TOC.map((t) => (
                 <a
@@ -359,6 +365,7 @@ export default function GuidePage() {
           </div>
         </aside>
       </div>
-    </div>
+      </div>
+    </main>
   );
 }

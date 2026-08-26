@@ -45,17 +45,9 @@ export type HomePageBackgrounds = {
 };
 
 export const homePageBackgrounds: HomePageBackgrounds = {
-  // 🎯 Hero 区域 - 探索新西兰优质教育机构
+  // 🎯 Hero 区域 - 当前使用纯 CSS 湖水绿视觉，不加载图片或视频
   hero: {
-    src: "/images/home/hero-bg.webp", // 静态图同时作为视频首帧 poster（防白屏）
-    videoSrc: "/images/home/hero-bg.mp4", // 动图背景（静音自动循环播放）
-    overlay: false, // 蒙层已移除，保留原图锐度
-    // overlay: true, // 开启蒙层，避免背景抢戏文字
-    // overlayDirection: "all", // 全局蒙层
-    // overlayStrength: "light", // 轻微蒙层，保持画面通透
-    position: "center",
-    fit: "cover", // Hero 区域已锁定 2.4:1，铺满不拉伸
-    dark: false, // 文字保持深色
+    src: "",
   },
 
   // 🎯 学校库入口区域 - 中小学/幼儿园卡片
