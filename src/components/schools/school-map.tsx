@@ -172,7 +172,7 @@ export function SchoolMap({
     (window as unknown as Record<string, unknown>).__schoolMapActions = {
       detail: (id: string) => onDetailRef.current(id),
       compare: (id: string) => {
-        onToggleCompareRef.current(id);
+        onToggleCompareRef.current(id, "school");
         // 同步更新当前 popup 内的对比按钮视觉（Leaflet 不会自动重渲 popup）
         const btn = document.querySelector(
           `.popup-btn--compare[data-id="${CSS.escape(id)}"]`

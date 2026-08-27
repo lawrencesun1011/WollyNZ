@@ -6,13 +6,6 @@ export const metadata = {
   description: "GoalNZ 合作物业公司房源匹配：提交您的住宿需求，有合适房源我们将主动联系您。",
 };
 
-const PARTNERS = [
-  { name: "Auckland Homestay Partners", note: "奥克兰 homestay 与学区房" },
-  { name: "Kiwi Rentals Co.", note: "惠灵顿 / 基督城长租" },
-  { name: "Families Welcome Ltd.", note: "带娃家庭友好型房源" },
-  { name: "Campus Near Living", note: "近学校短租与过渡房" },
-];
-
 const STEPS = [
   {
     icon: Search,
@@ -82,33 +75,6 @@ export default function AccommodationPage() {
               </div>
               <h3 className="mt-3 font-bold text-ink">{s.title}</h3>
               <p className="mt-1.5 text-sm text-ink-soft">{s.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 合作物业公司 */}
-      <section className="mx-auto max-w-5xl px-5 py-10">
-        <div className="mx-auto mb-7 max-w-xl text-center">
-          <p className="text-sm font-medium text-primary">合作网络</p>
-          <h2 className="mt-1 text-xl font-bold tracking-tight text-ink">合作物业公司</h2>
-        </div>
-        <p className="-mt-4 mb-6 text-center text-sm text-ink-soft">
-          以下为合作方示例，正式上线前将替换为真实合作机构。
-        </p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {PARTNERS.map((p) => (
-            <div
-              key={p.name}
-              className="service-panel service-panel-hover flex items-center gap-3 rounded-2xl p-4"
-            >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Building2 className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="font-semibold text-ink">{p.name}</p>
-                <p className="text-sm text-ink-soft">{p.note}</p>
-              </div>
             </div>
           ))}
         </div>

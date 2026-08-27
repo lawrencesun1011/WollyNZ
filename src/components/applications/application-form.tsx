@@ -18,6 +18,7 @@ import {
   type StudyTimeMode,
   type Tense,
 } from "@/lib/applications";
+import { getUserInfo, ensureUserInfo } from "@/lib/user-info";
 import { DateRangeCalendar } from "./date-range-calendar";
 import { useFavorites } from "@/lib/user-collections";
 import { PROVINCES, citiesOf, SELF_CITY_PROVINCES } from "@/lib/regions";
@@ -204,10 +205,22 @@ export function ApplicationForm({
     } else {
       setEmail(user?.email ?? "");
       const saved = getSavedProfile();
-      if (saved.province) {
-        setProvince(saved.province);
-        const self = SELF_CITY_PROVINCES[saved.province];
-        setCity(self ?? saved.city ?? "");
+      const applyRegion = (p: string, c: string) => {
+        if (p) {
+          setProvince(p);
+          setCity(SELF_CITY_PROVINCES[p] ?? c ?? "");
+        }
+      };
+      applyRegion(saved.province, saved.city);
+      // 从 user_info 补充基础信息（称呼 / 省份 / 城市），仅填补缺失字段
+      if (user?.uid) {
+        getUserInfo(user.uid)
+          .then((ui) => {
+            if (!ui) return;
+            if (!saved.province) applyRegion(ui.province, ui.city);
+            if (ui.name) setParentTitle((t) => t || ui.name);
+          })
+          .catch(() => {});
       }
     }
     setErrors({});
@@ -355,7 +368,16 @@ export function ApplicationForm({
     } else {
       item = addApplication(category, form, "generated");
     }
-    if (item) setGeneratedItem(item);
+    if (item) {
+      if (user?.uid) {
+        ensureUserInfo(user.uid, {
+          name: parentTitle.trim(),
+          province: province.trim(),
+          city: city.trim(),
+        }).catch(() => {});
+      }
+      setGeneratedItem(item);
+    }
   }
 
   async function handleSaveDraft() {
@@ -369,6 +391,13 @@ export function ApplicationForm({
     } else {
       const item = addApplication(category, form, "draft");
       id = item.id;
+    }
+    if (user?.uid) {
+      ensureUserInfo(user.uid, {
+        name: parentTitle.trim(),
+        province: province.trim(),
+        city: city.trim(),
+      }).catch(() => {});
     }
     finish(id);
   }

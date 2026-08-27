@@ -46,7 +46,7 @@ export function EceCompareBar({ schools, onCompare }: Props) {
         <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
-            onClick={clearCompare}
+            onClick={() => clearCompare("ece")}
             className="rounded-lg px-3 py-1.5 text-sm text-ink-soft transition-colors hover:text-ink"
           >
             清空

@@ -143,7 +143,7 @@ export function SchoolCard({
 
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); toggleCompare(school.id); }}
+          onClick={(e) => { e.stopPropagation(); toggleCompare(school.id, "school"); }}
           className={`inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition-colors ${
             inCompare
               ? "border-primary bg-primary/5 text-primary"

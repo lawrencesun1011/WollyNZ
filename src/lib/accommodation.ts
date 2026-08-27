@@ -46,6 +46,7 @@ export interface AccommodationForm {
   name: string; // 联系人姓名
   moveInDate: string; // 大致入住时间（YYYY-MM-DD）
   moveOutDate: string; // 大致退房时间（YYYY-MM-DD）
+  hasValidVisa?: boolean | null; // 入住期间是否具有合法签证（是/否）
   adults: number; // 成人数
   children: number; // 儿童数
   childAges: string[]; // 每个儿童的年龄（<1, 1..17）

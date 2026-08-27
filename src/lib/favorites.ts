@@ -86,9 +86,10 @@ async function syncCloud(entries: FavoriteEntry[]) {
       kind: e.kind,
       name: nameOf.get(e.id) ?? "",
     }));
-    const compare = readCompareLS().map((id) => ({
-      id,
-      name: nameOf.get(id) ?? "",
+    const compare = readCompareLS().map((e) => ({
+      id: e.id,
+      kind: e.kind,
+      name: nameOf.get(e.id) ?? "",
     }));
     await saveCloudCollections({ favorites, compare });
   } finally {

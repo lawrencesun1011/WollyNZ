@@ -19,12 +19,18 @@ export function LoginModal({ open, mode, onSwitchMode, onClose }: Props) {
   const [stage, setStage] = useState<Stage>("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [name, setName] = useState("");
+  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) {
       setStage("email");
       setCode("");
+      setName("");
+      setProvince("");
+      setCity("");
       setError(null);
     }
   }, [open]);
@@ -60,7 +66,13 @@ export function LoginModal({ open, mode, onSwitchMode, onClose }: Props) {
     }
     setStage("loading");
     try {
-      await signInWithEmailCode(email, code);
+      await signInWithEmailCode(
+        email,
+        code,
+        isRegister
+          ? { name: name.trim(), province: province.trim(), city: city.trim() }
+          : undefined
+      );
       onClose();
     } catch (e: any) {
       console.error(e);
@@ -124,6 +136,53 @@ export function LoginModal({ open, mode, onSwitchMode, onClose }: Props) {
                 />
               </div>
             </label>
+
+            {isRegister && (
+              <>
+                <label className="block">
+                  <span className="mb-1.5 block text-sm font-medium text-ink-soft">
+                    称呼
+                  </span>
+                  <input
+                    type="text"
+                    value={name}
+                    disabled={loading}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="如：张先生 / 李女士"
+                    className="h-11 w-full rounded-[--radius-sm] border border-stroke bg-white/70 px-3 text-ink outline-none focus:border-primary"
+                  />
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="block">
+                    <span className="mb-1.5 block text-sm font-medium text-ink-soft">
+                      省份
+                    </span>
+                    <input
+                      type="text"
+                      value={province}
+                      disabled={loading}
+                      onChange={(e) => setProvince(e.target.value)}
+                      placeholder="如：广东省"
+                      className="h-11 w-full rounded-[--radius-sm] border border-stroke bg-white/70 px-3 text-ink outline-none focus:border-primary"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1.5 block text-sm font-medium text-ink-soft">
+                      城市
+                    </span>
+                    <input
+                      type="text"
+                      value={city}
+                      disabled={loading}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="如：奥克兰"
+                      className="h-11 w-full rounded-[--radius-sm] border border-stroke bg-white/70 px-3 text-ink outline-none focus:border-primary"
+                    />
+                  </label>
+                </div>
+              </>
+            )}
+
             <button
               type="button"
               onClick={handleSend}

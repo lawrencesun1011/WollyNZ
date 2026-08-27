@@ -110,7 +110,7 @@ export default function GuidePage() {
           <header className="border-b border-stroke/70 pb-8">
             <span className="service-eyebrow chip inline-flex items-center gap-1.5 px-3 py-1 text-xs">
               <BookOpen className="h-3.5 w-3.5" />
-              低龄留学 · 游学攻略
+              低龄插班 · 游学攻略
             </span>
             <h1 className="mt-4 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
               新西兰低龄全真插班游学｜DIY完整攻略

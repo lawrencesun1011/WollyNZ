@@ -161,7 +161,11 @@ export async function sendEmailCode(email: string): Promise<void> {
  * signInWithEmail 内部按 verificationInfo.is_user 自动分支：
  * 已注册用户直接登录，新用户自动注册（注册成功即登录）。
  */
-export async function signInWithEmailCode(email: string, code: string): Promise<void> {
+export async function signInWithEmailCode(
+  email: string,
+  code: string,
+  extra?: { name?: string; province?: string; city?: string }
+): Promise<void> {
   const a = getAuth();
   if (!a) throw new Error("认证未初始化");
   if (!emailVerifyCtx || emailVerifyCtx.email !== email) {
@@ -179,6 +183,15 @@ export async function signInWithEmailCode(email: string, code: string): Promise<
     try {
       const state: any = await a.getLoginState();
       emitUser(toAuthUser(state));
+      // 登录/注册成功后始终同步基础信息（至少邮箱）；注册页携带的称呼/省份/城市一并写入。
+      // 失败静默忽略（表可能未建）。merge-duplicates 仅更新提供的列，不会清空已有字段。
+      if (currentUser) {
+        const { ensureUserInfo } = await import("./user-info");
+        await ensureUserInfo(currentUser.uid, {
+          email: currentUser.email ?? email,
+          ...extra,
+        }).catch(() => {});
+      }
     } catch (refreshErr) {
       console.warn("[auth] post-login getLoginState failed:", refreshErr);
     }
@@ -196,6 +209,11 @@ export async function signInWithEmailCode(email: string, code: string): Promise<
   } finally {
     emailVerifyCtx = null;
   }
+}
+
+/** 同步获取当前登录用户（不经过 React hook，供登录回调后立即拿到 uid）。 */
+export function getCurrentUser(): AuthUser | null {
+  return currentUser;
 }
 
 /** 登出（匿名态也会清除）。 */

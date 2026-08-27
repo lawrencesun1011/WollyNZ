@@ -34,7 +34,7 @@ import {
 } from "./user-collections";
 import { setApplicationsUser } from "./applications";
 import { setAccommodationUser } from "./accommodation";
-import { mergeLocalToCloudOnLogin } from "./user-data";
+import { mergeLocalToCloudOnLogin, setCollectionsEmail } from "./user-data";
 
 let bridgeStarted = false;
 
@@ -62,6 +62,7 @@ export function useAuthBridge() {
         setCompareUser(user.uid);
         setApplicationsUser(user.uid);
         setAccommodationUser(user.uid);
+        setCollectionsEmail(user.email ?? null);
         try {
           const cloud = await mergeLocalToCloudOnLogin(resolveSchoolName);
           if (cloud) {

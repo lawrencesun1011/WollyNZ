@@ -163,6 +163,8 @@ function inRange(value: number | undefined, range: string): boolean {
 }
 
 function matches(s: SchoolFrontend, f: Filters): boolean {
+  // 学生人数为 0 的学校不展示（中小学 / 幼儿园通用）
+  if (s.roll === 0) return false;
   if (f.keyword.trim()) {
     const k = f.keyword.trim().toLowerCase();
     const hay = `${s.name} ${s.city} ${s.suburb} ${s.territorial}`.toLowerCase();

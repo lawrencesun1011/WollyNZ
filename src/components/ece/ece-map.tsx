@@ -133,7 +133,7 @@ export function EceMap({
     (window as unknown as Record<string, unknown>).__schoolMapActions = {
       detail: (id: string) => onDetailRef.current(id),
       compare: (id: string) => {
-        onToggleCompareRef.current(id);
+        onToggleCompareRef.current(id, "ece");
         const btn = document.querySelector(
           `.popup-btn--compare[data-id="${CSS.escape(id)}"]`
         ) as HTMLElement | null;

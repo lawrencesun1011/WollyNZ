@@ -76,7 +76,15 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
         </div>
 
         <div className="mt-3 flex items-center gap-2 border-t border-stroke/60 pt-3">
-          {getEffectiveStatus(item) === "draft" && onEdit ? (
+          {getEffectiveStatus(item) === "closed" ? (
+            <button
+              type="button"
+              onClick={() => setDetail(true)}
+              className="flex-1 rounded-lg border border-primary/20 py-2 text-sm text-primary transition-colors hover:bg-primary/5"
+            >
+              查看详情
+            </button>
+          ) : getEffectiveStatus(item) === "draft" && onEdit ? (
             <button
               type="button"
               onClick={() => onEdit(item.id)}
@@ -94,14 +102,16 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
               查看详情
             </button>
           )}
-          <button
-            type="button"
-            onClick={() => onRemove(item.id)}
-            aria-label="移除意向"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/20 text-ink-soft transition-colors hover:bg-error/5 hover:text-error"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+          {getEffectiveStatus(item) !== "closed" && (
+            <button
+              type="button"
+              onClick={() => onRemove(item.id)}
+              aria-label="移除意向"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/20 text-ink-soft transition-colors hover:bg-error/5 hover:text-error"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 

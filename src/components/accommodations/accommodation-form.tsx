@@ -6,6 +6,7 @@ import { CalendarDays, Check, Loader2, Mail, MapPin, Save, Send } from "lucide-r
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useAuthUser, sendEmailCode, signInWithEmailCode } from "@/lib/auth";
+import { getUserInfo, ensureUserInfo } from "@/lib/user-info";
 import type { ExactDate } from "@/lib/applications";
 import { DateRangeCalendar } from "@/components/applications/date-range-calendar";
 import {
@@ -62,7 +63,7 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="flex items-center gap-1 text-sm font-medium text-slate-700">
+      <label className="flex items-center gap-1 text-sm font-medium text-primary">
         {label}
         {required && <span className="text-error">*</span>}
       </label>
@@ -143,6 +144,7 @@ const EMPTY: FormState = {
   name: "",
   moveInDate: "",
   moveOutDate: "",
+  hasValidVisa: null,
   adults: 1,
   children: 0,
   childAges: [],
@@ -162,6 +164,7 @@ function normalizeDraft(it: AccommodationItem): FormState {
     name: it.name ?? "",
     moveInDate: it.moveInDate ?? "",
     moveOutDate: it.moveOutDate ?? "",
+    hasValidVisa: it.hasValidVisa === true || it.hasValidVisa === false ? it.hasValidVisa : null,
     adults: it.adults ?? 1,
     children: it.children ?? 0,
     childAges: it.childAges ?? [],
@@ -234,6 +237,14 @@ export function AccommodationForm({
       } else {
         setForm((prev) => ({ ...prev, email: user?.email ?? "" }));
         setEmail(user?.email ?? "");
+        // 从 user_info 预填联系人姓名（称呼），仅当为空时
+        if (user?.uid) {
+          getUserInfo(user.uid)
+            .then((ui) => {
+              if (ui?.name) setField("name", ui.name);
+            })
+            .catch(() => {});
+        }
       }
       setErrors({});
       setNeedAuth(false);
@@ -327,6 +338,8 @@ export function AccommodationForm({
     if (!form.area.trim()) e.area = "请填写意向区域";
     if (!form.propertyTypes.length)
       e.propertyTypes = "请至少选择一种房屋类型";
+    if (form.hasValidVisa !== true && form.hasValidVisa !== false)
+      e.hasValidVisa = "请选择入住期间是否具有合法签证";
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -337,6 +350,10 @@ export function AccommodationForm({
       name: form.name.trim(),
       moveInDate: form.moveInDate,
       moveOutDate: form.moveOutDate,
+      hasValidVisa:
+        form.hasValidVisa === true || form.hasValidVisa === false
+          ? form.hasValidVisa
+          : undefined,
       adults: form.adults,
       children: form.children,
       childAges:
@@ -400,6 +417,9 @@ export function AccommodationForm({
         item = addAccommodation(payload, "submitted");
       }
       if (item) {
+        if (user?.uid) {
+          ensureUserInfo(user.uid, { name: payload.name.trim() }).catch(() => {});
+        }
         setSaved(true);
         setTimeout(() => onSubmitted?.(), 700);
       }
@@ -420,6 +440,9 @@ export function AccommodationForm({
       item = updateAccommodation(draftId, payload, "draft");
     } else {
       item = addAccommodation(payload, "draft");
+    }
+    if (user?.uid) {
+      ensureUserInfo(user.uid, { name: payload.name.trim() }).catch(() => {});
     }
     if (item) {
       onSubmitted?.();
@@ -455,20 +478,17 @@ export function AccommodationForm({
 
   return (
     <div className="space-y-5">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-ink">住宿需求</h2>
-          {editItem && (
-            <span className="text-xs text-ink-soft">
-              当前状态：
-              <span className="ml-1 font-medium text-primary">
-                <StatusLabel status={editItem.status} />
-              </span>
-              {editItem.appliedAt && (
-                <span className="ml-2">创建于 {formatDate(editItem.appliedAt)}</span>
-              )}
+        {editItem && (
+          <div className="mb-4 text-xs text-ink-soft">
+            当前状态：
+            <span className="ml-1 font-medium text-primary">
+              <StatusLabel status={editItem.status} />
             </span>
-          )}
-        </div>
+            {editItem.appliedAt && (
+              <span className="ml-2">创建于 {formatDate(editItem.appliedAt)}</span>
+            )}
+          </div>
+        )}
 
         {/* 联系邮箱 */}
         <div className="space-y-2.5">
@@ -610,6 +630,39 @@ export function AccommodationForm({
                   </div>
                 </div>
               )}
+            </div>
+          </Field>
+
+          {/* 入住期间是否具有合法签证（单选：是/否） */}
+          <Field
+            label="入住期间是否具有合法签证"
+            required
+            error={errors.hasValidVisa}
+          >
+            <div className="flex flex-wrap gap-2">
+              {[
+                { value: true, label: "是" },
+                { value: false, label: "否" },
+              ].map((opt) => {
+                const selected = form.hasValidVisa === opt.value;
+                return (
+                  <button
+                    key={String(opt.value)}
+                    type="button"
+                    disabled={locked}
+                    onClick={() => setField("hasValidVisa", opt.value)}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
+                      selected
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-stroke bg-white text-ink hover:border-primary/40"
+                    )}
+                  >
+                    {selected && <Check className="h-3.5 w-3.5" />}
+                    {opt.label}
+                  </button>
+                );
+              })}
             </div>
           </Field>
 
