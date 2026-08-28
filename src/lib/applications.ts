@@ -60,6 +60,13 @@ export interface ExactDate {
   day: number;
 }
 
+/** 学生信息：出生日期必填，性别 / 英语水平选填。 */
+export interface Student {
+  birthDate?: ExactDate | null;
+  gender?: string; // 选填：男 / 女 / 其他
+  englishLevel?: string; // 选填：英语水平等级描述
+}
+
 export type Tense = "early" | "mid" | "late";
 
 /** 模糊时段：年/月/旬。 */
@@ -87,11 +94,14 @@ export interface IntendedSchool {
 export interface ApplicationForm {
   email: string;
   parentTitle?: string; // 家长称呼，用于和学校沟通
-  birthDates?: (ExactDate | null)[]; // 学生1..n 出生日期，至少 1 个
+  students?: Student[]; // 学生1..n 信息（出生日期必填，性别/英语水平选填），至少 1 个
+  extraRequests?: string; // 其它诉求（选填，用户自由补充）
   province?: string;
   city?: string;
   studyPeriod?: StudyPeriod;
   intendedSchools: IntendedSchool[];
+  emailSubject?: string; // 邮件主题（AI 生成，可编辑，点完成保存）
+  emailBody?: string; // 邮件正文（AI 生成，可编辑，点完成保存）
 }
 
 export interface ApplicationItem extends ApplicationForm {
@@ -155,7 +165,20 @@ function normalizeApplication(raw: unknown): ApplicationItem | null {
     item.category === "ece" ? "ece" : item.category === "school" ? "school" : null;
   if (!category) return null;
   const status: ApplicationStatus = item.status === "draft" ? "draft" : "generated";
-  return { ...item, category, status } as ApplicationItem;
+  // 旧数据兼容：birthDates(仅含出生日期) → students
+  let students = Array.isArray(item.students) ? (item.students as Student[]) : undefined;
+  if (!students || students.length === 0) {
+    const legacy = (item as Record<string, unknown>).birthDates;
+    if (Array.isArray(legacy)) {
+      students = (legacy as (ExactDate | null)[]).map((b) => ({ birthDate: b }));
+    }
+  }
+  return {
+    ...item,
+    category,
+    status,
+    students: students && students.length ? students : undefined,
+  } as ApplicationItem;
 }
 
 type SchoolRef = { id: string; suburb: string; city: string };
@@ -348,7 +371,8 @@ export function updateApplication(id: string, patch: Partial<ApplicationItem>): 
 export function removeApplication(id: string) {
   items = items.filter((a) => a.id !== id);
   persist();
-  if (uid) deleteCloudApplication(id).then(() => markSynced(uid)).catch(() => {});
+  const u = uid;
+  if (u) deleteCloudApplication(id).then(() => markSynced(u)).catch(() => {});
 }
 
 // 每用户「是否已同步到云端」标记：用于区分「首次同步」与「云端被删除」。
@@ -373,7 +397,8 @@ function isSynced(u: string): boolean {
 /** 写云端并置位同步标记（失败不影响本地）。 */
 function pushCloud(item: ApplicationItem) {
   if (!uid) return;
-  saveCloudApplication(item).then(() => markSynced(uid)).catch(() => {});
+  const u = uid;
+  saveCloudApplication(item).then(() => markSynced(u)).catch(() => {});
 }
 
 /**

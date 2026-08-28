@@ -5,6 +5,7 @@ import { CalendarDays, Mail, Pencil, School, Trash2, Users, X } from "lucide-rea
 import {
   getEffectiveStatus,
   studyPeriodToString,
+  updateApplication,
   type ApplicationItem,
 } from "@/lib/applications";
 import { EmailTemplateModal } from "./email-template-modal";
@@ -51,7 +52,7 @@ export function ApplicationCard({ item, onRemove, onEdit }: Props) {
 
         <div className="mt-2 flex items-center gap-2 text-sm text-ink-soft">
           <Users className="h-4 w-4 shrink-0" />
-          <span>申请学生 {item.birthDates?.length || 0} 人</span>
+          <span>申请学生 {item.students?.length || 0} 人</span>
         </div>
 
         <div className="mt-2 flex items-center gap-2 text-sm text-ink-soft">
@@ -112,7 +113,13 @@ export function ApplicationCard({ item, onRemove, onEdit }: Props) {
       </div>
 
       {showEmail && (
-        <EmailTemplateModal item={item} onClose={() => setShowEmail(false)} />
+        <EmailTemplateModal
+          item={item}
+          onClose={(subject, body) => {
+            updateApplication(item.id, { emailSubject: subject, emailBody: body });
+            setShowEmail(false);
+          }}
+        />
       )}
     </>
   );

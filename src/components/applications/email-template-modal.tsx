@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Check, Copy, Mail, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Check, Copy, Loader2, Mail, RefreshCw, X } from "lucide-react";
 import type { ApplicationItem } from "@/lib/applications";
 
 function buildRecipients(item: ApplicationItem): { text: string; hasEmail: boolean } {
@@ -11,17 +11,50 @@ function buildRecipients(item: ApplicationItem): { text: string; hasEmail: boole
   return { text: emails.join(", "), hasEmail: emails.length > 0 };
 }
 
-export function EmailTemplateModal({
-  item,
-  onClose,
-}: {
+interface Props {
   item: ApplicationItem;
-  onClose: () => void;
-}) {
+  /** 关闭时回传当前主题/正文（以用户改动为准，由调用方保存）。 */
+  onClose: (subject: string, body: string) => void;
+}
+
+export function EmailTemplateModal({ item, onClose }: Props) {
   const recipients = buildRecipients(item);
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
+  const [subject, setSubject] = useState(item.emailSubject ?? "");
+  const [body, setBody] = useState(item.emailBody ?? "");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
+
+  async function generateEmail(signal?: AbortSignal) {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/generate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ item }),
+        signal,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "生成失败，请稍后重试");
+      setSubject(data.subject ?? "");
+      setBody(data.body ?? "");
+    } catch (e: unknown) {
+      if ((e as { name?: string })?.name === "AbortError") return;
+      setError((e as { message?: string })?.message || "生成失败，请重试");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // 打开弹窗即自动生成（无已保存内容时）；StrictMode 双挂载用 AbortController 取消首次请求。
+  useEffect(() => {
+    if (item.emailSubject || item.emailBody) return;
+    const ctrl = new AbortController();
+    void generateEmail(ctrl.signal);
+    return () => ctrl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.id]);
 
   function copy(text: string, key: string) {
     const value = text ?? "";
@@ -40,7 +73,7 @@ export function EmailTemplateModal({
   return (
     <div
       className="animate-overlay fixed inset-0 z-[1200] flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm"
-      onClick={onClose}
+      onClick={() => onClose(subject, body)}
     >
       <div
         className="animate-fade-up relative max-h-[90vh] w-[560px] max-w-full overflow-y-auto rounded-3xl bg-white shadow-2xl scroll-thin"
@@ -53,7 +86,7 @@ export function EmailTemplateModal({
           </h3>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => onClose(subject, body)}
             aria-label="关闭"
             className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-primary/10 hover:text-primary"
           >
@@ -62,6 +95,17 @@ export function EmailTemplateModal({
         </div>
 
         <div className="space-y-5 px-5 py-5">
+          {/* 生成状态提示 */}
+          {loading && (
+            <p className="flex items-center gap-2 rounded-xl bg-primary/5 px-3 py-2 text-xs text-primary">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              正在生成邮件模板…
+            </p>
+          )}
+          {error && (
+            <p className="rounded-xl bg-error/5 px-3 py-2 text-xs text-error">{error}</p>
+          )}
+
           {/* 邮件主题 */}
           <div>
             <div className="mb-1.5 flex items-center justify-between">
@@ -71,7 +115,7 @@ export function EmailTemplateModal({
             <input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="（待填写，例如：新西兰插班游学申请 — 学生姓名）"
+              placeholder="（AI 生成中…可手动填写，例如：新西兰插班游学申请）"
               className="input"
             />
           </div>
@@ -88,6 +132,9 @@ export function EmailTemplateModal({
                 未获取到意向学校邮箱，请手动补充收件人后再发送。
               </p>
             )}
+            <p className="mt-1 text-xs text-red-500">
+              重要！请不要直接群发邮件，QQ邮箱请开启右上角“<strong className="font-bold">分别发送</strong>”， 163邮箱请开启右上角“<strong className="font-bold">群发单显</strong>”，其它邮箱请使用类似功能
+            </p>
           </div>
 
           {/* 邮件正文 */}
@@ -100,20 +147,33 @@ export function EmailTemplateModal({
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={8}
-              placeholder="（待填写，可粘贴学校申请要点：学生信息、游学时间、意向学校等）"
+              placeholder="（AI 生成中…可手动填写）"
               className="input resize-none"
             />
           </div>
 
-          <p className="rounded-xl bg-primary/5 px-3 py-2 text-xs text-ink-soft">
-            主题与正文均可编辑；复制后粘贴到您的邮箱发送即可。我们会持续补充学校邮箱与模板内容。
+          <p className="rounded-xl bg-primary/5 px-3 py-2 text-xs font-bold text-black">
+            主题与正文由 AI 生成，请仔细检查是否符合预期，可直接编辑修改；确认后复制粘贴到您的邮箱发送即可。
           </p>
         </div>
 
         <div className="flex justify-end gap-3 border-t border-stroke/70 px-5 py-4">
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => void generateEmail()}
+            disabled={loading}
+            className="flex items-center gap-1.5 rounded-xl border border-primary/20 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            重新生成
+          </button>
+          <button
+            type="button"
+            onClick={() => onClose(subject, body)}
             className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
           >
             完成

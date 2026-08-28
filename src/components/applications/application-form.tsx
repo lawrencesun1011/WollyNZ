@@ -15,9 +15,24 @@ import {
   type ExactDate,
   type FuzzyDate,
   type IntendedSchool,
+  type Student,
   type StudyTimeMode,
   type Tense,
 } from "@/lib/applications";
+
+/** 英语水平选项（选填）。 */
+const ENGLISH_LEVELS = [
+  "初学者（刚开始学，只会单字）",
+  "有基础的初学者（学过一点，但仍无法交流）",
+  "初级（能听懂简单指令，会说日常短句）",
+  "中级（能进行基础对话，读懂简单故事）",
+  "中高级（表达较流利，能讨论复杂话题）",
+  "高级（听说读写熟练，接近母语国家同龄孩子）",
+  "流利/接近母语。（表达自如，无语言障碍）",
+];
+
+/** 性别选项（选填）。 */
+const GENDERS = ["男", "女"];
 import { getUserInfo, ensureUserInfo } from "@/lib/user-info";
 import { DateRangeCalendar } from "./date-range-calendar";
 import { useFavorites } from "@/lib/user-collections";
@@ -32,8 +47,8 @@ const MONTHS: number[] = Array.from({ length: 12 }, (_, i) => i + 1);
 const DAYS: number[] = Array.from({ length: 31 }, (_, i) => i + 1);
 const TENSES: Tense[] = ["early", "mid", "late"];
 
-// 出生年份：今年 → 今年-18，降序（近的在上）
 const CUR_YEAR = new Date().getFullYear();
+// 出生年份：今年 → 今年-18，降序（近的在上）
 const BIRTH_YEARS: number[] = Array.from({ length: 19 }, (_, i) => CUR_YEAR - i);
 // 开始年份：仅今年、明年
 const START_YEARS: number[] = [CUR_YEAR, CUR_YEAR + 1];
@@ -101,9 +116,10 @@ export function ApplicationForm({
   const [cooldown, setCooldown] = useState(0);
   const codeTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const [parentTitle, setParentTitle] = useState("");
-  const [birthDates, setBirthDates] = useState<(ExactDate | null)[]>([
-    { year: CUR_YEAR - 8, month: 1, day: 1 },
+  const [students, setStudents] = useState<Student[]>([
+    { birthDate: { year: CUR_YEAR - 8, month: 1, day: 1 } },
   ]);
+  const [extraRequests, setExtraRequests] = useState("");
   const [province, setProvince] = useState("");
   const [city, setCity] = useState("");
   const [timeMode, setTimeMode] = useState<StudyTimeMode>("exact");
@@ -185,11 +201,12 @@ export function ApplicationForm({
       if (it) {
         setEmail(user?.email ?? it.email);
         setParentTitle(it.parentTitle ?? "");
-        setBirthDates(
-          it.birthDates && it.birthDates.length
-            ? it.birthDates
-            : [{ year: CUR_YEAR - 8, month: 1, day: 1 }]
+        setStudents(
+          it.students && it.students.length
+            ? it.students
+            : [{ birthDate: { year: CUR_YEAR - 8, month: 1, day: 1 } }]
         );
+        setExtraRequests(it.extraRequests ?? "");
         setProvince(it.province ?? "");
         setCity(it.city ?? "");
         setTimeMode(it.studyPeriod?.mode ?? "fuzzy");
@@ -211,7 +228,7 @@ export function ApplicationForm({
           setCity(SELF_CITY_PROVINCES[p] ?? c ?? "");
         }
       };
-      applyRegion(saved.province, saved.city);
+      applyRegion(saved.province ?? "", saved.city ?? "");
       // 从 user_info 补充基础信息（称呼 / 省份 / 城市），仅填补缺失字段
       if (user?.uid) {
         getUserInfo(user.uid)
@@ -242,7 +259,7 @@ export function ApplicationForm({
   }, [schoolInput, schools]);
 
   const childWord = ece ? "孩子" : "学生";
-  const studentTitle = (n: number) => `${childWord}${n}出生日期`;
+  const studentTitle = (n: number) => `${childWord}${n}信息`;
 
   function validate(): boolean {
     const e: Record<string, string> = {};
@@ -254,7 +271,7 @@ export function ApplicationForm({
 
     // 学生1 出生日期：不得晚于今天，最早往前推 18 年
     const t = todayDate();
-    const b0 = birthDates[0];
+    const b0 = students[0]?.birthDate;
     if (!b0 || !b0.year) {
       e.birth = "请填写学生1出生日期";
     } else {
@@ -314,7 +331,8 @@ export function ApplicationForm({
     return {
       email: email.trim(),
       parentTitle: parentTitle.trim() || undefined,
-      birthDates,
+      students,
+      extraRequests: extraRequests.trim() || undefined,
       province,
       city,
       studyPeriod,
@@ -426,23 +444,25 @@ export function ApplicationForm({
       });
   }
 
-  function updateBirth(idx: number, patch: Partial<ExactDate>) {
-    setBirthDates((p) =>
-      p.map((b, i) => {
-        if (i !== idx) return b;
-        const base = b ?? { year: CUR_YEAR - 8, month: 1, day: 1 };
-        return { ...base, ...patch };
+  function updateStudent(idx: number, patch: Partial<Student>) {
+    setStudents((p) => p.map((s, i) => (i !== idx ? s : { ...s, ...patch })));
+  }
+  function patchBirth(idx: number, patch: Partial<ExactDate>) {
+    setStudents((p) =>
+      p.map((s, i) => {
+        if (i !== idx) return s;
+        const base = s.birthDate ?? { year: CUR_YEAR - 8, month: 1, day: 1 };
+        return { ...s, birthDate: { ...base, ...patch } };
       })
     );
   }
-
   function addStudent() {
-    setBirthDates((p) => [...p, { year: CUR_YEAR - 8, month: 1, day: 1 }]);
+    setStudents((p) => [...p, { birthDate: { year: CUR_YEAR - 8, month: 1, day: 1 } }]);
+  }
+  function removeStudent(idx: number) {
+    setStudents((p) => p.filter((_, i) => i !== idx));
   }
 
-  function removeStudent(idx: number) {
-    setBirthDates((p) => p.filter((_, i) => i !== idx));
-  }
 
   return (
     <div className="space-y-5">
@@ -519,72 +539,114 @@ export function ApplicationForm({
         {errors.parentTitle && <p className="mt-1 text-xs text-error">{errors.parentTitle}</p>}
       </Section>
 
-      {/* ③ 学生出生日期（可添加多名） */}
+      {/* ③ 学生信息（出生日期 + 性别 + 英语水平，可添加多名） */}
       <div className="space-y-3">
-        {birthDates.map((bd, idx) => (
+        {students.map((st, idx) => (
           <Section key={idx} title={studentTitle(idx + 1)} required={idx === 0}>
-            <div className="flex items-center gap-2">
-              <div className="grid flex-1 grid-cols-3 gap-2">
-                <select
-                  className={selectCls(errors.birth ? "border-error" : "")}
-                  value={bd?.year ?? CUR_YEAR - 8}
-                  disabled={locked}
-                  onChange={(e) => updateBirth(idx, { year: +e.target.value })}
-                >
-                  {BIRTH_YEARS.map((y) => (
-                    <option key={y} value={y}>
-                      {y} 年
-                    </option>
-                  ))}
-                </select>
-                <select
-                  className={selectCls(errors.birth ? "border-error" : "")}
-                  value={bd?.month ?? 1}
-                  disabled={locked}
-                  onChange={(e) => updateBirth(idx, { month: +e.target.value })}
-                >
-                  {MONTHS.map((m) => (
-                    <option key={m} value={m}>
-                      {m} 月
-                    </option>
-                  ))}
-                </select>
-                <select
-                  className={selectCls(errors.birth ? "border-error" : "")}
-                  value={bd?.day ?? 1}
-                  disabled={locked}
-                  onChange={(e) => updateBirth(idx, { day: +e.target.value })}
-                >
-                  {DAYS.map((d) => (
-                    <option key={d} value={d}>
-                      {d} 日
-                    </option>
-                  ))}
-                </select>
+            <div className="space-y-3">
+              {/* 出生日期 + 性别 + 英语水平（同一行） */}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                {/* 出生日期：年 / 月 / 日 */}
+                <div className="min-w-0 flex-[1.6]">
+                  <label className="mb-1 block text-xs text-ink-soft">出生日期</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <select
+                      className={selectCls(errors.birth ? "border-error" : "")}
+                      value={st.birthDate?.year ?? CUR_YEAR - 8}
+                      disabled={locked}
+                      onChange={(e) => patchBirth(idx, { year: +e.target.value })}
+                    >
+                      {BIRTH_YEARS.map((y) => (
+                        <option key={y} value={y}>
+                          {y} 年
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      className={selectCls(errors.birth ? "border-error" : "")}
+                      value={st.birthDate?.month ?? 1}
+                      disabled={locked}
+                      onChange={(e) => patchBirth(idx, { month: +e.target.value })}
+                    >
+                      {MONTHS.map((m) => (
+                        <option key={m} value={m}>
+                          {m} 月
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      className={selectCls(errors.birth ? "border-error" : "")}
+                      value={st.birthDate?.day ?? 1}
+                      disabled={locked}
+                      onChange={(e) => patchBirth(idx, { day: +e.target.value })}
+                    >
+                      {DAYS.map((d) => (
+                        <option key={d} value={d}>
+                          {d} 日
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                {/* 性别（选填） */}
+                <div className="min-w-0 flex-1">
+                  <label className="mb-1 block text-xs text-ink-soft">性别（选填）</label>
+                  <select
+                    className={selectCls("")}
+                    value={st.gender ?? ""}
+                    disabled={locked}
+                    onChange={(e) => updateStudent(idx, { gender: e.target.value || undefined })}
+                  >
+                    <option value="">不填</option>
+                    {GENDERS.map((g) => (
+                      <option key={g} value={g}>
+                        {g}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {/* 英语水平（选填） */}
+                <div className="min-w-0 flex-1">
+                  <label className="mb-1 block text-xs text-ink-soft">英语水平（选填）</label>
+                  <select
+                    className={selectCls("")}
+                    value={st.englishLevel ?? ""}
+                    disabled={locked}
+                    onChange={(e) => updateStudent(idx, { englishLevel: e.target.value || undefined })}
+                  >
+                    <option value="">不填</option>
+                    {ENGLISH_LEVELS.map((lv) => (
+                      <option key={lv} value={lv}>
+                        {lv}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              {idx > 0 && (
+            </div>
+            {idx > 0 && (
+              <div className="mt-3">
                 <button
                   type="button"
                   onClick={() => removeStudent(idx)}
                   disabled={locked}
-                  aria-label="移除该学生"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-stroke/70 text-ink-soft transition-colors hover:bg-error/5 hover:text-error disabled:opacity-50"
+                  className="text-xs text-ink-soft hover:text-error disabled:opacity-50"
                 >
-                  <X className="h-4 w-4" />
+                  删除该{childWord}
                 </button>
-              )}
-            </div>
+              </div>
+            )}
             {idx === 0 && errors.birth && <p className="mt-1 text-xs text-error">{errors.birth}</p>}
           </Section>
         ))}
-        {birthDates.length < 5 && (
+        {students.length < 5 && (
           <button
             type="button"
             onClick={addStudent}
             disabled={locked}
             className="flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary/80 disabled:opacity-50"
           >
-            <Plus className="h-4 w-4" /> 添加学生{`（${birthDates.length + 1}）`}
+            <Plus className="h-4 w-4" /> 添加学生{`（${students.length + 1}）`}
           </button>
         )}
       </div>
@@ -824,6 +886,18 @@ export function ApplicationForm({
         {errors.schools && <p className="text-xs text-error">{errors.schools}</p>}
       </Section>
 
+      {/* ⑦ 其它诉求（选填） */}
+      <Section title="其它诉求">
+        <textarea
+          value={extraRequests}
+          disabled={locked}
+          onChange={(e) => setExtraRequests(e.target.value)}
+          rows={3}
+          placeholder="可补充其它信息"
+          className="w-full resize-none rounded-xl border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft"
+        />
+      </Section>
+
       {/* 底部三态 */}
       <div className="flex items-center gap-3 border-t border-stroke/70 px-1 py-6">
         <button
@@ -860,8 +934,9 @@ export function ApplicationForm({
       {generatedItem && (
         <EmailTemplateModal
           item={generatedItem}
-          onClose={() => {
+          onClose={(subject, body) => {
             const id = generatedItem.id;
+            updateApplication(id, { emailSubject: subject, emailBody: body });
             setGeneratedItem(null);
             finish(id);
           }}

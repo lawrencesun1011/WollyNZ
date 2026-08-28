@@ -779,7 +779,7 @@ export function AccommodationForm({
                 step={50}
                 value={form.budgetMin}
                 disabled={locked}
-                onChange={(e) => setField("budgetMin", e.target.value)}
+                onChange={(e) => setField("budgetMin", Number(e.target.value))}
                 placeholder="下限"
                 className={inputCls(errors.budget)}
               />
@@ -790,7 +790,7 @@ export function AccommodationForm({
                 step={50}
                 value={form.budgetMax}
                 disabled={locked}
-                onChange={(e) => setField("budgetMax", e.target.value)}
+                onChange={(e) => setField("budgetMax", Number(e.target.value))}
                 placeholder="上限"
                 className={inputCls(errors.budgetMax || errors.budget)}
               />

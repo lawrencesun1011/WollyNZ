@@ -44,6 +44,9 @@ const HOT_REGIONS = {
 };
 
 /* 中文城市名 → 数据英文 city（多个中文可映射到同一英文） */
+/* 奥克兰热门子区：在奥克兰下拉中对这些项附加红色火苗标志 */
+const HOT_AUCKLAND_CHILDREN = new Set(["奥克兰-北岸", "奥克兰-东区", "奥克兰-中区"]);
+
 const CITY_MAP: Record<string, string> = {
   奥克兰: "Auckland",
   汉密尔顿: "Hamilton",
@@ -693,6 +696,11 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
                                   }`}
                                 >
                                   {child.replace("奥克兰-", "")}
+                                  {HOT_AUCKLAND_CHILDREN.has(child) && (
+                                    <span className="ml-1 inline-block rounded bg-red-500 px-1 py-0.5 text-[10px] font-bold leading-none text-white">
+                                      HOT
+                                    </span>
+                                  )}
                                 </button>
                               );
                             })}
