@@ -98,6 +98,71 @@ function parseEceEqi(x) {
   return undefined; // 其它值 -> 丢弃
 }
 
+// ECE 源数据的 suburb 命名与中小学不一致（如 "Mt Eden" / "Mount Eden"、
+// "Botany" / "Botany Downs"），统一规范化为中小学（SchoolFrontend）所用的
+// 同一套 suburb 字典，确保「奥克兰-其它」、各子区筛选与中小学对齐。
+// 键为 ECE 原始 suburb（大小写/空格不敏感匹配），值为规范名。
+const ECE_SUBURB_ALIAS: Record<string, string> = {
+  // 同一地点、命名不同 -> 规范名
+  "Mt Eden": "Mount Eden",
+  "Mt Roskill": "Mount Roskill",
+  "Mt Wellington": "Mount Wellington",
+  "Mt Albert": "Mount Albert",
+  "Botany": "Botany Downs",
+  "Glenfield North": "Glenfield",
+  "Northcote Central": "Northcote",
+  "Northcote Point": "Northcote",
+  "Clendon": "Clendon Park",
+  "Manurewa East": "Manurewa",
+  "Papakura Central": "Papakura",
+  "Papakura East": "Papakura",
+  "Auckland Central": "Auckland CBD",
+  // 属北岸但中小学字典无同名项 -> 归入北岸代表 suburb
+  "Campbells Bay": "Murrays Bay",
+  "Narrow Neck": "Devonport",
+  "North Harbour": "Forrest Hill",
+  "North Shore": "Takapuna",
+  "Northcross": "Murrays Bay",
+  "Sunnynook": "Glenfield",
+  "Unsworth Heights": "Rosedale",
+  // 属东区（Howick 一带）-> 归入东区代表 suburb
+  "Cockle Bay": "Botany Downs",
+  "Golflands": "Botany Downs",
+  "Half Moon Bay": "Howick",
+  "Highland Park-Auckland": "Pakuranga",
+  "Huntington Park": "Pakuranga",
+  // 属中区 -> 归入中区代表 suburb
+  "Eden Terrace": "Grey Lynn",
+  "Morningside-Auckland": "Kingsland",
+  "Owairaka": "Mount Albert",
+  "Point England": "Panmure",
+  "St Johns": "Remuera",
+  "St Lukes": "Mount Albert",
+  "Mission Bay": "Kohimarama",
+  // 属南区 -> 归入南区代表 suburb
+  "Clover Park": "Manurewa",
+  "Conifer Grove": "Takanini",
+  // 属西区 -> 归入西区代表 suburb
+  "Sunnyvale-Auckland": "New Lynn",
+  // 奥克兰外围 / 其它 -> 归入中小学「其它」已有项
+  "Auckland Airport": "Auckland West",
+  "Beachlands": "Beachlands",
+  "Great Barrier Island": "Auckland West",
+  "Karaka": "Pukekohe West",
+  "Kawakawa Bay": "Pukekohe West",
+  "Manukau": "Manukau City",
+  "Maraetai": "Pukekohe West",
+  "Swanson": "Dairy Flat",
+  "Waitakere": "Dairy Flat",
+  "Wellsford": "Dairy Flat",
+};
+
+function normalizeEceSuburb(raw: string): string {
+  const s = (raw || "").trim();
+  if (!s) return s;
+  return ECE_SUBURB_ALIAS[s] ?? s;
+}
+
 function buildEceFrontend(raw) {
   const typ = (raw.Org_Type || "").trim();
   if (!KEEP_ECE_TYPE.includes(typ)) return null;
@@ -128,7 +193,7 @@ function buildEceFrontend(raw) {
     languageCN: "",
     enrolment: "",
     street: (raw.Add1_Line1 || "").trim(),
-    suburb: (raw.Add1_Suburb || "").trim(),
+    suburb: normalizeEceSuburb(raw.Add1_Suburb),
     city: (raw.Add1_City || "").trim(),
     territorial: (raw.Territorial_Authority || "").trim(),
     region: (raw.Education_Region || "").trim(),

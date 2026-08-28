@@ -62,14 +62,17 @@ export function EceExplorer({ initialSchools }: { initialSchools: SchoolFrontend
     [filtered, favoritesOnly, favSet]
   );
 
+  // 地图飞行目标：携带 city + suburb，使同一城市下不同区（北岸/中区/东区）切换时
+  // 也能改变 key，触发地图重新自适应到对应范围
   const flyCities = useMemo(
-    () =>
-      filters.cities.length
-        ? filters.cities
-        : filters.suburbs.length
-          ? [filters.hotRegion || "Auckland"]
-          : [],
-    [filters.cities, filters.suburbs, filters.hotRegion]
+    () => {
+      if (!filters.cities.length && !filters.suburbs.length) return [];
+      return [
+        ...(filters.cities.length ? filters.cities : ["Auckland"]),
+        ...filters.suburbs,
+      ];
+    },
+    [filters.cities, filters.suburbs]
   );
 
   const hasKeyword = filters.keyword.trim() !== "";

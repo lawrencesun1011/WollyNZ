@@ -91,16 +91,17 @@ export function SchoolsExplorer({
     [filtered, favoritesOnly, favSet]
   );
 
-  // 地图飞行目标：普通城市按城市名；奥克兰子区（北岸/中区/东区）携带 hotRegion
-  // 以区分三者，确保切换子区时地图重新飞行到对应范围
+  // 地图飞行目标：携带 city + suburb，使同一城市下不同区（北岸/中区/东区）切换时
+  // 也能改变 key，触发地图重新自适应到对应范围
   const flyCities = useMemo(
-    () =>
-      filters.cities.length
-        ? filters.cities
-        : filters.suburbs.length
-          ? [filters.hotRegion || "Auckland"]
-          : [],
-    [filters.cities, filters.suburbs, filters.hotRegion]
+    () => {
+      if (!filters.cities.length && !filters.suburbs.length) return [];
+      return [
+        ...(filters.cities.length ? filters.cities : ["Auckland"]),
+        ...filters.suburbs,
+      ];
+    },
+    [filters.cities, filters.suburbs]
   );
 
   // 搜索时：结果为全局匹配（不受地图范围影响），仍受其它筛选项影响。

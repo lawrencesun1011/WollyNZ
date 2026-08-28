@@ -22,13 +22,18 @@ const HOT_REGIONS = {
     labelEn: "NORTH ISLAND",
     cities: [
       "奥克兰",
-      "奥克兰-北岸",
-      "奥克兰-东区",
-      "奥克兰-中区",
       "汉密尔顿",
       "惠灵顿",
       "陶朗加",
       "北帕默斯顿",
+    ],
+    aucklandChildren: [
+      "奥克兰-北岸",
+      "奥克兰-东区",
+      "奥克兰-中区",
+      "奥克兰-南区",
+      "奥克兰-西区",
+      "奥克兰-其它",
     ],
   },
   south: {
@@ -59,19 +64,32 @@ const SUBURB_REGIONS: Record<string, string[]> = {
   ],
   "奥克兰-东区": [
     "Botany Downs", "Bucklands Beach", "Dannemora", "East Tamaki", "Farm Cove",
-    "Flat Bush", "Howick", "Howick South", "Howick West", "Pakuranga", "Shelly Park",
+    "Flat Bush", "Howick", "Howick South", "Howick West", "Pakuranga", "Pakuranga Heights", "Shelly Park",
   ],
   "奥克兰-中区": [
-    "Auckland CBD", "Balmoral", "Blockhouse Bay", "Ellerslie", "Epsom",
+    "Auckland CBD", "Balmoral", "Ellerslie", "Epsom",
     "Freemans Bay", "Glen Innes", "Glendowie", "Grafton", "Greenlane",
     "Grey Lynn", "Herne Bay", "Hillsborough", "Kingsland", "Kohimarama",
     "Lynfield", "Meadowbank", "Mount Albert", "Mt Albert", "Mount Eden",
     "Mount Roskill", "Mount Wellington", "Mt Wellington", "Newmarket",
-    "Newton", "One Tree Hill", "Onehunga", "Orakei", "Panmure", "Parnell",
+    "Newton", "New Windsor", "One Tree Hill", "Onehunga", "Orakei", "Panmure", "Parnell",
     "Penrose", "Point Chevalier", "Ponsonby", "Remuera", "Royal Oak",
     "Sandringham", "St Heliers", "Stonefields", "Three Kings", "Waterview",
     "Western Springs", "Westmere",
   ],
+  "奥克兰-南区": [
+    "Clendon Park", "Favona", "Hingaia", "Mangere", "Mangere Bridge", "Mangere East",
+    "Manukau Central", "Manukau City", "Mangere Central", "Manurewa", "Otahuhu", "Otara", "Papakura",
+    "Papatoetoe", "Randwick Park", "Takanini", "Wattle Downs",
+    "Weymouth", "Wiri",
+  ],
+  "奥克兰-西区": [
+    "Avondale", "Blockhouse Bay", "Glen Eden", "Glendene", "Green Bay", "Henderson", "Kelston",
+    "Laingholm", "Massey", "New Lynn", "Oratia", "Ranui", "Te Atatu",
+    "Te Atatu Peninsula", "Te Atatu South", "Te Atatu North", "Titirangi", "West Harbour",
+    "Westgate", "Hobsonville", "Hobsonville Point", "Whenuapai",
+  ],
+  "奥克兰-其它": [],
 };
 
 const ECE_TYPE_OPTIONS = [
@@ -255,8 +273,169 @@ function FilterCity({
   );
 }
 
+/* ── 奥克兰 suburb 多选（区）── */
+function FilterDistrict({
+  options,
+  suburbs,
+  onChange,
+  disabled,
+  groups,
+}: {
+  options: string[];
+  suburbs: string[];
+  onChange: (v: string[]) => void;
+  disabled?: boolean;
+  groups?: { label: string; suburbs: string[] }[];
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  function toggle(sub: string) {
+    if (suburbs.includes(sub)) {
+      onChange(suburbs.filter((s) => s !== sub));
+    } else {
+      onChange([...suburbs, sub]);
+    }
+  }
+
+  function toggleGroup(subs: string[]) {
+    const allOn = subs.length > 0 && subs.every((s) => suburbs.includes(s));
+    if (allOn) onChange(suburbs.filter((s) => !subs.includes(s)));
+    else onChange([...new Set([...suburbs, ...subs])]);
+  }
+
+  const summary =
+    suburbs.length === 0
+      ? disabled
+        ? "请先选城市"
+        : "任意"
+      : suburbs.slice(0, 2).join("、") + (suburbs.length > 2 ? ` 等${suburbs.length}个` : "");
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && setOpen(!open)}
+        title={disabled ? "请先选择城市" : undefined}
+        className={`${filterBtn} ${suburbs.length > 0 ? "border-primary/30 text-primary font-medium" : ""} ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
+      >
+        <span className="text-xs text-caption">区</span>
+        <span className="max-w-[150px] truncate">{summary}</span>
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+        {suburbs.length > 0 && (
+          <X
+            className="h-3 w-3.5 ml-0.5 cursor-pointer text-caption hover:text-error"
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange([]);
+            }}
+          />
+        )}
+      </button>
+      {open && !disabled && (
+        <div className="absolute left-0 top-full z-50 mt-1 max-h-64 w-[240px] overflow-auto rounded-xl border border-stroke bg-white p-2 shadow-lg">
+          {groups ? (
+            groups.map((g) => {
+              const allOn = g.suburbs.length > 0 && g.suburbs.every((s) => suburbs.includes(s));
+              const someOn = g.suburbs.some((s) => suburbs.includes(s));
+              return (
+                <div key={g.label} className="mb-1.5 last:mb-0">
+                  <label className="flex cursor-pointer items-center gap-2 px-1 py-1">
+                    <input
+                      type="checkbox"
+                      checked={allOn}
+                      ref={(el) => { if (el) el.indeterminate = !allOn && someOn; }}
+                      onChange={() => toggleGroup(g.suburbs)}
+                      className="h-4 w-4 rounded border-stroke accent-primary"
+                    />
+                    <span className="text-xs font-semibold text-primary">{g.label}</span>
+                    <span className="text-[11px] text-caption">{g.suburbs.length}</span>
+                  </label>
+                  <div className="pl-3">
+                    {g.suburbs.map((sub) => (
+                      <label key={sub} className="flex cursor-pointer items-center gap-2.5 py-1 text-sm text-ink-soft">
+                        <input
+                          type="checkbox"
+                          checked={suburbs.includes(sub)}
+                          onChange={() => toggle(sub)}
+                          className="h-4 w-4 rounded border-stroke accent-primary"
+                        />
+                        {sub}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            options.map((sub) => (
+              <label key={sub} className="flex cursor-pointer items-center gap-2.5 py-1.5 text-sm text-ink-soft">
+                <input
+                  type="checkbox"
+                  checked={suburbs.includes(sub)}
+                  onChange={() => toggle(sub)}
+                  className="h-4 w-4 rounded border-stroke accent-primary"
+                />
+                {sub}
+              </label>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function EceFilterBar({ schools, filters, onChange, onClear, active }: Props) {
   const cities = useMemo(() => uniqueSorted(schools, "city"), [schools]);
+  // 区跟随城市：未选城市时列出全部 suburb，选中城市后只列该城市的 suburb
+  const suburbOptions = useMemo(
+    () =>
+      uniqueSorted(
+        schools.filter((s) => !filters.cities.length || filters.cities.includes(s.city)),
+        "suburb"
+      ),
+    [schools, filters.cities]
+  );
+
+  // 奥克兰-其它：属于奥克兰、但不在北岸/东区/中区/南区/西区 的其余 suburb
+  const aucklandOtherSuburbs = useMemo(() => {
+    const named = new Set(Object.values(SUBURB_REGIONS).flat());
+    return Array.from(
+      new Set(
+        schools
+          .filter((s) => s.city === "Auckland" && !named.has(s.suburb))
+          .map((s) => s.suburb)
+      )
+    ).sort();
+  }, [schools]);
+
+  // 城市为奥克兰时，区下拉按子区分组：北岸、东区、中区、南区、西区、其它
+  const aucklandGroups = useMemo(() => {
+    if (filters.cities.length !== 1 || filters.cities[0] !== "Auckland") return undefined;
+    const named = new Set(Object.values(SUBURB_REGIONS).flat());
+    const opts = new Set(suburbOptions);
+    const order = ["奥克兰-北岸", "奥克兰-东区", "奥克兰-中区", "奥克兰-南区", "奥克兰-西区", "奥克兰-其它"];
+    return order
+      .map((region) => ({
+        label: region.replace("奥克兰-", ""),
+        suburbs: (
+          region === "奥克兰-其它"
+            ? [...opts].filter((s) => !named.has(s))
+            : SUBURB_REGIONS[region].filter((s) => opts.has(s))
+        ).sort(),
+      }))
+      .filter((g) => g.suburbs.length > 0);
+  }, [filters.cities, suburbOptions]);
 
   function setField<K extends keyof Filters>(key: K, value: Filters[K]) {
     onChange({ ...filters, [key]: value });
@@ -265,11 +444,13 @@ export function EceFilterBar({ schools, filters, onChange, onClear, active }: Pr
   function handleHotCity(cityCN: string) {
     const isOn = filters.hotRegion === cityCN;
     if (cityCN in SUBURB_REGIONS) {
+      // 奥克兰子区（含"其它"）：按 suburb 筛选，并锁定城市为奥克兰
+      const list = cityCN === "奥克兰-其它" ? aucklandOtherSuburbs : SUBURB_REGIONS[cityCN];
       onChange({
         ...filters,
         hotRegion: isOn ? "" : cityCN,
-        cities: [],
-        suburbs: isOn ? [] : SUBURB_REGIONS[cityCN],
+        cities: isOn ? [] : ["Auckland"],
+        suburbs: isOn ? [] : list,
       });
     } else {
       const cityEn = CITY_MAP[cityCN] || cityCN;
@@ -283,6 +464,15 @@ export function EceFilterBar({ schools, filters, onChange, onClear, active }: Pr
   }
 
   const activeHot = filters.hotRegion || "";
+  const [expandedAuckland, setExpandedAuckland] = useState(false);
+  const aucklandRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    function onDoc(e: MouseEvent) {
+      if (aucklandRef.current && !aucklandRef.current.contains(e.target as Node)) setExpandedAuckland(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
 
   return (
     <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
@@ -297,8 +487,54 @@ export function EceFilterBar({ schools, filters, onChange, onClear, active }: Pr
                 {HOT_REGIONS.north.label}{" "}
                 <span className="font-normal normal-case tracking-normal text-caption">{HOT_REGIONS.north.labelEn}</span>
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {HOT_REGIONS.north.cities.map((city) => {
+                  if (city === "奥克兰") {
+                    const isChild = activeHot.startsWith("奥克兰-");
+                    const label = isChild ? activeHot : "奥克兰";
+                    const on = activeHot === "奥克兰" || isChild;
+                    return (
+                      <div key="auckland-group" className="relative" ref={aucklandRef}>
+                        <button type="button"
+                          onClick={() => setExpandedAuckland((v) => !v)}
+                          className={`inline-flex items-center gap-1 rounded-full border px-4 py-1.5 text-sm font-medium transition-all ${
+                            on
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-stroke bg-white text-black hover:border-primary/40 hover:text-primary"
+                          }`}
+                        >
+                          {label}
+                          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${expandedAuckland ? "rotate-180" : ""}`} />
+                        </button>
+                        {expandedAuckland && (
+                          <div className="absolute left-0 top-full z-50 mt-1 w-[170px] rounded-xl border border-stroke bg-white p-2 shadow-lg">
+                            <button type="button"
+                              onClick={() => { handleHotCity("奥克兰"); setExpandedAuckland(false); }}
+                              className={`mb-1 block w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-all ${
+                                activeHot === "奥克兰" ? "bg-primary/10 text-primary" : "text-black hover:bg-primary/5 hover:text-primary"
+                              }`}
+                            >
+                              全部奥克兰
+                            </button>
+                            <div className="my-1 h-px bg-stroke" />
+                            {HOT_REGIONS.north.aucklandChildren.map((child) => {
+                              const cOn = activeHot === child;
+                              return (
+                                <button key={child} type="button"
+                                  onClick={() => { handleHotCity(child); setExpandedAuckland(false); }}
+                                  className={`block w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-all ${
+                                    cOn ? "bg-primary/10 text-primary" : "text-black hover:bg-primary/5 hover:text-primary"
+                                  }`}
+                                >
+                                  {child.replace("奥克兰-", "")}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
                   const on = activeHot === city;
                   return (
                     <button key={city} type="button" onClick={() => handleHotCity(city)}
@@ -367,6 +603,14 @@ export function EceFilterBar({ schools, filters, onChange, onClear, active }: Pr
 
           <div className="flex flex-wrap items-center gap-3">
             <FilterCity cities={filters.cities} allCities={cities} onChange={(v) => onChange({ ...filters, hotRegion: "", suburbs: [], cities: v })} />
+
+            <FilterDistrict
+              options={suburbOptions}
+              groups={aucklandGroups}
+              suburbs={filters.suburbs}
+              disabled={filters.cities.length === 0}
+              onChange={(v) => onChange({ ...filters, hotRegion: "", suburbs: v })}
+            />
 
             <FilterSelect
               label="学校类型"

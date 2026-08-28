@@ -172,16 +172,14 @@ function matches(s: SchoolFrontend, f: Filters): boolean {
   }
   if (f.types.length && !typeMatches(s, f.types)) return false;
   if (f.levels.length && !f.levels.includes(s.level)) return false;
-  // 城市：cities 命中 或 suburbs 命中 任一即满足
-  // 注意：suburbs 仅用于奥克兰子区，须同时限定 city === "Auckland"，
-  // 避免其它地区（如惠灵顿 Lower Hutt 的 Belmont）的同名 suburb 误匹配
-  if (f.cities.length || f.suburbs.length) {
-    const cityOk = f.cities.length ? f.cities.includes(s.city) : false;
+  // 城市与区（suburb）：区跟随城市；城市命中即满足，若同时选了区则进一步限定到该区
+  const cityOk = !f.cities.length || f.cities.includes(s.city);
+  if (!cityOk) return false;
+  if (f.suburbs.length) {
     const suburbOk =
-      f.suburbs.length && s.city === "Auckland"
-        ? f.suburbs.includes(s.suburb)
-        : false;
-    if (!cityOk && !suburbOk) return false;
+      f.suburbs.includes(s.suburb) &&
+      (f.cities.length === 0 || f.cities.includes(s.city));
+    if (!suburbOk) return false;
   }
   if (f.authorities.length && !authorityMatches(s, f.authorities)) return false;
   if (f.urbanRural.length && !f.urbanRural.includes(s.urbanRural)) return false;

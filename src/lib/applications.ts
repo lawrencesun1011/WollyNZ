@@ -17,6 +17,8 @@ import {
   saveCloudProfile,
   type UserProfile,
 } from "./user-data";
+import { getSchoolsSnapshot, preloadSchools } from "./schools-store";
+import { getEceSnapshot, loadEceSnapshot } from "./ece-store";
 
 export type ApplicationCategory = "school" | "ece";
 
@@ -156,6 +158,80 @@ function normalizeApplication(raw: unknown): ApplicationItem | null {
   return { ...item, category, status } as ApplicationItem;
 }
 
+type SchoolRef = { id: string; suburb: string; city: string };
+
+/** 由学校/ECE 前端数据构建「名称 → {id, suburb, city}」映射，用于旧数据补齐。 */
+function buildLookups(): { school: Map<string, SchoolRef>; ece: Map<string, SchoolRef> } {
+  const school = new Map<string, SchoolRef>();
+  for (const s of getSchoolsSnapshot() ?? []) {
+    if (s.name) school.set(s.name, { id: s.id, suburb: s.suburb ?? "", city: s.city ?? "" });
+  }
+  const ece = new Map<string, SchoolRef>();
+  for (const s of getEceSnapshot() ?? []) {
+    if (s.name) ece.set(s.name, { id: s.id, suburb: s.suburb ?? "", city: s.city ?? "" });
+  }
+  return { school, ece };
+}
+
+/**
+ * 归一化一条申请的意向学校：
+ * - 补齐 id（按 name 命中学校数据）
+ * - city 统一为 "suburb, city"（旧数据为 suburb 与 city 直接黏连）
+ * 无法命中或无变化则返回 null（避免无谓回写）。
+ */
+function normalizeIntendedSchoolsForItem(
+  item: ApplicationItem,
+  lookups: { school: Map<string, SchoolRef>; ece: Map<string, SchoolRef> }
+): ApplicationItem | null {
+  if (!item.intendedSchools || item.intendedSchools.length === 0) return null;
+  const map = item.category === "ece" ? lookups.ece : lookups.school;
+  let changed = false;
+  const next = item.intendedSchools.map((s) => {
+    const hit = map.get(s.name);
+    const idealId = hit?.id;
+    const idealCity = hit ? [hit.suburb, hit.city].filter(Boolean).join(", ") : undefined;
+    if (s.id === idealId && s.city === idealCity) return s;
+    changed = true;
+    return { id: idealId ?? s.id, name: s.name, city: idealCity ?? s.city, email: s.email };
+  });
+  return changed ? { ...item, intendedSchools: next } : null;
+}
+
+/** 确保迁移所需的学校/ECE 数据已加载（按需触发一次）。 */
+async function ensureLookupsReady(list: ApplicationItem[]) {
+  const needSchool = list.some((it) => it.category === "school");
+  const needEce = list.some((it) => it.category === "ece");
+  if (needSchool && !getSchoolsSnapshot()) {
+    try {
+      await preloadSchools();
+    } catch {
+      /* 忽略 */
+    }
+  }
+  if (needEce && !getEceSnapshot()) {
+    try {
+      await loadEceSnapshot();
+    } catch {
+      /* 忽略 */
+    }
+  }
+}
+
+/** 对一批申请做数据迁移：返回迁移后的列表，并把变化的条目回写云端。 */
+function migrateList(list: ApplicationItem[]): ApplicationItem[] {
+  const lookups = buildLookups();
+  const changed: ApplicationItem[] = [];
+  const out = list.map((it) => {
+    const m = normalizeIntendedSchoolsForItem(it, lookups);
+    if (m) changed.push(m);
+    return m ?? it;
+  });
+  if (changed.length && uid) {
+    changed.forEach((m) => pushCloud(m));
+  }
+  return out;
+}
+
 function loadLS(): ApplicationItem[] {
   if (typeof window === "undefined") return [];
   try {
@@ -245,7 +321,7 @@ export function addApplication(
       }
     }
   }
-  if (uid) saveCloudApplication(item).catch(() => {});
+  pushCloud(item);
   return item;
 }
 
@@ -265,43 +341,88 @@ export function updateApplication(id: string, patch: Partial<ApplicationItem>): 
     profileCache = { province: updated.province, city: updated.city };
     if (uid) saveCloudProfile(profileCache).catch(() => {});
   }
-  if (uid) saveCloudApplication(updated).catch(() => {});
+  pushCloud(updated);
   return updated;
 }
 
 export function removeApplication(id: string) {
   items = items.filter((a) => a.id !== id);
   persist();
-  if (uid) deleteCloudApplication(id).catch(() => {});
+  if (uid) deleteCloudApplication(id).then(() => markSynced(uid)).catch(() => {});
 }
 
-/** 登录后设置 uid 并首合并：云端有则以云端为准，否则把本地申请上传云端。 */
-export function setApplicationsUser(next: string | null) {
+// 每用户「是否已同步到云端」标记：用于区分「首次同步」与「云端被删除」。
+// 云端有数据 / 成功写云端 → 置位；云端为空且已置位 → 视为被有意清空，不再回传本地。
+const APP_SYNCED_PREFIX = "wollyn:schools:apps:synced:";
+function markSynced(u: string) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(APP_SYNCED_PREFIX + u, "1");
+  } catch {
+    /* 忽略 */
+  }
+}
+function isSynced(u: string): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(APP_SYNCED_PREFIX + u) === "1";
+  } catch {
+    return false;
+  }
+}
+/** 写云端并置位同步标记（失败不影响本地）。 */
+function pushCloud(item: ApplicationItem) {
+  if (!uid) return;
+  saveCloudApplication(item).then(() => markSynced(uid)).catch(() => {});
+}
+
+/**
+ * 登录后设置 uid 并首合并：云端有则以云端为准并做数据迁移，否则把本地申请上传云端。
+ * 迁移会按学校名补齐 id、把 city 规范为 "suburb, city"，并把变化的条目回写云端。
+ */
+export async function setApplicationsUser(next: string | null) {
   uid = next;
   if (!next) return;
-  Promise.all([fetchCloudApplications(), fetchCloudProfile()])
-    .then(([cloud, profile]) => {
-      if (cloud && cloud.length > 0) {
-        items = cloud
-          .map(normalizeApplication)
-          .filter((a): a is ApplicationItem => a !== null);
+  try {
+    const [cloud, profile] = await Promise.all([
+      fetchCloudApplications(),
+      fetchCloudProfile(),
+    ]);
+    if (cloud && cloud.length > 0) {
+      const list = cloud
+        .map(normalizeApplication)
+        .filter((a): a is ApplicationItem => a !== null);
+      await ensureLookupsReady(list);
+      items = migrateList(list);
+      persist();
+      markSynced(next);
+    } else if (items.length > 0) {
+      if (isSynced(next)) {
+        // 曾同步过但云端已空（被后台删除）→ 尊重删除，清空本地，不再回传
+        items = [];
         persist();
-        subs.forEach((cb) => cb(items));
-      } else if (items.length > 0) {
-        items.forEach((it) => saveCloudApplication(it).catch(() => {}));
+      } else {
+        // 首次同步：本地离线数据上传云端
+        await ensureLookupsReady(items);
+        items = migrateList(items);
+        persist();
+        items.forEach((it) => pushCloud(it));
+        markSynced(next);
       }
-      if (profile) profileCache = profile;
-      else {
-        // 未登录时本地可能缓存了 profile
-        try {
-          const raw = window.localStorage.getItem("wollyn:schools:profile");
-          if (raw) profileCache = JSON.parse(raw);
-        } catch {
-          /* 忽略 */
-        }
+    }
+    if (profile) profileCache = profile;
+    else {
+      // 未登录时本地可能缓存了 profile
+      try {
+        const raw = window.localStorage.getItem("wollyn:schools:profile");
+        if (raw) profileCache = JSON.parse(raw);
+      } catch {
+        /* 忽略 */
       }
-    })
-    .catch(() => {});
+    }
+  } catch {
+    /* 忽略 */
+  }
 }
 
 export function useApplications(): ApplicationItem[] {

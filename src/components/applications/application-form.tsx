@@ -402,10 +402,10 @@ export function ApplicationForm({
     finish(id);
   }
 
-  function addSchool(s: { name: string; city?: string; email?: string }) {
+  function addSchool(s: { id?: string; name: string; city?: string; email?: string }) {
     const n = s.name.trim();
     if (!n || schools.some((x) => x.name === n)) return;
-    setSchools((p) => [...p, { name: n, city: s.city, email: s.email }]);
+    setSchools((p) => [...p, { id: s.id, name: n, city: s.city, email: s.email }]);
     setSchoolInput("");
     setSchoolSuggest([]);
     setSchoolSuggestOpen(false);
@@ -422,7 +422,7 @@ export function ApplicationForm({
       .filter((e) => e.kind === (ece ? "ece" : "school"))
       .forEach((e) => {
         const s = map.get(e.id);
-        if (s) addSchool({ name: s.name, city: [s.suburb, s.city].filter(Boolean).join("") || undefined, email: s.email });
+        if (s) addSchool({ id: s.id, name: s.name, city: [s.suburb, s.city].filter(Boolean).join(", ") || undefined, email: s.email });
       });
   }
 
@@ -778,7 +778,7 @@ export function ApplicationForm({
                     key={s.id}
                     type="button"
                     disabled={locked}
-                    onClick={() => addSchool({ name: s.name, city: [s.suburb, s.city].filter(Boolean).join("") || undefined, email: s.email })}
+                    onClick={() => addSchool({ id: s.id, name: s.name, city: [s.suburb, s.city].filter(Boolean).join(", ") || undefined, email: s.email })}
                     className="block w-full px-3 py-2 text-left text-sm text-ink transition-colors hover:bg-primary/5 disabled:opacity-50"
                   >
                     {s.name}
