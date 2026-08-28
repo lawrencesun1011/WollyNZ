@@ -208,7 +208,7 @@ export function SchoolMap({
       maxZoom: 19,
     });
 
-    // ── 卫星底图组：Esri 影像 + CARTO 透明标注 ──
+    // ── 卫星底图组：Esri 影像 + Esri 透明标注 ──
     const satBase = L.tileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       {
@@ -218,22 +218,19 @@ export function SchoolMap({
       }
     );
     const satLabels = L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png",
+      "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
       {
         maxZoom: 19,
-        subdomains: "abcd",
-        attribution:
-          "&copy; OpenStreetMap contributors &copy; CARTO",
+        attribution: "Tiles &copy; Esri",
       }
     );
 
-    // ── 街道底图组：CARTO Voyager（默认） ──
+    // ── 街道底图组：OpenStreetMap（默认） ──
     const streetBase = L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       {
         maxZoom: 19,
-        subdomains: "abcd",
-        attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+        attribution: "&copy; OpenStreetMap contributors",
       }
     );
 
