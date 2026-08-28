@@ -26,7 +26,7 @@
 | 包管理 | npm |
 | 部署 | **EdgeOne Makers**（支持 Next.js 构建产物） |
 | 图标 | lucide-react |
-| 地图 | Leaflet 1.9 + leaflet.markercluster（OSM 免费瓦片） |
+| 地图 | MapLibre GL JS 5 + OpenFreeMap（免 key 矢量瓦片）；卫星图用 Esri World Imagery 栅格 |
 | 图表 | Chart.js 4（类型饼图 / 地区柱图） |
 
 设计风格：**新西兰自然风 + Glassmorphism 轻玻璃 + 清新渐变（teal 主色 #0E7C7B/#1B9AAA/#2BB1A8）**，Premium 且响应式。
@@ -117,17 +117,16 @@ src/
       school-modal.tsx      详情弹层（含族裔条形图）
       ethnic-bar.tsx        族裔占比进度条
       compare-bar.tsx       底部对比条
-      school-map.tsx        Leaflet 地图（dynamic ssr:false，聚类/联动）
+      school-map.tsx        MapLibre GL JS 地图（dynamic ssr:false，聚合/联动）
       charts.tsx            Chart.js 学段饼图 + 地区柱图
   lib/
     types.ts                SchoolFrontend / Filters / Stats 等类型
     data.ts                 getSchoolFrontendList / getDataMeta（读 data/）
     filters.ts              过滤/排序/统计/族裔/配色工具
     data-sources.ts         数据源 resourceId 与 JSON 端点常量
+    maplibre-shared.ts      地图公共层：OpenFreeMap/Esri 底图、marker 与聚合构造、屏幕空间聚合
   scripts/
     fetch-data.mjs          全量拉取 + 中小学清洗过滤，输出 data/*.json
-  types/
-    leaflet-markercluster.d.ts   markercluster 类型声明
 data/                        （gitignore 忽略，由 fetch:data 生成）
   schools-frontend.json     过滤后前端数据（约 2465 所）
   schools.json / ece.json   原始落盘

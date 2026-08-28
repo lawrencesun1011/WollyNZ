@@ -140,17 +140,326 @@ textarea.input {
   resize: vertical;
 }
 
+/* ============================================================
+   地图（OpenFreeMap + MapLibre GL JS）
+   两个地图组件（中小学 / 幼儿园）共用同一套 marker、聚合、popup 样式，
+   统一放在这里，避免在每个组件里重复注入 <style>。
+   ============================================================ */
+
 /* 地图容器层级控制，避免筛选下拉被地图覆盖 */
-.leaflet-container {
+.maplibregl-map {
   z-index: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
   font-family: var(--font-sans);
   border-radius: 1rem;
 }
 
-.leaflet-popup-content-wrapper {
+/* MapLibre 控件（缩放按钮 / 归属信息）与站点圆角风格统一 */
+.maplibregl-ctrl-group {
+  overflow: hidden;
+  border-radius: 0.6rem;
+  box-shadow: 0 2px 8px rgba(20, 42, 51, 0.12);
+}
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  border-radius: 0.6rem;
+}
+
+/* ── marker ──
+   结构：.map-pin-wrap（26×26 定位基准）
+           ├ .map-pin（可缩放的图形区，hover / active 时 scale）
+           └ .map-pin-tip（悬停时显示的名称气泡，替代 Leaflet tooltip）
+   注意：这里显式写出 position/top/left，避免与 maplibre-gl.css 的
+   .maplibregl-marker 规则因样式加载顺序不同而被覆盖。 */
+.map-pin-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+}
+
+.map-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.map-pin svg {
+  display: block;
+  filter: drop-shadow(0 1px 3px rgba(31, 45, 43, 0.4));
+}
+
+/* 注意：层级提升（盖过相邻 marker）由 JS 在 .maplibregl-marker 容器上设置，
+   .map-pin 本身不加 z-index——因为它不建立层叠上下文。 */
+.map-pin.is-hover,
+.map-pin.is-active {
+  transform: scale(1.6);
+}
+.map-pin.is-hover svg .shape,
+.map-pin.is-active svg .shape {
+  stroke: #f2a541;
+  stroke-width: 2.2;
+}
+.map-pin.is-hover svg,
+.map-pin.is-active svg {
+  filter: drop-shadow(0 2px 6px rgba(31, 45, 43, 0.55));
+}
+
+.map-pin-tip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #2e9e8c;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(46, 158, 140, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  transform: translateX(-50%);
+}
+.map-pin-wrap:hover .map-pin-tip,
+.map-pin.is-hover + .map-pin-tip,
+.map-pin.is-active + .map-pin-tip {
+  opacity: 1;
+}
+.map-pin-tip::after {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border: 4px solid transparent;
+  border-top-color: #2e9e8c;
+  content: "";
+  transform: translateX(-50%);
+}
+
+/* ── 聚合气泡（替代 leaflet.markercluster 的 MarkerCluster.Default.css，
+   颜色改用站点主色薄荷绿） ── */
+.map-cluster {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+.map-cluster--sm {
+  width: 34px;
+  height: 34px;
+  font-size: 12px;
+  background: rgba(46, 158, 140, 0.6);
+  box-shadow: 0 0 0 6px rgba(46, 158, 140, 0.2);
+}
+.map-cluster--md {
+  width: 44px;
+  height: 44px;
+  font-size: 13px;
+  background: rgba(46, 158, 140, 0.7);
+  box-shadow: 0 0 0 8px rgba(46, 158, 140, 0.2);
+}
+.map-cluster--lg {
+  width: 54px;
+  height: 54px;
+  font-size: 14px;
+  background: rgba(46, 158, 140, 0.8);
+  box-shadow: 0 0 0 10px rgba(46, 158, 140, 0.2);
+}
+
+/* ── popup 卡片 ── */
+.school-popup .maplibregl-popup-content {
+  padding: 12px 14px;
   border-radius: 0.75rem;
+  box-shadow: 0 8px 24px rgba(20, 42, 51, 0.14);
+}
+.school-popup .maplibregl-popup-close-button {
+  top: 2px;
+  right: 6px;
+  padding: 0 4px;
+  font-size: 18px;
+  line-height: 1;
+  color: #94a3b8;
+  background: transparent;
+}
+.school-popup .maplibregl-popup-close-button:hover {
+  color: #2e9e8c;
+  background: transparent;
+}
+
+.popup-card {
+  width: 260px;
+  font-family: inherit;
+}
+.popup-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.popup-card__title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #000;
+}
+.popup-card__loc {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #888;
+}
+.popup-ic {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: #2e9e8c;
+}
+.popup-ic svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.popup-ic--title {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+.popup-ic--loc {
+  width: 12px;
+  height: 12px;
+  color: #94a3b8;
+}
+.popup-ic--r {
+  margin-left: 3px;
+}
+.popup-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.popup-chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(46, 158, 140, 0.08);
+  color: #2e9e8c;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.popup-card__actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+.popup-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease;
+}
+.popup-btn--solid {
+  background: #2e9e8c;
+  color: #fff;
+  border: 1px solid #2e9e8c;
+  box-shadow: 0 1px 2px rgba(46, 158, 140, 0.15);
+}
+.popup-btn--solid:hover {
+  background: #258a7a;
+}
+.popup-btn--compare {
+  background: #fff;
+  color: #6b7280;
+  border: 1px solid rgba(46, 158, 140, 0.2);
+}
+.popup-btn--compare:hover {
+  background: rgba(46, 158, 140, 0.05);
+  color: #2e9e8c;
+}
+.popup-btn--compare.is-on {
+  background: rgba(46, 158, 140, 0.05);
+  color: #2e9e8c;
+  border-color: #2e9e8c;
+}
+.popup-btn--favorite {
+  border: 1px solid #d1d5db;
+  color: #6b7280;
+}
+.popup-btn--favorite .popup-ic--fav {
+  width: 15px;
+  height: 15px;
+  color: #6b7280;
+}
+.popup-btn--favorite .popup-ic--fav svg path {
+  stroke: #6b7280;
+}
+.popup-btn--favorite.is-on {
+  background: #fef2f2;
+  color: #ef4444;
+  border-color: #ef4444;
+}
+.popup-btn--favorite.is-on .popup-ic--fav {
+  fill: #ef4444;
+  color: #ef4444;
+}
+.popup-btn--favorite.is-on .popup-ic--fav svg {
+  fill: #ef4444 !important;
+}
+.popup-btn--favorite.is-on .popup-ic--fav svg path {
+  stroke: #ef4444;
+}
+.popup-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+  border-radius: 3px;
+  background: #fff;
+}
+.popup-check .popup-ic {
+  width: 10px;
+  height: 10px;
+  color: transparent;
+}
+.popup-btn--compare.is-on .popup-check {
+  background: #2e9e8c;
+  border-color: #2e9e8c;
+}
+.popup-btn--compare.is-on .popup-check .popup-ic {
+  color: #fff;
 }
 
 /* 弹层动画 */
