@@ -4,36 +4,12 @@ export const metadata = {
   title: "加入社群 · GoalNZ",
 };
 
-// 二维码占位置：后续把 src 换成真实二维码图片即可（建议放在 /public 下）
-const QR_PLACEHOLDER =
-  "data:image/svg+xml;utf8," +
-  encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
-      <rect width="200" height="200" fill="#fff"/>
-      <rect x="10" y="10" width="50" height="50" fill="#0f766e"/>
-      <rect x="25" y="25" width="20" height="20" fill="#fff"/>
-      <rect x="140" y="10" width="50" height="50" fill="#0f766e"/>
-      <rect x="155" y="25" width="20" height="20" fill="#fff"/>
-      <rect x="10" y="140" width="50" height="50" fill="#0f766e"/>
-      <rect x="25" y="155" width="20" height="20" fill="#fff"/>
-      <g fill="#0f766e">
-        <rect x="80" y="20" width="12" height="12"/><rect x="104" y="20" width="12" height="12"/>
-        <rect x="80" y="44" width="12" height="12"/><rect x="128" y="44" width="12" height="12"/>
-        <rect x="80" y="80" width="12" height="12"/><rect x="116" y="80" width="12" height="12"/>
-        <rect x="152" y="80" width="12" height="12"/><rect x="80" y="116" width="12" height="12"/>
-        <rect x="104" y="116" width="12" height="12"/><rect x="140" y="116" width="12" height="12"/>
-        <rect x="168" y="140" width="12" height="12"/><rect x="80" y="152" width="12" height="12"/>
-        <rect x="116" y="168" width="12" height="12"/><rect x="152" y="168" width="12" height="12"/>
-      </g>
-    </svg>`
-  );
 
 const CARDS = [
   {
     icon: Users,
     title: "家长社群",
     desc: "扫码加入 GoalNZ 家长社群，和正在为孩子选校的爸妈们一起交流择校经验、学区动态与游学攻略，第一时间获取学校库更新提醒。",
-    qrNote: "长按或扫码加入社群",
   },
 ];
 
@@ -86,17 +62,16 @@ export default function CommunityPage() {
             </div>
 
             <div className="flex flex-col items-center">
-              <div className="rounded-2xl border border-dashed border-primary/25 bg-white/80 p-3 shadow-sm">
-                {/* 后续将 src 替换为真实二维码图片，例如 /qrcode-community.png */}
+              <div className="overflow-hidden rounded-2xl border border-primary/10 bg-white p-3 shadow-sm">
                 <img
-                  src={QR_PLACEHOLDER}
+                  src="/images/community/wechat-qrcode.png"
                   alt={`${title}二维码`}
                   width={200}
                   height={200}
                   className="h-[200px] w-[200px]"
                 />
               </div>
-              <p className="mt-3 text-xs text-ink-soft">{qrNote}</p>
+              <p className="mt-3 text-xs font-medium text-ink">{qrNote}</p>
             </div>
           </div>
         ))}
@@ -123,9 +98,9 @@ export default function CommunityPage() {
       <section className="mx-auto max-w-3xl px-5 pb-14 pt-10">
         <div className="service-panel flex flex-col items-center gap-2 rounded-3xl p-7 text-center">
           <CheckCircle2 className="h-7 w-7 text-primary" />
-          <p className="text-base font-medium text-ink">扫码后按提示加入，社群更容易保持有用</p>
+          <p className="text-base font-medium text-ink">扫码后按提示加入</p>
           <p className="max-w-xl text-sm leading-6 text-ink-soft">
-            二维码为占位图，正式上线前请替换为真实的家长社群二维码。
+            如果扫码失败，请刷新页面或联系我们。
           </p>
         </div>
       </section>
