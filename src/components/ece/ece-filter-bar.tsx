@@ -57,40 +57,52 @@ const CITY_MAP: Record<string, string> = {
   但尼丁: "Dunedin",
 };
 
+// 幼儿园专属划分：基于 ECE 原始 suburb，不再对齐中小学字典。
 const SUBURB_REGIONS: Record<string, string[]> = {
   "奥克兰-北岸": [
     "Albany", "Bayswater-Auckland", "Beach Haven", "Belmont", "Birkdale",
-    "Birkenhead", "Browns Bay", "Castor Bay", "Devonport", "Forrest Hill",
-    "Glenfield", "Greenhithe", "Hillcrest", "Mairangi Bay", "Milford",
-    "Murrays Bay", "Northcote", "Oteha", "Paremoremo", "Pinehill",
-    "Rosedale", "Stanley Point", "Takapuna", "Takapuna North", "Torbay",
+    "Birkenhead", "Browns Bay", "Campbells Bay", "Devonport", "Forrest Hill",
+    "Glenfield", "Glenfield North", "Greenhithe", "Hillcrest", "Mairangi Bay",
+    "Milford", "Murrays Bay", "Narrow Neck", "North Harbour", "North Shore",
+    "Northcote", "Northcote Central", "Northcote Point", "Northcross",
+    "Oteha", "Pinehill", "Rosedale", "Sunnynook", "Takapuna", "Torbay",
+    "Unsworth Heights"
   ],
   "奥克兰-东区": [
-    "Botany Downs", "Bucklands Beach", "Dannemora", "East Tamaki", "Farm Cove",
-    "Flat Bush", "Howick", "Howick South", "Howick West", "Pakuranga", "Pakuranga Heights", "Shelly Park",
+    "Botany", "Botany Downs", "Bucklands Beach", "Cockle Bay", "Dannemora",
+    "East Tamaki", "East Tamaki Heights", "Eastern Beach", "Flat Bush",
+    "Golflands", "Half Moon Bay", "Highland Park-Auckland", "Howick",
+    "Howick South", "Huntington Park", "Pakuranga", "Pakuranga Heights",
+    "Sunnyhills"
   ],
   "奥克兰-中区": [
-    "Auckland CBD", "Balmoral", "Ellerslie", "Epsom",
+    "Auckland CBD", "Auckland Central", "Eden Terrace", "Ellerslie", "Epsom",
     "Freemans Bay", "Glen Innes", "Glendowie", "Grafton", "Greenlane",
     "Grey Lynn", "Herne Bay", "Hillsborough", "Kingsland", "Kohimarama",
-    "Lynfield", "Meadowbank", "Mount Albert", "Mt Albert", "Mount Eden",
-    "Mount Roskill", "Mount Wellington", "Mt Wellington", "Newmarket",
-    "Newton", "New Windsor", "One Tree Hill", "Onehunga", "Orakei", "Panmure", "Parnell",
-    "Penrose", "Point Chevalier", "Ponsonby", "Remuera", "Royal Oak",
-    "Sandringham", "St Heliers", "Stonefields", "Three Kings", "Waterview",
-    "Western Springs", "Westmere",
+    "Lynfield", "Meadowbank", "Mission Bay", "Morningside-Auckland",
+    "Mount Albert", "Mount Eden", "Mount Roskill", "Mount Wellington",
+    "Mt Albert", "Mt Eden", "Mt Roskill", "Mt Wellington", "New Windsor",
+    "Newmarket", "Newton", "One Tree Hill", "Onehunga", "Orakei", "Owairaka",
+    "Panmure", "Parnell", "Penrose", "Point Chevalier", "Point England",
+    "Ponsonby", "Remuera", "Royal Oak", "Sandringham", "St Heliers",
+    "St Johns", "St Lukes", "Stonefields", "Three Kings", "Waterview",
+    "Western Springs", "Westmere"
   ],
   "奥克兰-南区": [
-    "Clendon Park", "Favona", "Hingaia", "Mangere", "Mangere Bridge", "Mangere East",
-    "Manukau Central", "Manukau City", "Mangere Central", "Manurewa", "Otahuhu", "Otara", "Papakura",
-    "Papatoetoe", "Randwick Park", "Takanini", "Wattle Downs",
-    "Weymouth", "Wiri",
+    "Auckland Airport", "Clendon", "Clendon Park", "Clover Park",
+    "Conifer Grove", "Favona", "Karaka", "Mangere", "Mangere Bridge",
+    "Mangere Central", "Mangere East", "Manukau", "Manukau Central",
+    "Manukau City", "Manurewa", "Manurewa East", "Otahuhu", "Otara",
+    "Papakura", "Papakura Central", "Papakura East", "Papakura North",
+    "Papatoetoe", "Randwick Park", "Takanini", "Wattle Downs", "Weymouth",
+    "Wiri"
   ],
   "奥克兰-西区": [
-    "Avondale", "Blockhouse Bay", "Glen Eden", "Glendene", "Green Bay", "Henderson", "Kelston",
-    "Laingholm", "Massey", "New Lynn", "Oratia", "Ranui", "Te Atatu",
-    "Te Atatu Peninsula", "Te Atatu South", "Te Atatu North", "Titirangi", "West Harbour",
-    "Westgate", "Hobsonville", "Hobsonville Point", "Whenuapai",
+    "Avondale", "Blockhouse Bay", "Glen Eden", "Glendene", "Green Bay",
+    "Henderson", "Hobsonville", "Hobsonville Point", "Kelston", "Massey",
+    "New Lynn", "Oratia", "Ranui", "Rosebank-Auckland", "Sunnyvale-Auckland",
+    "Swanson", "Te Atatu Peninsula", "Te Atatu South", "Titirangi",
+    "Waitakere", "West Harbour", "Westgate", "Whenuapai"
   ],
   "奥克兰-其它": [],
 };
@@ -410,7 +422,7 @@ export function EceFilterBar({ schools, filters, onChange, onClear, active }: Pr
     [schools, filters.cities]
   );
 
-  // 奥克兰-其它：属于奥克兰、但不在北岸/东区/中区/南区/西区 的其余 suburb
+  // 奥克兰-其它：属于奥克兰、但不在北岸/东区/中区/南区/西区 的其余 suburb（与中小学逻辑一致）
   const aucklandOtherSuburbs = useMemo(() => {
     const named = new Set(Object.values(SUBURB_REGIONS).flat());
     return Array.from(
@@ -423,6 +435,7 @@ export function EceFilterBar({ schools, filters, onChange, onClear, active }: Pr
   }, [schools]);
 
   // 城市为奥克兰时，区下拉按子区分组：北岸、东区、中区、南区、西区、其它
+  // 「其它」= 奥克兰中不属于上述五区的剩余 suburb（与中小学逻辑一致）
   const aucklandGroups = useMemo(() => {
     if (filters.cities.length !== 1 || filters.cities[0] !== "Auckland") return undefined;
     const named = new Set(Object.values(SUBURB_REGIONS).flat());
@@ -431,11 +444,10 @@ export function EceFilterBar({ schools, filters, onChange, onClear, active }: Pr
     return order
       .map((region) => ({
         label: region.replace("奥克兰-", ""),
-        suburbs: (
+        suburbs:
           region === "奥克兰-其它"
             ? [...opts].filter((s) => !named.has(s))
-            : SUBURB_REGIONS[region].filter((s) => opts.has(s))
-        ).sort(),
+            : SUBURB_REGIONS[region].filter((s) => opts.has(s)),
       }))
       .filter((g) => g.suburbs.length > 0);
   }, [filters.cities, suburbOptions]);
