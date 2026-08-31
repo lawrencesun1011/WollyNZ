@@ -428,14 +428,13 @@ export function EceMap({
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     let cancelled = false;
-    let map: MapLibreMap | null = null;
 
     (async () => {
       // 预拉取并把海水改色的街道样式，使首帧即为天蓝，避免浅蓝闪现
       const style = await getStreetStyle();
       if (cancelled || !containerRef.current) return;
 
-      map = new MapLibreMap({
+      const m = new MapLibreMap({
         container: containerRef.current,
         style,
         center: [
@@ -449,15 +448,15 @@ export function EceMap({
         dragRotate: false,
         attributionControl: { compact: true },
       });
-      mapRef.current = map;
-      map.addControl(new NavigationControl({ showCompass: false }), "top-left");
+      mapRef.current = m;
+      m.addControl(new NavigationControl({ showCompass: false }), "top-left");
 
       // OpenFreeMap liberty 底图 sprite 缺图（sports_centre / atm …）的透明占位，
       // 消除 "Image ... could not be loaded" 控制台警告。
-      installMissingImageFallback(map);
+      installMissingImageFallback(m);
 
       const reportBounds = () => {
-        const b = map!.getBounds();
+        const b = m.getBounds();
         onBoundsChangeRef.current?.([
           b.getSouth(),
           b.getWest(),
@@ -466,22 +465,22 @@ export function EceMap({
         ]);
       };
 
-      map.on("load", () => {
-        if (mapRef.current !== map) return;
+      m.on("load", () => {
+        if (mapRef.current !== m) return;
         loadedRef.current = true;
-        map.resize();
+        m.resize();
         reportBounds();
         syncAggregation();
         setLoaded(true);
       });
 
-      map.on("moveend", () => {
+      m.on("moveend", () => {
         if (!loadedRef.current) return;
         reportBounds();
         syncAggregation();
       });
 
-      map.on("click", (e) => {
+      m.on("click", (e) => {
         if (suppressingCloseRef.current) return;
         const target = e.originalEvent?.target as HTMLElement | null;
         if (target?.closest(".maplibregl-popup, .map-pin-wrap, .map-cluster")) {
@@ -558,8 +557,9 @@ export function EceMap({
 
     pointsRef.current = points;
     syncAggregation();
+    // 依赖 loaded：地图为异步创建，就绪后需重跑本 effect 才能渲染 marker
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schools]);
+  }, [schools, loaded]);
 
   // 选中城市变化时飞到对应区域；无筛选时回退到新西兰全景框
   useEffect(() => {
@@ -725,7 +725,7 @@ export function EceMap({
       "1000"
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeId]);
+  }, [activeId, loaded]);
 
   // 底图切换（OpenFreeMap 街道 ⇄ Esri 卫星影像）
   async function switchBase(name: BaseLayerName) {
