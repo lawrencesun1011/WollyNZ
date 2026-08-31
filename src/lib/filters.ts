@@ -303,6 +303,12 @@ export function eceEqiText(value: number | undefined): string {
   return String(value);
 }
 
+/** ECE 公平指数紧凑展示（卡片 / popup chip 用）：>5 档统一显示 ">5" */
+export function eceEqiShort(value: number | undefined): string {
+  if (value == null) return "不适用";
+  return value > 5 ? ">5" : String(value);
+}
+
 /* ECE 机构类型中文展示 */
 export function eceTypeCN(type: string | undefined): string {
   if (type === "Education & Care Service") return "日托幼教中心";

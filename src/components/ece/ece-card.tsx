@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { SchoolFrontend } from "@/lib/types";
-import { eceTypeCN } from "@/lib/filters";
+import { eceTypeCN, eceEqiShort } from "@/lib/filters";
 import { MapPin, Home, Check, Heart } from "lucide-react";
 import { useFavorites, useCompare } from "@/lib/user-collections";
 
@@ -57,7 +57,7 @@ export function EceCard({
         <span className="chip bg-primary/8 text-primary">{eceTypeCN(school.type)}</span>
         <span className="chip bg-primary/8 text-primary">学生 {school.roll ?? "—"}</span>
         <span className="chip bg-primary/8 text-primary">
-          EQI {school.eqi == null ? "不适用" : school.eqi > 5 ? ">5" : school.eqi}
+          EQI {eceEqiShort(school.eqi)}
         </span>
       </div>
     </>

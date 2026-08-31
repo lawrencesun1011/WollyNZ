@@ -75,6 +75,54 @@ export const BASE_STYLES: Record<BaseLayerName, string | StyleSpecification> = {
   卫星: SATELLITE_STYLE,
 };
 
+/* 街道底图海水填充色（OpenFreeMap liberty 的 water 图层，原值 rgb(158,189,255)） */
+export const WATER_FILL_COLOR = "#87CEEB";
+
+/**
+ * 在样式加载完成后覆盖海水（water 图层）填充色。
+ * 卫星底图（Esri World Imagery）不含 water 图层，setPaintProperty 会抛错，故用 try/catch 兜底。
+ */
+export function applyOceanColor(map: MapLibreMap) {
+  try {
+    map.setPaintProperty("water", "fill-color", WATER_FILL_COLOR);
+  } catch {
+    // 卫星底图无 water 图层，忽略
+  }
+}
+
+/**
+ * 取得「海水已改色」的街道底图样式。
+ * 预拉取 OpenFreeMap liberty 样式 JSON，就地改写 water 图层 fill-color，
+ * 使地图首帧即为目标海水色，避免「先浅蓝后改色」的闪现。
+ * 结果按 Promise 缓存，初始化与切回街道时复用（只拉取一次）；
+ * 拉取失败则回退到远程样式 URL。
+ */
+let streetStylePromise: Promise<string | StyleSpecification> | null = null;
+
+export function getStreetStyle(): Promise<string | StyleSpecification> {
+  if (!streetStylePromise) {
+    streetStylePromise = (async () => {
+      try {
+        const res = await fetch(OPENFREEMAP_STYLE_URL);
+        if (!res.ok) throw new Error(String(res.status));
+        const json = (await res.json()) as StyleSpecification;
+        for (const layer of json.layers ?? []) {
+          if (layer.id === "water" && layer.type === "fill") {
+            (layer as { paint?: Record<string, unknown> }).paint = {
+              ...((layer as { paint?: Record<string, unknown> }).paint ?? {}),
+              "fill-color": WATER_FILL_COLOR,
+            };
+          }
+        }
+        return json;
+      } catch {
+        return OPENFREEMAP_STYLE_URL;
+      }
+    })();
+  }
+  return streetStylePromise;
+}
+
 /* ============================================================
    地理常量与工具
    ============================================================ */

@@ -30,6 +30,7 @@ import {
   isReasonableNZCoord,
   nzBoundsLngLat,
   updatePinSvg,
+  getStreetStyle,
   type BaseLayerName,
   type MapPoint,
   type ScreenCluster,
@@ -497,83 +498,89 @@ export function SchoolMap({
   // 初始化地图（仅一次）
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+    let cancelled = false;
+    let map: MapLibreMap | null = null;
 
-    const map = new MapLibreMap({
-      container: containerRef.current,
-      // 街道底图：OpenFreeMap 公共实例（免 key，数据来自 OpenStreetMap）
-      style: BASE_STYLES["街道"],
-      // 先给一个大致的新西兰中心，随后由 flyCities effect 精确 fitBounds
-      center: [
-        (DEFAULT_NZ_BOUNDS[1] + DEFAULT_NZ_BOUNDS[3]) / 2,
-        (DEFAULT_NZ_BOUNDS[0] + DEFAULT_NZ_BOUNDS[2]) / 2,
-      ],
-      zoom: 5,
-      minZoom: 3,
-      maxZoom: MAP_MAX_ZOOM,
-      scrollZoom: true, // 对应 Leaflet 的 scrollWheelZoom
-      dragRotate: false, // 锁定正北，避免旋转后 pin 方向错乱
-      attributionControl: { compact: true },
-    });
-    // 缩放控件（对应 Leaflet 默认的 zoomControl，位置同为左上角）
-    map.addControl(new NavigationControl({ showCompass: false }), "top-left");
+    (async () => {
+      // 预拉取并把海水改色的街道样式，使首帧即为天蓝，避免浅蓝闪现
+      const style = await getStreetStyle();
+      if (cancelled || !containerRef.current) return;
 
-    // OpenFreeMap liberty 底图 sprite 缺图（sports_centre / atm …）的透明占位，
-    // 消除 "Image ... could not be loaded" 控制台警告。
-    installMissingImageFallback(map);
+      map = new MapLibreMap({
+        container: containerRef.current,
+        // 街道底图：OpenFreeMap 公共实例（免 key，数据来自 OpenStreetMap），海水已预改色
+        style,
+        // 先给一个大致的新西兰中心，随后由 flyCities effect 精确 fitBounds
+        center: [
+          (DEFAULT_NZ_BOUNDS[1] + DEFAULT_NZ_BOUNDS[3]) / 2,
+          (DEFAULT_NZ_BOUNDS[0] + DEFAULT_NZ_BOUNDS[2]) / 2,
+        ],
+        zoom: 5,
+        minZoom: 3,
+        maxZoom: MAP_MAX_ZOOM,
+        scrollZoom: true, // 对应 Leaflet 的 scrollWheelZoom
+        dragRotate: false, // 锁定正北，避免旋转后 pin 方向错乱
+        attributionControl: { compact: true },
+      });
+      mapRef.current = map;
+      // 缩放控件（对应 Leaflet 默认的 zoomControl，位置同为左上角）
+      map.addControl(new NavigationControl({ showCompass: false }), "top-left");
 
-    const reportBounds = () => {
-      const b = map.getBounds();
-      onBoundsChangeRef.current?.([
-        b.getSouth(),
-        b.getWest(),
-        b.getNorth(),
-        b.getEast(),
-      ]);
-    };
+      // OpenFreeMap liberty 底图 sprite 缺图（sports_centre / atm …）的透明占位，
+      // 消除 "Image ... could not be loaded" 控制台警告。
+      installMissingImageFallback(map);
 
-    map.on("load", () => {
-      // StrictMode 重挂载可能导致旧 map 已被 remove，确保当前仍是同一个实例
-      if (mapRef.current !== map) return;
-      loadedRef.current = true;
-      map.resize();
-      reportBounds();
-      syncAggregation();
-      setLoaded(true);
-    });
+      const reportBounds = () => {
+        const b = map!.getBounds();
+        onBoundsChangeRef.current?.([
+          b.getSouth(),
+          b.getWest(),
+          b.getNorth(),
+          b.getEast(),
+        ]);
+      };
 
-    map.on("moveend", () => {
-      if (!loadedRef.current) return;
-      reportBounds();
-      syncAggregation();
-    });
+      map.on("load", () => {
+        // StrictMode 重挂载可能导致旧 map 已被 remove，确保当前仍是同一个实例
+        if (mapRef.current !== map) return;
+        loadedRef.current = true;
+        map.resize();
+        reportBounds();
+        syncAggregation();
+        setLoaded(true);
+      });
 
-    // 点击地图空白处（非 marker / 非 popup 内部）→ 取消当前选中的高亮/弹窗。
-    // popup 挂在 map.getContainer() 上，不会冒泡到 canvas 容器；
-    // marker 与聚合气泡挂在 canvas 容器上，已各自 stopPropagation。
-    map.on("click", (e) => {
-      if (suppressingCloseRef.current) return;
-      const target = e.originalEvent?.target as HTMLElement | null;
-      if (target?.closest(".maplibregl-popup, .map-pin-wrap, .map-cluster")) {
-        return;
-      }
-      closePopup();
-      onSelectRef.current(null);
-    });
+      map.on("moveend", () => {
+        if (!loadedRef.current) return;
+        reportBounds();
+        syncAggregation();
+      });
 
-    mapRef.current = map;
-    // 捕获 Set/Map 引用，避免 cleanup 中直接读 .current（该 effect 只执行一次）
-    const onMap = onMapRef.current;
-    const clusterMarkers = clusterMarkersRef.current;
+      // 点击地图空白处（非 marker / 非 popup 内部）→ 取消当前选中的高亮/弹窗。
+      // popup 挂在 map.getContainer() 上，不会冒泡到 canvas 容器；
+      // marker 与聚合气泡挂在 canvas 容器上，已各自 stopPropagation。
+      map.on("click", (e) => {
+        if (suppressingCloseRef.current) return;
+        const target = e.originalEvent?.target as HTMLElement | null;
+        if (target?.closest(".maplibregl-popup, .map-pin-wrap, .map-cluster")) {
+          return;
+        }
+        closePopup();
+        onSelectRef.current(null);
+      });
+    })();
+
     return () => {
+      cancelled = true;
       loadedRef.current = false;
-      map.remove();
+      mapRef.current?.remove();
       mapRef.current = null;
       markersRef.current = {};
       pointsRef.current = [];
       pointByIdRef.current = {};
       schoolByIdRef.current = {};
-      onMap.clear();
-      clusterMarkers.clear();
+      onMapRef.current.clear();
+      clusterMarkersRef.current.clear();
       popupRef.current = null;
       popupIdRef.current = null;
       spiderIdsRef.current = null;
@@ -825,10 +832,12 @@ export function SchoolMap({
   }, [activeId]);
 
   // 底图切换（OpenFreeMap 街道 ⇄ Esri 卫星影像）
-  function switchBase(name: BaseLayerName) {
+  async function switchBase(name: BaseLayerName) {
     const map = mapRef.current;
     if (!map || baseLayer === name) return;
-    map.setStyle(BASE_STYLES[name]);
+    // 切回街道时用已改色的样式对象，避免浅蓝闪现
+    const style = name === "街道" ? await getStreetStyle() : BASE_STYLES[name];
+    map.setStyle(style);
     setBaseLayer(name);
   }
 

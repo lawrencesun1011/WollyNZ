@@ -9,7 +9,7 @@ import {
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { SchoolFrontend } from "@/lib/types";
-import { eceTypeCN, eceAuthStyle } from "@/lib/filters";
+import { eceTypeCN, eceAuthStyle, eceEqiShort } from "@/lib/filters";
 import { useFavorites, useCompare } from "@/lib/user-collections";
 import {
   BASE_STYLES,
@@ -28,6 +28,7 @@ import {
   isReasonableNZCoord,
   nzBoundsLngLat,
   updatePinSvg,
+  getStreetStyle,
   type BaseLayerName,
   type MapPoint,
   type ScreenCluster,
@@ -81,7 +82,7 @@ function buildPopupHtml(
     `<span class="popup-chip">${esc(s.authorityCN || "")}</span>`,
     `<span class="popup-chip">${esc(eceTypeCN(s.type))}</span>`,
     `<span class="popup-chip">学生 ${s.roll ?? "—"}</span>`,
-    `<span class="popup-chip">EQI ${s.eqi ?? "—"}</span>`,
+    `<span class="popup-chip">EQI ${eceEqiShort(s.eqi)}</span>`,
   ].join("");
   return `<div class="popup-card">
       <div class="popup-card__head"><i class="popup-ic popup-ic--title">${SVG_HOUSE}</i><span class="popup-card__title">${esc(
@@ -426,76 +427,82 @@ export function EceMap({
   // 初始化地图（仅一次）
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+    let cancelled = false;
+    let map: MapLibreMap | null = null;
 
-    const map = new MapLibreMap({
-      container: containerRef.current,
-      style: BASE_STYLES["街道"],
-      center: [
-        (DEFAULT_NZ_BOUNDS[1] + DEFAULT_NZ_BOUNDS[3]) / 2,
-        (DEFAULT_NZ_BOUNDS[0] + DEFAULT_NZ_BOUNDS[2]) / 2,
-      ],
-      zoom: 5,
-      minZoom: 3,
-      maxZoom: MAP_MAX_ZOOM,
-      scrollZoom: true,
-      dragRotate: false,
-      attributionControl: { compact: true },
-    });
-    map.addControl(new NavigationControl({ showCompass: false }), "top-left");
+    (async () => {
+      // 预拉取并把海水改色的街道样式，使首帧即为天蓝，避免浅蓝闪现
+      const style = await getStreetStyle();
+      if (cancelled || !containerRef.current) return;
 
-    // OpenFreeMap liberty 底图 sprite 缺图（sports_centre / atm …）的透明占位，
-    // 消除 "Image ... could not be loaded" 控制台警告。
-    installMissingImageFallback(map);
+      map = new MapLibreMap({
+        container: containerRef.current,
+        style,
+        center: [
+          (DEFAULT_NZ_BOUNDS[1] + DEFAULT_NZ_BOUNDS[3]) / 2,
+          (DEFAULT_NZ_BOUNDS[0] + DEFAULT_NZ_BOUNDS[2]) / 2,
+        ],
+        zoom: 5,
+        minZoom: 3,
+        maxZoom: MAP_MAX_ZOOM,
+        scrollZoom: true,
+        dragRotate: false,
+        attributionControl: { compact: true },
+      });
+      mapRef.current = map;
+      map.addControl(new NavigationControl({ showCompass: false }), "top-left");
 
-    const reportBounds = () => {
-      const b = map.getBounds();
-      onBoundsChangeRef.current?.([
-        b.getSouth(),
-        b.getWest(),
-        b.getNorth(),
-        b.getEast(),
-      ]);
-    };
+      // OpenFreeMap liberty 底图 sprite 缺图（sports_centre / atm …）的透明占位，
+      // 消除 "Image ... could not be loaded" 控制台警告。
+      installMissingImageFallback(map);
 
-    map.on("load", () => {
-      if (mapRef.current !== map) return;
-      loadedRef.current = true;
-      map.resize();
-      reportBounds();
-      syncAggregation();
-      setLoaded(true);
-    });
+      const reportBounds = () => {
+        const b = map!.getBounds();
+        onBoundsChangeRef.current?.([
+          b.getSouth(),
+          b.getWest(),
+          b.getNorth(),
+          b.getEast(),
+        ]);
+      };
 
-    map.on("moveend", () => {
-      if (!loadedRef.current) return;
-      reportBounds();
-      syncAggregation();
-    });
+      map.on("load", () => {
+        if (mapRef.current !== map) return;
+        loadedRef.current = true;
+        map.resize();
+        reportBounds();
+        syncAggregation();
+        setLoaded(true);
+      });
 
-    map.on("click", (e) => {
-      if (suppressingCloseRef.current) return;
-      const target = e.originalEvent?.target as HTMLElement | null;
-      if (target?.closest(".maplibregl-popup, .map-pin-wrap, .map-cluster")) {
-        return;
-      }
-      closePopup();
-      onSelectRef.current(null);
-    });
+      map.on("moveend", () => {
+        if (!loadedRef.current) return;
+        reportBounds();
+        syncAggregation();
+      });
 
-    mapRef.current = map;
-    // 捕获 Set/Map 引用，避免 cleanup 中直接读 .current（该 effect 只执行一次）
-    const onMap = onMapRef.current;
-    const clusterMarkers = clusterMarkersRef.current;
+      map.on("click", (e) => {
+        if (suppressingCloseRef.current) return;
+        const target = e.originalEvent?.target as HTMLElement | null;
+        if (target?.closest(".maplibregl-popup, .map-pin-wrap, .map-cluster")) {
+          return;
+        }
+        closePopup();
+        onSelectRef.current(null);
+      });
+    })();
+
     return () => {
+      cancelled = true;
       loadedRef.current = false;
-      map.remove();
+      mapRef.current?.remove();
       mapRef.current = null;
       markersRef.current = {};
       pointsRef.current = [];
       pointByIdRef.current = {};
       schoolByIdRef.current = {};
-      onMap.clear();
-      clusterMarkers.clear();
+      onMapRef.current.clear();
+      clusterMarkersRef.current.clear();
       popupRef.current = null;
       popupIdRef.current = null;
       spiderIdsRef.current = null;
@@ -721,10 +728,12 @@ export function EceMap({
   }, [activeId]);
 
   // 底图切换（OpenFreeMap 街道 ⇄ Esri 卫星影像）
-  function switchBase(name: BaseLayerName) {
+  async function switchBase(name: BaseLayerName) {
     const map = mapRef.current;
     if (!map || baseLayer === name) return;
-    map.setStyle(BASE_STYLES[name]);
+    // 切回街道时用已改色的样式对象，避免浅蓝闪现
+    const style = name === "街道" ? await getStreetStyle() : BASE_STYLES[name];
+    map.setStyle(style);
     setBaseLayer(name);
   }
 
