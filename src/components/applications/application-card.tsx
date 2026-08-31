@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarDays, Mail, Pencil, School, Trash2, Users, X } from "lucide-react";
+import { CalendarDays, Mail, Pencil, School, Trash2, Users } from "lucide-react";
 import {
   getEffectiveStatus,
   studyPeriodToString,

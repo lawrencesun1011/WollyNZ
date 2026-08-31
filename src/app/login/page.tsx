@@ -59,8 +59,8 @@ export default function LoginPage() {
       await sendEmailCode(email);
       setSent(true);
       setCooldown(60);
-    } catch (e: any) {
-      setError(e?.message || "验证码发送失败，请稍后重试");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "验证码发送失败，请稍后重试");
     } finally {
       setSending(false);
     }
@@ -84,8 +84,8 @@ export default function LoginPage() {
     try {
       await signInWithEmailCode(email, code.trim());
       router.push("/");
-    } catch (e: any) {
-      setError(e?.message || "验证失败，请检查验证码");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "验证失败，请检查验证码");
     } finally {
       setVerifying(false);
     }

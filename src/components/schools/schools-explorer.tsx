@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import type { SchoolFrontend, Filters, SortKey } from "@/lib/types";
 import {
@@ -35,26 +35,22 @@ const PAGE_SIZE = 60;
 
 export function SchoolsExplorer({
   initialSchools,
-  fetchedAt,
 }: {
   initialSchools: SchoolFrontend[];
   fetchedAt: string | null;
 }) {
-  // 首屏本地兜底秒开；PG 数据由全局预热层（布局内 SchoolsPreloader）拉取就绪后无缝替换。
-  const [schools, setSchools] = useState<SchoolFrontend[]>(initialSchools);
-
-  useEffect(() => {
-    // 若预热层已有数据（同会话命中或跨会话 localStorage 命中），直接采用
-    const snap = getSchoolsSnapshot();
-    if (snap && snap.length >= initialSchools.length) {
-      setSchools(snap);
-      return;
-    }
-    const unsub = subscribeSchools((list) => {
-      setSchools((prev) => (list.length >= prev.length ? list : prev));
-    });
-    return unsub;
-  }, [initialSchools]);
+  // 订阅全局学校库：PG 数据由全局预热层（布局内 SchoolsPreloader）拉取就绪后，
+  // 通过外部 store 即时同步；首帧即为真实值，避免「先空后填充」的级联渲染。
+  const cloudSchools = useSyncExternalStore(
+    subscribeSchools,
+    getSchoolsSnapshot,
+    () => null
+  );
+  // 云端数据更完整时采用云端，否则沿用首屏兜底（秒开）
+  const schools =
+    cloudSchools && cloudSchools.length >= initialSchools.length
+      ? cloudSchools
+      : initialSchools;
 
   const [filters, setFilters] = useState<Filters>(emptyFilters());
   const [sort, setSort] = useState<SortKey>("eqi");
@@ -127,19 +123,21 @@ export function SchoolsExplorer({
     return filters.keyword.trim() || undefined;
   }, [favoritesOnly, base.length, filters.keyword]);
 
-  // 筛选或地图视野变化时，重置分页到首页
-  useEffect(() => {
+  // 筛选或地图视野变化时，重置分页到首页（渲染期间调整 state，避免 effect 级联渲染）
+  const [prevInBounds, setPrevInBounds] = useState(inBounds);
+  if (prevInBounds !== inBounds) {
+    setPrevInBounds(inBounds);
     setVisibleCount(PAGE_SIZE);
-  }, [inBounds]);
+  }
 
   // 选中的 marker 学校可能还在"加载更多"之外，自动展开分页以显示并高亮
-  useEffect(() => {
-    if (!popupId) return;
-    const idx = inBounds.findIndex((s) => s.id === popupId);
-    if (idx >= 0 && idx >= visibleCount) {
-      setVisibleCount(idx + 1);
-    }
-  }, [popupId, inBounds, visibleCount]);
+  const popupIdx = useMemo(
+    () => (popupId ? inBounds.findIndex((s) => s.id === popupId) : -1),
+    [popupId, inBounds]
+  );
+  if (popupId && popupIdx >= 0 && popupIdx >= visibleCount) {
+    setVisibleCount(popupIdx + 1);
+  }
 
   const visible = inBounds.slice(0, visibleCount);
   const detailSchool = detailId ? schools.find((s) => s.id === detailId) || null : null;

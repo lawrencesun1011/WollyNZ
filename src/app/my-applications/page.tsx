@@ -1,11 +1,13 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, Sparkles, Inbox, Pencil, Mail, History } from "lucide-react";
+import { Plus, Sparkles, Inbox, Pencil, Mail, History, LogIn } from "lucide-react";
 import { useApplications, removeApplication, getEffectiveStatus, type ApplicationCategory } from "@/lib/applications";
 import { ApplicationCard } from "@/components/applications/application-card";
+import { useAuthUser, useAuthReady } from "@/lib/auth";
+import { useAuthBridge } from "@/lib/auth-init";
 
 type Tab = ApplicationCategory;
 
@@ -21,9 +23,9 @@ function MyApplicationsInner() {
   const all = useApplications();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>(initialTab);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const user = useAuthUser();
+  const authReady = useAuthReady();
+  useAuthBridge();
 
   const filtered = useMemo(
     () => all.filter((a) => a.category === tab),
@@ -32,8 +34,6 @@ function MyApplicationsInner() {
   const drafts = filtered.filter((a) => getEffectiveStatus(a) === "draft");
   const generated = filtered.filter((a) => getEffectiveStatus(a) === "generated");
   const history = filtered.filter((a) => getEffectiveStatus(a) === "closed");
-
-  const ecePlaceholder = false;
 
   function handleAdd() {
     router.push(`/apply?category=${tab}`);
@@ -54,7 +54,7 @@ function MyApplicationsInner() {
             管理您在新西兰的游学申请，可生成邮件模板直接联系学校
           </p>
         </div>
-        {(
+        {user && (
           <button
             type="button"
             onClick={handleAdd}
@@ -82,8 +82,12 @@ function MyApplicationsInner() {
         ))}
       </div>
 
-      {/* 列表 / 空态 */}
-      {!mounted ? null : (
+      {/* 列表 / 空态：仅登录态可见（含草稿）；未登录显示登录墙 */}
+      {!authReady ? (
+        <LoadingState />
+      ) : !user ? (
+        <LoginWall desc="登录后即可查看你的学校申请记录（含草稿）。新建申请时也需要先验证邮箱。" />
+      ) : (
         <div className="mt-6 space-y-8">
           {filtered.length === 0 || (drafts.length === 0 && generated.length === 0 && history.length === 0) ? (
             <EmptyState tab={tab} onAdd={handleAdd} />
@@ -157,6 +161,35 @@ function Section({
       </h2>
       {children}
     </section>
+  );
+}
+
+/** 未登录时的登录引导（不展示任何本地记录，含草稿） */
+function LoginWall({ desc }: { desc: string }) {
+  return (
+    <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-3xl border border-dashed border-stroke bg-white/50 px-6 py-16 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <LogIn className="h-7 w-7" />
+      </div>
+      <p className="text-base font-semibold text-ink">登录后查看</p>
+      <p className="max-w-sm text-sm text-ink-soft">{desc}</p>
+      <Link
+        href="/login"
+        className="mt-2 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+      >
+        <Mail className="h-4 w-4" />
+        注册 / 登录
+      </Link>
+    </div>
+  );
+}
+
+/** 登录态恢复中：此时不能判定为未登录，避免已登录用户闪一下登录墙 */
+function LoadingState() {
+  return (
+    <div className="mt-6 flex items-center justify-center py-16 text-sm text-ink-soft">
+      正在确认登录状态…
+    </div>
   );
 }
 

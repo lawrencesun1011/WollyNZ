@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { X, Mail, ShieldCheck } from "lucide-react";
 import { sendEmailCode, signInWithEmailCode } from "@/lib/auth";
 
@@ -24,7 +24,10 @@ export function LoginModal({ open, mode, onSwitchMode, onClose }: Props) {
   const [city, setCity] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  // 关闭时重置弹窗内部状态（用 state 跟踪 open 变化，渲染期间调整，避免 effect 级联渲染）
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (prevOpen !== open) {
+    setPrevOpen(open);
     if (!open) {
       setStage("email");
       setCode("");
@@ -33,7 +36,7 @@ export function LoginModal({ open, mode, onSwitchMode, onClose }: Props) {
       setCity("");
       setError(null);
     }
-  }, [open]);
+  }
 
   if (!open) return null;
 
@@ -51,9 +54,9 @@ export function LoginModal({ open, mode, onSwitchMode, onClose }: Props) {
     try {
       await sendEmailCode(email);
       setStage("code");
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      setError(e?.message || "验证码发送失败，请稍后重试");
+      setError(e instanceof Error ? e.message : "验证码发送失败，请稍后重试");
       setStage("email");
     }
   }
@@ -74,9 +77,9 @@ export function LoginModal({ open, mode, onSwitchMode, onClose }: Props) {
           : undefined
       );
       onClose();
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      setError(e?.message || "验证失败，请检查验证码");
+      setError(e instanceof Error ? e.message : "验证失败，请检查验证码");
       setStage("code");
     }
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SchoolFrontend } from "@/lib/types";
 import { subscribeSchools, getSchoolsSnapshot, preloadSchools } from "@/lib/schools-store";
@@ -10,17 +10,20 @@ import { removeFavoritesByKind } from "@/lib/favorites";
 import { Heart, X, MapPin, GraduationCap } from "lucide-react";
 
 function useSchoolsList(): SchoolFrontend[] {
-  const [list, setList] = useState<SchoolFrontend[]>(() => getSchoolsSnapshot() ?? []);
+  // 浮层打开时若学校数据尚未加载（如停留在 /ece、/my-applications 等页面），
+  // 主动预拉取，确保中小学心愿项能反查到名称，避免只显示数字。
+  // 数据就绪后由外部 store 的订阅通知组件更新，故此处不再 setState。
   useEffect(() => {
-    // 浮层打开时若学校数据尚未加载（如停留在 /ece、/my-applications 等页面），
-    // 主动预拉取，确保中小学心愿项能反查到名称，避免只显示数字。
     if (!getSchoolsSnapshot()) {
-      void preloadSchools().then(() => setList(getSchoolsSnapshot() ?? []));
+      void preloadSchools();
     }
-    setList(getSchoolsSnapshot() ?? []);
-    return subscribeSchools((data) => setList(data ?? []));
   }, []);
-  return list;
+  // 直接订阅全局学校库：首帧即为真实值，避免「先空后填充」的级联渲染
+  return useSyncExternalStore(
+    subscribeSchools,
+    () => getSchoolsSnapshot() ?? [],
+    () => []
+  );
 }
 
 interface Props {

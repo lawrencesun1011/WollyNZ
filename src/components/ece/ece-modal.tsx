@@ -11,11 +11,6 @@ interface Props {
   onClose: () => void;
 }
 
-function fmtNoneZero(v: number | undefined | null): string {
-  if (v == null || v === 0) return "不适用";
-  return String(v);
-}
-
 function eroUrl(school: SchoolFrontend): string {
   const slug = school.name
     .toLowerCase()

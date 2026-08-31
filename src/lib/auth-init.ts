@@ -48,7 +48,7 @@ export function useAuthBridge() {
     // 进站清理历史匿名 token（之前自动匿名登录遗留）：匿名态不视为登录，
     // 但残留 token 会占用云端匿名 uid，这里主动登出清掉。
     getLoginStateRaw()
-      .then((raw: any) => {
+      .then((raw) => {
         const u = raw?.user;
         if (u && (u.loginType === "ANONYMOUS" || !u.email)) {
           return signOut();

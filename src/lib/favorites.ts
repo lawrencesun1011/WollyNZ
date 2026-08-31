@@ -16,11 +16,7 @@ const LS_KEY = "wollyn:schools:favorites";
 export const FAV_TOPIC = "favorites";
 
 const favSubs = new Set<(ids: FavoriteEntry[]) => void>();
-let favState: { ids: FavoriteEntry[] } = { ids: [] };
-
-function favKey(e: FavoriteEntry): string {
-  return `${e.kind}:${e.id}`;
-}
+const favState: { ids: FavoriteEntry[] } = { ids: [] };
 
 // 兼容旧 string[] 与新 {id,kind}[] 两种格式
 function readLocalStorage(): FavoriteEntry[] {

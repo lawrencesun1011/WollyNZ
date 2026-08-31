@@ -491,6 +491,9 @@ export function EceMap({
       });
     })();
 
+    // 捕获 Set/Map 引用，避免 cleanup 中直接读 .current（该 effect 只执行一次）
+    const onMap = onMapRef.current;
+    const clusterMarkers = clusterMarkersRef.current;
     return () => {
       cancelled = true;
       loadedRef.current = false;
@@ -500,8 +503,8 @@ export function EceMap({
       pointsRef.current = [];
       pointByIdRef.current = {};
       schoolByIdRef.current = {};
-      onMapRef.current.clear();
-      clusterMarkersRef.current.clear();
+      onMap.clear();
+      clusterMarkers.clear();
       popupRef.current = null;
       popupIdRef.current = null;
       spiderIdsRef.current = null;

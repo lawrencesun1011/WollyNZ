@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import type { SchoolFrontend, Filters, SortKey } from "@/lib/types";
 import {
   applyFilters,
-  applySort,
   applySortEce,
   emptyFilters,
   hasActiveFilters,
@@ -34,7 +33,7 @@ const PAGE_SIZE = 60;
 
 export function EceExplorer({ initialSchools }: { initialSchools: SchoolFrontend[] }) {
   // ECE 数据来自本地 JSON（ece-frontend.json），直接用首屏数据，无需预热层。
-  const [schools, setSchools] = useState<SchoolFrontend[]>(initialSchools);
+  const [schools] = useState<SchoolFrontend[]>(initialSchools);
 
   const [filters, setFilters] = useState<Filters>(emptyFilters());
   const [sort, setSort] = useState<SortKey>("eqi");
@@ -95,17 +94,21 @@ export function EceExplorer({ initialSchools }: { initialSchools: SchoolFrontend
     return filters.keyword.trim() || undefined;
   }, [favoritesOnly, base.length, filters.keyword]);
 
-  useEffect(() => {
+  // 筛选或地图视野变化时，重置分页到首页（渲染期间调整 state，避免 effect 级联渲染）
+  const [prevInBounds, setPrevInBounds] = useState(inBounds);
+  if (prevInBounds !== inBounds) {
+    setPrevInBounds(inBounds);
     setVisibleCount(PAGE_SIZE);
-  }, [inBounds]);
+  }
 
-  useEffect(() => {
-    if (!popupId) return;
-    const idx = inBounds.findIndex((s) => s.id === popupId);
-    if (idx >= 0 && idx >= visibleCount) {
-      setVisibleCount(idx + 1);
-    }
-  }, [popupId, inBounds, visibleCount]);
+  // 选中的 marker 学校可能还在"加载更多"之外，自动展开分页以显示并高亮
+  const popupIdx = useMemo(
+    () => (popupId ? inBounds.findIndex((s) => s.id === popupId) : -1),
+    [popupId, inBounds]
+  );
+  if (popupId && popupIdx >= 0 && popupIdx >= visibleCount) {
+    setVisibleCount(popupIdx + 1);
+  }
 
   const visible = inBounds.slice(0, visibleCount);
   const detailSchool = detailId ? schools.find((s) => s.id === detailId) || null : null;

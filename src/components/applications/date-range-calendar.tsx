@@ -5,7 +5,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ExactDate } from "@/lib/applications";
 
 const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
-const T_MONTH = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
 
 function toDate(d: ExactDate) {
   return new Date(d.year, d.month - 1, d.day);
@@ -39,10 +38,6 @@ function addMonths(d: Date, n: number) {
   const copy = new Date(d);
   copy.setMonth(copy.getMonth() + n);
   return copy;
-}
-
-function formatRange(start: ExactDate, end: ExactDate) {
-  return `${start.month}月${start.day}日 — ${end.month}月${end.day}日`;
 }
 
 function clampMinDate(): ExactDate {
@@ -145,8 +140,6 @@ export function DateRangeCalendar({ start, end, onChange, maxYear }: Props) {
       </div>
     );
   }
-
-  const sameMonth = start.month === end.month && start.year === end.year;
 
   return (
     <div className="rounded-2xl">

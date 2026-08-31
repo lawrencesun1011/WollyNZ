@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Loader2, Mail, Heart, Layers, Save, Send, X, Plus } from "lucide-react";
 import {
   addApplication,
@@ -38,7 +37,7 @@ import { DateRangeCalendar } from "./date-range-calendar";
 import { useFavorites } from "@/lib/user-collections";
 import { PROVINCES, citiesOf, SELF_CITY_PROVINCES } from "@/lib/regions";
 import { getSchoolsSnapshot, subscribeSchools } from "@/lib/schools-store";
-import { getEceSnapshot, loadEceSnapshot } from "@/lib/ece-store";
+import { getEceSnapshot, loadEceSnapshot, subscribeEce } from "@/lib/ece-store";
 import type { SchoolFrontend } from "@/lib/types";
 import { useAuthUser, sendEmailCode, signInWithEmailCode } from "@/lib/auth";
 import { EmailTemplateModal } from "./email-template-modal";
@@ -136,7 +135,7 @@ export function ApplicationForm({
   const [fzEnd, setFzEnd] = useState<FuzzyDate>({ year: CUR_YEAR, month: 8, tense: "mid" });
   const [schoolInput, setSchoolInput] = useState("");
   const [schools, setSchools] = useState<IntendedSchool[]>([]);
-  const [schoolSuggest, setSchoolSuggest] = useState<SchoolFrontend[]>([]);
+  const [, setSchoolSuggest] = useState<SchoolFrontend[]>([]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [schoolSuggestOpen, setSchoolSuggestOpen] = useState(false);
@@ -151,28 +150,18 @@ export function ApplicationForm({
 
   const [generatedItem, setGeneratedItem] = useState<ApplicationItem | null>(null);
 
-  const [schoolsData, setSchoolsData] = useState<SchoolFrontend[]>([]);
-
   // 意向学校数据源：幼儿园从 ECE 库（异步）拉取，中小学从 schools-store 拉取。
-  // 用 state 而非 ref，确保数据到达后组件重新渲染、联想与导入跟随更新。
+  // 直接订阅外部 store；ECE 为异步加载，这里仅负责触发加载（不直接 setState）。
   useEffect(() => {
-    if (ece) {
-      const snap = getEceSnapshot();
-      if (snap) {
-        setSchoolsData(snap);
-        return;
-      }
-      let active = true;
-      void loadEceSnapshot().then((d) => {
-        if (active) setSchoolsData(d ?? []);
-      });
-      return () => {
-        active = false;
-      };
-    }
-    setSchoolsData(getSchoolsSnapshot() ?? []);
-    return subscribeSchools((d) => setSchoolsData(d ?? []));
+    if (ece) void loadEceSnapshot();
   }, [ece]);
+
+  const eceSchools = useSyncExternalStore(subscribeEce, getEceSnapshot, () => null);
+  const cloudSchools = useSyncExternalStore(subscribeSchools, getSchoolsSnapshot, () => null);
+  const schoolsData = useMemo(
+    () => (ece ? (eceSchools ?? []) : (cloudSchools ?? [])),
+    [ece, eceSchools, cloudSchools]
+  );
 
   // 验证码发送后 60s 冷却，避免用户反复点击（与登录页一致）
   useEffect(() => {
@@ -194,8 +183,12 @@ export function ApplicationForm({
     };
   }, [cooldown]);
 
-  // 挂载时初始化：草稿编辑载入 / 预填
-  useEffect(() => {
+  // 挂载 / 切换草稿时初始化表单（渲染期间调整 state，避免 effect 级联渲染）。
+  // 仅随 editId 变化重初始化，不再随 user 变化重跑（否则会覆盖用户已输入内容）。
+  const [formEditId, setFormEditId] = useState(editId);
+  const [initialized, setInitialized] = useState(false);
+
+  function initFormData() {
     if (editId) {
       const it = getApplication(editId);
       if (it) {
@@ -231,7 +224,7 @@ export function ApplicationForm({
       applyRegion(saved.province ?? "", saved.city ?? "");
       // 从 user_info 补充基础信息（称呼 / 省份 / 城市），仅填补缺失字段
       if (user?.uid) {
-        getUserInfo(user.uid)
+        getUserInfo()
           .then((ui) => {
             if (!ui) return;
             if (!saved.province) applyRegion(ui.province, ui.city);
@@ -245,8 +238,13 @@ export function ApplicationForm({
     setCode("");
     setAuthError("");
     setSubmitting(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editId, user]);
+  }
+
+  if (!initialized || formEditId !== editId) {
+    setInitialized(true);
+    setFormEditId(editId);
+    initFormData();
+  }
 
   const cityOptions = useMemo(() => (province ? citiesOf(province) : []), [province]);
 
@@ -256,7 +254,8 @@ export function ApplicationForm({
     return (schoolsData ?? [])
       .filter((s) => s.name.toLowerCase().startsWith(q) && !schools.some((x) => x.name === s.name))
       .slice(0, 6);
-  }, [schoolInput, schools]);
+    // schoolsData 为异步加载（ECE 库），缺此依赖会导致数据到达后建议不刷新
+  }, [schoolInput, schools, schoolsData]);
 
   const childWord = ece ? "孩子" : "学生";
   const studentTitle = (n: number) => `${childWord}${n}信息`;
@@ -355,8 +354,8 @@ export function ApplicationForm({
       await sendEmailCode(email.trim());
       setNeedAuth(true);
       setCooldown(60);
-    } catch (err: any) {
-      setAuthError(err?.message || "发送验证码失败");
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : "发送验证码失败");
     } finally {
       setCodeSending(false);
     }
@@ -368,8 +367,8 @@ export function ApplicationForm({
       setSubmitting(true);
       await signInWithEmailCode(email.trim(), code.trim());
       // 登录成功后 user 更新 → locked 解除，表单解锁
-    } catch (err: any) {
-      setAuthError(err?.message || "验证失败");
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : "验证失败");
     } finally {
       setSubmitting(false);
     }

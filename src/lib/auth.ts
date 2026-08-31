@@ -16,6 +16,51 @@
 import { useSyncExternalStore } from "react";
 import cloudbase from "@cloudbase/js-sdk";
 
+/**
+ * CloudBase JS-SDK 的最小类型声明（官方 npm 包类型不完整，这里仅声明本项目用到的方法/字段）。
+ * 用最小接口替代 any：既能消除 no-explicit-any，又能让 SDK 调用获得基本类型检查。
+ */
+interface CloudBaseApp {
+  auth: () => CloudBaseAuth;
+}
+interface CloudBaseAuth {
+  getLoginState: () => Promise<CloudBaseLoginState>;
+  onLoginStateChanged: (cb: (state: CloudBaseLoginState) => void) => void;
+  getVerification: (opts: { email: string }) => Promise<CloudBaseVerificationResult>;
+  signInWithEmail: (opts: {
+    verificationInfo: CloudBaseVerificationInfo;
+    verificationCode: string;
+    email: string;
+  }) => Promise<CloudBaseSignInResult>;
+  signOut: () => Promise<unknown>;
+  getAccessToken: () => Promise<CloudBaseAccessTokenInfo>;
+}
+interface CloudBaseLoginState {
+  user?: {
+    uid?: string;
+    openid?: string;
+    customUserId?: string;
+    email?: string | null;
+    loginType?: string;
+  } | null;
+}
+interface CloudBaseVerificationInfo {
+  is_user?: boolean;
+  [key: string]: unknown;
+}
+interface CloudBaseVerificationResult {
+  data?: CloudBaseVerificationInfo;
+  error?: unknown;
+}
+interface CloudBaseSignInResult {
+  error?: unknown;
+  [key: string]: unknown;
+}
+interface CloudBaseAccessTokenInfo {
+  accessToken?: string;
+  [key: string]: unknown;
+}
+
 const ENV_ID = process.env.NEXT_PUBLIC_CLOUDBASE_ENV_ID!;
 const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLOUDBASE_PUBLISHABLE_KEY!;
 
@@ -25,10 +70,10 @@ export interface AuthUser {
   isAnonymous: boolean;
 }
 
-let app: any = null;
-let auth: any = null;
+let app: CloudBaseApp | null = null;
+let auth: CloudBaseAuth | null = null;
 let initialized = false;
-let emailVerifyCtx: { verificationInfo: any; email: string } | null = null;
+let emailVerifyCtx: { verificationInfo: CloudBaseVerificationInfo; email: string } | null = null;
 
 /**
  * 全局登录态 store：所有组件共享同一份 user 状态，登录/登出即时广播。
@@ -37,6 +82,21 @@ let emailVerifyCtx: { verificationInfo: any; email: string } | null = null;
 let currentUser: AuthUser | null = null;
 const userListeners = new Set<(u: AuthUser | null) => void>();
 let storeStarted = false;
+
+/**
+ * 登录态是否已完成「首次恢复」。用于区分两种情况：
+ *   - false：尚未确定（SDK 还在异步恢复登录态）——此时不能判定为未登录
+ *   - true ：已确定（可能是已登录，也可能是确实未登录）
+ * 页面据此避免「已登录用户首帧闪一下登录墙」。
+ */
+let authReady = false;
+const readyListeners = new Set<() => void>();
+
+function emitReady() {
+  if (authReady) return;
+  authReady = true;
+  readyListeners.forEach((l) => l());
+}
 
 function emitUser(next: AuthUser | null) {
   // 浅比较，避免无变化时重复通知
@@ -49,14 +109,20 @@ function emitUser(next: AuthUser | null) {
 
 function startUserStore() {
   const a = getAuth();
-  if (storeStarted || !a) return;
+  if (storeStarted) return;
+  // 未配置 CloudBase（缺 envId / key）时没有 auth 实例，直接视为「已确定未登录」
+  if (!a) {
+    emitReady();
+    return;
+  }
   storeStarted = true;
   // 同步当前态
   a.getLoginState()
-    .then((state: any) => emitUser(toAuthUser(state)))
-    .catch(() => emitUser(null));
+    .then((state: CloudBaseLoginState) => emitUser(toAuthUser(state)))
+    .catch(() => emitUser(null))
+    .finally(() => emitReady());
   // 订阅后续变化
-  a.onLoginStateChanged((loginState: any) => emitUser(toAuthUser(loginState)));
+  a.onLoginStateChanged((loginState: CloudBaseLoginState) => emitUser(toAuthUser(loginState)));
 }
 
 /**
@@ -64,7 +130,7 @@ function startUserStore() {
  * 口径：只有邮箱登录（user.email 存在且非匿名）才算「已登录」；
  * 匿名态、或没有邮箱的态一律视为「未登录」(返回 null)，小人区不显示退出登录。
  */
-function toAuthUser(loginState: any): AuthUser | null {
+function toAuthUser(loginState: CloudBaseLoginState): AuthUser | null {
   const u = loginState?.user;
   if (!u) return null;
   const isAnonymous = u.loginType === "ANONYMOUS" || !u.email;
@@ -77,7 +143,7 @@ function toAuthUser(loginState: any): AuthUser | null {
 }
 
 /** 初始化 CloudBase 客户端（幂等），返回 auth 实例。 */
-export function initCloudBase(): any {
+export function initCloudBase(): CloudBaseAuth | null {
   if (initialized && app && auth) return auth;
   if (!ENV_ID || !PUBLISHABLE_KEY) {
     console.warn(
@@ -89,7 +155,7 @@ export function initCloudBase(): any {
     env: ENV_ID,
     accessKey: PUBLISHABLE_KEY,
     region: "ap-shanghai",
-  });
+  }) as unknown as CloudBaseApp;
   auth = app.auth();
   initialized = true;
   startUserStore();
@@ -97,7 +163,7 @@ export function initCloudBase(): any {
 }
 
 /** 获取当前 auth 实例（确保已初始化）。 */
-function getAuth(): any {
+function getAuth(): CloudBaseAuth | null {
   return initCloudBase();
 }
 
@@ -127,8 +193,31 @@ export function useAuthUser(): AuthUser | null {
   );
 }
 
+/**
+ * 订阅「登录态首次恢复完成」。
+ * 配合 useAuthUser 使用：只有 ready 为 true 时，user === null 才代表「确实未登录」，
+ * 否则只是「登录态尚未恢复」，此时应显示加载态而不是登录墙。
+ */
+export function subscribeAuthReady(cb: () => void): () => void {
+  initCloudBase();
+  startUserStore();
+  readyListeners.add(cb);
+  return () => {
+    readyListeners.delete(cb);
+  };
+}
+
+/** React hook：登录态是否已确定（SSR 恒为 false）。 */
+export function useAuthReady(): boolean {
+  return useSyncExternalStore(
+    (cb) => subscribeAuthReady(() => cb()),
+    () => authReady,
+    () => false, // SSR：服务端始终未就绪
+  );
+}
+
 /** 返回原始 loginState（未经 toAuthUser 过滤），供 auth-init 判断是否匿名残留。 */
-export function getLoginStateRaw(): Promise<any> {
+export function getLoginStateRaw(): Promise<CloudBaseLoginState | null> {
   const a = getAuth();
   if (!a) return Promise.resolve(null);
   return a.getLoginState().catch(() => null);
@@ -139,19 +228,21 @@ export async function sendEmailCode(email: string): Promise<void> {
   const a = getAuth();
   if (!a) throw new Error("认证未初始化");
   try {
-    const res: any = await a.getVerification({ email });
+    const res = await a.getVerification({ email });
     if (res?.error) throw res.error;
-    emailVerifyCtx = { verificationInfo: res?.data ?? res, email };
-  } catch (e: any) {
+    const info = res?.data ?? (res as unknown as CloudBaseVerificationInfo);
+    emailVerifyCtx = { verificationInfo: info, email };
+  } catch (e: unknown) {
+    const err = e as { message?: string; code?: string; requestId?: string; status?: number };
     console.error("[auth] sendEmailCode 失败:", {
-      message: e?.message,
-      code: e?.code,
-      requestId: e?.requestId,
-      status: e?.status,
+      message: err.message,
+      code: err.code,
+      requestId: err.requestId,
+      status: err.status,
       error: e,
     });
     throw new Error(
-      e?.message || `发送验证码失败${e?.code ? ` (code=${e.code})` : ""}`,
+      err.message || `发送验证码失败${err.code ? ` (code=${err.code})` : ""}`,
     );
   }
 }
@@ -172,7 +263,7 @@ export async function signInWithEmailCode(
     throw new Error("请先获取验证码");
   }
   try {
-    const res: any = await a.signInWithEmail({
+    const res = await a.signInWithEmail({
       verificationInfo: emailVerifyCtx.verificationInfo,
       verificationCode: code,
       email,
@@ -181,7 +272,7 @@ export async function signInWithEmailCode(
     // 双保险：主动从 SDK 拉一次最新 loginState 并 emit，
     // 保证即便 SDK 内部未及时触发 onLoginStateChanged，UI 也能立即更新到登录态。
     try {
-      const state: any = await a.getLoginState();
+      const state = await a.getLoginState();
       emitUser(toAuthUser(state));
       // 登录/注册成功后始终同步基础信息（至少邮箱）；注册页携带的称呼/省份/城市一并写入。
       // 失败静默忽略（表可能未建）。merge-duplicates 仅更新提供的列，不会清空已有字段。
@@ -195,16 +286,17 @@ export async function signInWithEmailCode(
     } catch (refreshErr) {
       console.warn("[auth] post-login getLoginState failed:", refreshErr);
     }
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const err = e as { message?: string; code?: string; requestId?: string; status?: number };
     console.error("[auth] 邮箱验证码登录失败:", {
-      message: e?.message,
-      code: e?.code,
-      requestId: e?.requestId,
-      status: e?.status,
+      message: err.message,
+      code: err.code,
+      requestId: err.requestId,
+      status: err.status,
       error: e,
     });
     throw new Error(
-      e?.message || `验证失败${e?.code ? ` (code=${e.code})` : ""}`,
+      err.message || `验证失败${err.code ? ` (code=${err.code})` : ""}`,
     );
   } finally {
     emailVerifyCtx = null;
@@ -234,7 +326,7 @@ export async function getAccessToken(): Promise<string | null> {
   if (!a) return null;
   try {
     const info = await a.getAccessToken();
-    return (info as any)?.accessToken ?? null;
+    return info?.accessToken ?? null;
   } catch (e) {
     console.warn("[auth] 获取 access token 失败", e);
     return null;

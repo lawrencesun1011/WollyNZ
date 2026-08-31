@@ -69,17 +69,6 @@ function gatewayBase(): string {
   return `https://${envId}.api.tcloudbasegateway.com/v1/rdb/rest`;
 }
 
-function readLS(key: string): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(key);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed.filter((x) => typeof x === "string") : [];
-  } catch {
-    return [];
-  }
-}
-
 function writeLS(key: string, value: unknown) {
   if (typeof window === "undefined") return;
   try {
@@ -438,7 +427,7 @@ export async function saveCloudProfile(profile: UserProfile): Promise<boolean> {
   if (!token) return false;
   try {
     const state = await getLoginStateRaw();
-    const owner = state?.userInfo?.uuid ?? state?.user?.uuid ?? null;
+    const owner = state?.user?.uid ?? null;
     if (!owner) return false;
     return await ensureUserInfo(owner, {
       province: profile.province,

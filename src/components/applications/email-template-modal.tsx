@@ -47,10 +47,14 @@ export function EmailTemplateModal({ item, onClose }: Props) {
     }
   }
 
-  // 打开弹窗即自动生成（无已保存内容时）；StrictMode 双挂载用 AbortController 取消首次请求。
+  // 打开弹窗且无已保存内容时自动生成邮件。
+  // 这是「挂载即网络请求」的有意副作用：结果来自异步 API，无法用 state 派生替代；
+  // 在不引入数据获取层（SWR / React Query 等）的前提下，保留 effect 触发是唯一合理做法。
   useEffect(() => {
     if (item.emailSubject || item.emailBody) return;
     const ctrl = new AbortController();
+    // 挂载即网络请求：结果来自异步 API，无法用 state 派生替代
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void generateEmail(ctrl.signal);
     return () => ctrl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps

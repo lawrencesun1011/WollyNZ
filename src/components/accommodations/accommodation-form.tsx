@@ -239,7 +239,7 @@ export function AccommodationForm({
         setEmail(user?.email ?? "");
         // 从 user_info 预填联系人姓名（称呼），仅当为空时
         if (user?.uid) {
-          getUserInfo(user.uid)
+          getUserInfo()
             .then((ui) => {
               if (ui?.name) setField("name", ui.name);
             })
@@ -380,8 +380,8 @@ export function AccommodationForm({
       await sendEmailCode(email.trim());
       setNeedAuth(true);
       setCooldown(60);
-    } catch (err: any) {
-      setAuthError(err?.message || "发送验证码失败");
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : "发送验证码失败");
     } finally {
       setCodeSending(false);
     }
@@ -393,8 +393,8 @@ export function AccommodationForm({
       setSubmitting(true);
       await signInWithEmailCode(email.trim(), code.trim());
       // 登录成功后 user 更新 → locked 解除，表单解锁
-    } catch (err: any) {
-      setAuthError(err?.message || "验证失败");
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : "验证失败");
     } finally {
       setSubmitting(false);
     }

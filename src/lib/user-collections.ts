@@ -6,18 +6,20 @@
 // 登录后（currentUid 非空）读写改为云端同步，以云端为准。
 //
 // 对比项携带 kind（"school" | "ece"），便于云端分别落 school_compare / ece_compare 列。
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { getSchoolsSnapshot } from "./schools-store";
 import { getEceSnapshot } from "./ece-store";
 import {
-  applyCloudFavorites,
   getFavoriteIds,
-  setFavoritesUser,
   subscribeFavorites,
   toggleFavorite,
   removeFavorite,
   clearFavorites,
 } from "./favorites";
+
+/** SSR / 首帧的空快照（必须是稳定引用，否则 useSyncExternalStore 会无限重渲染） */
+const EMPTY_FAVORITES: { id: string; kind: "school" | "ece" }[] = [];
+const EMPTY_COMPARE: string[] = [];
 
 const COMPARE_LS_KEY = "wollyn:schools:compare";
 const COMPARE_MAX = 4;
@@ -81,9 +83,15 @@ function writeCompareLocalStorage(items: CompareItem[]) {
   }
 }
 
+/**
+ * 对比 id 的稳定快照：useSyncExternalStore 要求 getSnapshot 返回「稳定引用」，
+ * 若每次调用都 map 出新数组会触发无限重渲染。故在 emitCompare 时统一刷新。
+ */
+let compareIdsSnapshot: string[] = compareState.items.map((i) => i.id);
+
 function emitCompare() {
-  const ids = compareState.items.map((i) => i.id);
-  for (const l of compareState.listeners) l(ids);
+  compareIdsSnapshot = compareState.items.map((i) => i.id);
+  for (const l of compareState.listeners) l(compareIdsSnapshot);
 }
 
 export function subscribeCompare(cb: CompareListener): () => void {
@@ -92,7 +100,7 @@ export function subscribeCompare(cb: CompareListener): () => void {
 }
 
 export function getCompareIds(): string[] {
-  return compareState.items.map((i) => i.id);
+  return compareIdsSnapshot;
 }
 
 /** 供 favorites.ts 读取当前对比列表（含 kind，用于云端分列）。 */
@@ -190,12 +198,12 @@ export function useFavorites(): {
   removeFavorite: (id: string, kind: "school" | "ece") => void;
   clearFavorites: () => void;
 } {
-  const [favoriteIds, setFavoriteIds] = useState<{ id: string; kind: "school" | "ece" }[]>([]);
-
-  useEffect(() => {
-    setFavoriteIds(getFavoriteIds());
-    return subscribeFavorites(setFavoriteIds);
-  }, []);
+  // 直接订阅外部 store：首帧即为真实值，避免「先空后填充」的级联渲染
+  const favoriteIds = useSyncExternalStore(
+    subscribeFavorites,
+    getFavoriteIds,
+    () => EMPTY_FAVORITES
+  );
 
   return {
     favoriteIds,
@@ -213,12 +221,12 @@ export function useCompare(): {
   removeCompare: (id: string) => void;
   clearCompare: (kind?: "school" | "ece") => void;
 } {
-  const [compareIds, setCompareIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    setCompareIds(getCompareIds());
-    return subscribeCompare(setCompareIds);
-  }, []);
+  // 直接订阅外部 store：首帧即为真实值，避免「先空后填充」的级联渲染
+  const compareIds = useSyncExternalStore(
+    subscribeCompare,
+    getCompareIds,
+    () => EMPTY_COMPARE
+  );
 
   return {
     compareIds,

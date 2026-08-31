@@ -55,7 +55,6 @@ export function SectionBackgroundLayer({
         />
       ) : bg.videoSrc ? (
         // cover 模式 + 视频：静音自动循环播放，src(静态图) 作为首帧 poster 防白屏
-        // eslint-disable-next-line @next/next/no-img-element
         <video
           className="h-full w-full object-cover"
           style={{ objectPosition: bg.position || "center" }}

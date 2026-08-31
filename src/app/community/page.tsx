@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { CheckCircle2, HeartHandshake, MessageCircle, Sparkles, Users } from "lucide-react";
 
 export const metadata = {
@@ -64,7 +65,7 @@ export default function CommunityPage() {
 
             <div className="flex flex-col items-center">
               <div className="overflow-hidden rounded-2xl border border-primary/10 bg-white p-3 shadow-sm">
-                <img
+                <Image
                   src="/images/community/wechat-qrcode.png"
                   alt={`${title}二维码`}
                   width={200}

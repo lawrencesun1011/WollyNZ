@@ -15,7 +15,7 @@
  *
  * 用法：
  * - 注册/登录成功后：ensureUserInfo(uid, { name, email, province, city }) 写入基础信息（uid 仅用于兼容，owner 实际由服务端注入）。
- * - 新建申请表单预填：getUserInfo(uid) 读取称呼/省份/城市（RLS 自动限定到本人行）。
+ * - 新建申请表单预填：getUserInfo() 读取称呼/省份/城市（RLS 自动限定到本人行）。
  */
 
 import { getAccessToken } from "./auth";
@@ -80,7 +80,7 @@ export async function ensureUserInfo(
 }
 
 /** 读取当前用户基础信息；未登录 / 无记录 / 失败返回 null。 */
-export async function getUserInfo(owner: string): Promise<UserInfo | null> {
+export async function getUserInfo(): Promise<UserInfo | null> {
   const token = await getAccessToken();
   if (!token) return null;
   try {

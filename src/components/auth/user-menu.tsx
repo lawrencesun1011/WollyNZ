@@ -5,10 +5,6 @@ import Link from "next/link";
 import { User, LogOut, Mail, FileText, BedDouble } from "lucide-react";
 import { signOut, useAuthUser } from "@/lib/auth";
 
-interface Props {
-  onLoginClick: () => void;
-}
-
 /** 顶栏右侧用户区：点击小人弹出下拉菜单（注册/登录、我的申请、退出登录）。 */
 export function UserMenu() {
   const user = useAuthUser();
