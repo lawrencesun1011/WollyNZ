@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-08-31T23:44:29.883Z",
+  "fetchedAt": "2026-09-01T00:32:52.465Z",
   "sources": {
     "schools": {
       "resourceId": "4b292323-9fcc-41f8-814b-3c7b19cf14b3",
@@ -8,10 +8,10 @@
       "frontendCount": 2465
     },
     "ece": {
-      "resourceId": "ece.json",
+      "resourceId": "a9d65b07-8483-4b05-bdfd-d2abe4f38827",
       "label": "幼儿园",
-      "count": 4371,
-      "frontendCount": 3176
+      "count": 4381,
+      "frontendCount": 3174
     }
   }
 }

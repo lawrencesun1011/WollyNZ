@@ -1,11 +1,11 @@
-// 全量拉取 data.govt.nz 中小学数据，清洗后落地到 data/ 目录（本地 JSON）。
+// 全量拉取 data.govt.nz 的「中小学」与「幼儿园（ECE）」数据，清洗后落地到 data/ 目录（本地 JSON）。
 // 用法：node src/scripts/fetch-data.mjs  （或 npm run fetch:data）
 // 说明：
+//   - 中小学与幼儿园均通过 CKAN datastore dump 接口拉取「原始数据」，分别落为 schools.json / ece.json。
 //   - CKAN datastore dump 的 records 为「按 fields 顺序的数组」，需按 fields 映射为对象。
-//   - 生成 schools.json（原始）与 schools-frontend.json（前端过滤+派生后的 SchoolFrontend[]）。
-//   - 本仓库不再使用 PostgreSQL，数据全部走本地 JSON（运行时由 src/lib/data.ts 读取）。
+//   - 再经 buildSchoolFrontend / buildEceFrontend 过滤+派生，落为 *-frontend.json（前端运行时由 src/lib/data.ts 读取）。
+//   - 本仓库不再使用 PostgreSQL，数据全部走本地 JSON。
 //   - 低频更新：手动运行本脚本 -> 生成文件 -> 提交 git -> 重新部署。
-//   - 幼儿园（ECE）数据接入后续单独开发，本脚本暂不处理。
 
 import { writeFile, mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
@@ -14,10 +14,15 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "..", "..", "data");
 
-const SOURCE = {
+const SCHOOL_SOURCE = {
   resourceId: "4b292323-9fcc-41f8-814b-3c7b19cf14b3",
   url: "https://catalogue.data.govt.nz/datastore/dump/4b292323-9fcc-41f8-814b-3c7b19cf14b3?format=json",
   label: "中小学",
+};
+const ECE_SOURCE = {
+  resourceId: "a9d65b07-8483-4b05-bdfd-d2abe4f38827",
+  url: "https://catalogue.data.govt.nz/datastore/dump/a9d65b07-8483-4b05-bdfd-d2abe4f38827?format=json",
+  label: "幼儿园",
 };
 
 const KEEP_SCHOOL_TYPE_KEYWORDS = [
@@ -72,7 +77,7 @@ function toNumber(x) {
   return Number.isNaN(n) ? null : n;
 }
 
-// 幼儿园（ECE）数据接入：读取本地 data/ece.json（不联网）。
+// 幼儿园（ECE）原始数据来自 ECE_SOURCE（data.govt.nz 的 Early Childhood Services Directory）。
 // 仅保留 Org_Type ∈ {Education & Care Service, Free Kindergarten} 且
 // Authority ∈ {Privately owned, Community based} 的记录。
 const KEEP_ECE_TYPE = ["Education & Care Service", "Free Kindergarten"];
@@ -216,10 +221,10 @@ function buildSchoolFrontend(raw) {
   };
 }
 
-async function fetchSource() {
-  console.log(`[schools] 拉取中: ${SOURCE.url}`);
-  const res = await fetch(SOURCE.url);
-  if (!res.ok) throw new Error(`[schools] HTTP ${res.status}`);
+async function fetchSource(source) {
+  console.log(`[${source.label}] 拉取中: ${source.url}`);
+  const res = await fetch(source.url);
+  if (!res.ok) throw new Error(`[${source.label}] HTTP ${res.status}`);
   const json = await res.json();
   const fields = json.fields.map((f) => f.id);
   const records = json.records.map((row) => {
@@ -229,7 +234,7 @@ async function fetchSource() {
     });
     return obj;
   });
-  console.log(`[schools] 记录数: ${records.length}`);
+  console.log(`[${source.label}] 记录数: ${records.length}`);
   return records;
 }
 
@@ -237,7 +242,7 @@ async function main() {
   await mkdir(DATA_DIR, { recursive: true });
   const meta = { fetchedAt: new Date().toISOString(), sources: {} };
 
-  const schoolRaw = await fetchSource();
+  const schoolRaw = await fetchSource(SCHOOL_SOURCE);
   await writeFile(join(DATA_DIR, "schools.json"), JSON.stringify(schoolRaw));
 
   const frontend = schoolRaw
@@ -250,8 +255,8 @@ async function main() {
   );
   console.log(`[schools] 前端过滤后: ${frontend.length} 所`);
   meta.sources.schools = {
-    resourceId: SOURCE.resourceId,
-    label: SOURCE.label,
+    resourceId: SCHOOL_SOURCE.resourceId,
+    label: SCHOOL_SOURCE.label,
     count: schoolRaw.length,
     frontendCount: frontend.length,
   };
@@ -259,33 +264,25 @@ async function main() {
   await writeFile(join(DATA_DIR, "_meta.json"), JSON.stringify(meta, null, 2));
   console.log(`完成。数据已写入 ${DATA_DIR}`);
 
-  // ── ECE（幼儿园） ──
-  try {
-    const eceRaw = JSON.parse(
-      await (await import("node:fs/promises")).readFile(
-        join(DATA_DIR, "ece.json"),
-        "utf-8"
-      )
-    );
-    const eceFrontend = eceRaw
-      .map(buildEceFrontend)
-      .filter(Boolean)
-      .sort((a, b) => a.name.localeCompare(b.name));
-    await writeFile(
-      join(DATA_DIR, "ece-frontend.json"),
-      JSON.stringify(eceFrontend)
-    );
-    console.log(`[ece] 前端过滤后: ${eceFrontend.length} 所`);
-    meta.sources.ece = {
-      resourceId: "ece.json",
-      label: "幼儿园",
-      count: eceRaw.length,
-      frontendCount: eceFrontend.length,
-    };
-    await writeFile(join(DATA_DIR, "_meta.json"), JSON.stringify(meta, null, 2));
-  } catch (e) {
-    console.error("[ece] 生成失败（跳过）:", e.message);
-  }
+  // ── ECE（幼儿园） ── 与中小学一致：先拉原始数据落 ece.json，再过滤派生。
+  const eceRaw = await fetchSource(ECE_SOURCE);
+  await writeFile(join(DATA_DIR, "ece.json"), JSON.stringify(eceRaw));
+  const eceFrontend = eceRaw
+    .map(buildEceFrontend)
+    .filter(Boolean)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  await writeFile(
+    join(DATA_DIR, "ece-frontend.json"),
+    JSON.stringify(eceFrontend)
+  );
+  console.log(`[ece] 前端过滤后: ${eceFrontend.length} 所`);
+  meta.sources.ece = {
+    resourceId: ECE_SOURCE.resourceId,
+    label: ECE_SOURCE.label,
+    count: eceRaw.length,
+    frontendCount: eceFrontend.length,
+  };
+  await writeFile(join(DATA_DIR, "_meta.json"), JSON.stringify(meta, null, 2));
 }
 
 // 直接 `node` 运行（本地/CI）时自执行；作为模块被 import 时不自执行。
