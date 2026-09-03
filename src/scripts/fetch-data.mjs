@@ -142,8 +142,8 @@ function buildEceFrontend(raw) {
     territorial: (raw.Territorial_Authority || "").trim(),
     region: (raw.Education_Region || "").trim(),
     urbanRural: (raw.Urban_Rural_Indicator || "").trim(),
-    phone: "",
-    email: "",
+    phone: (raw.Telephone || "").trim(),
+    email: (raw.Email || "").trim(),
     roll: total,
     eqi: eqiVal,
     isolation: 0,
@@ -295,4 +295,4 @@ if (isDirectRun) {
   });
 }
 
-export { main };
+export { main, buildEceFrontend, buildSchoolFrontend };
