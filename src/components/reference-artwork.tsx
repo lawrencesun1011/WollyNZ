@@ -20,7 +20,7 @@ const artworkRegions = {
     x: 56, y: 1624, width: 170, height: 110,
   },
   school: {
-    image: "homepage-v13-atlas.png", canvas: [1106, 1422],
+    image: "homepage-v13-atlas.webp", canvas: [1106, 1422],
     x: 386, y: 790, width: 335, height: 153,
   },
 } as const;

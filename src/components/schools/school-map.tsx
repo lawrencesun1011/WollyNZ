@@ -13,6 +13,7 @@ import { levelShape } from "@/lib/filters";
 import type { MarkerShape } from "@/lib/filters";
 import { cnGender } from "@/lib/labels";
 import { useFavorites, useCompare } from "@/lib/user-collections";
+import { perfMark } from "@/lib/perf";
 import {
   BASE_STYLES,
   CLUSTER_THRESHOLD,
@@ -182,6 +183,9 @@ export function SchoolMap({
   const clusterMarkersRef = useRef<Map<string, MapLibreMarker>>(new Map());
   const popupRef = useRef<MapLibrePopup | null>(null);
   const popupIdRef = useRef<string | null>(null);
+  // 临时性能打点（用完删除）
+  const mapMountLogged = useRef(false);
+  const markersLogged = useRef(false);
 
   const onSelectRef = useRef(onSelect);
   const onDetailRef = useRef(onDetail);
@@ -210,6 +214,11 @@ export function SchoolMap({
   const suppressingCloseRef = useRef<boolean>(false);
   // spiderfy（摊开重合点）中被临时移位的 marker
   const spiderIdsRef = useRef<string[] | null>(null);
+
+  if (!mapMountLogged.current) {
+    mapMountLogged.current = true;
+    perfMark("④ 地图chunk加载+组件实例化");
+  }
 
   useEffect(() => {
     onSelectRef.current = onSelect;
@@ -502,6 +511,7 @@ export function SchoolMap({
 
     (async () => {
       // 预拉取并把海水改色的街道样式，使首帧即为天蓝，避免浅蓝闪现
+      perfMark("⑤ 底图样式拉取开始");
       const style = await getStreetStyle();
       if (cancelled || !containerRef.current) return;
 
@@ -522,6 +532,7 @@ export function SchoolMap({
         attributionControl: { compact: true },
       });
       mapRef.current = m;
+      perfMark("⑥ MapLibre实例创建");
       // 缩放控件（对应 Leaflet 默认的 zoomControl，位置同为左上角）
       m.addControl(new NavigationControl({ showCompass: false }), "top-left");
 
@@ -542,6 +553,7 @@ export function SchoolMap({
       m.on("load", () => {
         // StrictMode 重挂载可能导致旧 map 已被 remove，确保当前仍是同一个实例
         if (mapRef.current !== m) return;
+        perfMark("⑦ 底图load完成(可交互)");
         loadedRef.current = true;
         m.resize();
         reportBounds();
@@ -644,6 +656,10 @@ export function SchoolMap({
 
     pointsRef.current = points;
     syncAggregation();
+    if (!markersLogged.current) {
+      markersLogged.current = true;
+      perfMark("⑧ 标注渲染完成", `${schools.length}个`);
+    }
     // 依赖 loaded：地图为异步创建，就绪后需重跑本 effect 才能渲染 marker
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schools, loaded]);

@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { ReferenceArtwork } from "@/components/reference-artwork";
 
 /**
  * 用 CSS 窗口从设计稿图集中裁出插画区域，避免把文字和 UI 一起栅格化。
@@ -24,14 +25,15 @@ export function Artwork({
   name: ArtworkName;
   className?: string;
 }) {
+  if (name === "school") {
+    return <ReferenceArtwork name="school" className={`artwork artwork-school ${className}`} />;
+  }
   const { x, y, w, h } = regions[name];
   const style = {
     aspectRatio: `${w} / ${h}`,
     backgroundImage: "url('/images/design-atlas.webp')",
     backgroundSize: `${(ATLAS_W / w) * 100}% ${(ATLAS_H / h) * 100}%`,
-    backgroundPosition: `${(x / (ATLAS_W - w)) * 100}% ${
-      (y / (ATLAS_H - h)) * 100
-    }%`,
+    backgroundPosition: `${(x / (ATLAS_W - w)) * 100}% ${(y / (ATLAS_H - h)) * 100}%`,
   } satisfies CSSProperties;
 
   return (

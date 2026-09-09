@@ -12,15 +12,21 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function SchoolsPage() {
+  const t0 =
+    typeof performance !== "undefined" ? performance.now() : 0;
   const [schools, meta] = await Promise.all([
     getSchoolFrontendAll(),
     getDataMeta(),
   ]);
+  const serverFetchMs = Math.round(
+    (typeof performance !== "undefined" ? performance.now() : 0) - t0
+  );
 
   return (
     <SchoolsExplorer
       initialSchools={schools}
       fetchedAt={meta?.fetchedAt ?? null}
+      serverFetchMs={serverFetchMs}
     />
   );
 }
