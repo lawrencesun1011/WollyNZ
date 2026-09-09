@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import type { SchoolFrontend, Filters, SortKey } from "@/lib/types";
 import {
@@ -16,6 +16,7 @@ import { EceModal } from "./ece-modal";
 import { EceCompareBar } from "./ece-compare-bar";
 import { EceCompareModal } from "./ece-compare-modal";
 import { useFavorites, useCompare } from "@/lib/user-collections";
+import { subscribeEce, getEceSnapshot } from "@/lib/ece-store";
 
 const EceMap = dynamic(
   () => import("./ece-map").then((m) => m.EceMap),
@@ -32,8 +33,17 @@ const EceMap = dynamic(
 const PAGE_SIZE = 60;
 
 export function EceExplorer({ initialSchools }: { initialSchools: SchoolFrontend[] }) {
-  // ECE 数据来自本地 JSON（ece-frontend.json），直接用首屏数据，无需预热层。
-  const [schools] = useState<SchoolFrontend[]>(initialSchools);
+  // 订阅全局幼儿园库：客户端预热层（布局内 EcePreloader）拉取就绪后通过 store 即时同步；
+  // 首屏 SSR 仅给前 100 所兜底（秒开），全量数据到达后无缝替换。
+  const cloudSchools = useSyncExternalStore(
+    subscribeEce,
+    getEceSnapshot,
+    () => null
+  );
+  const schools =
+    cloudSchools && cloudSchools.length >= initialSchools.length
+      ? cloudSchools
+      : initialSchools;
 
   const [filters, setFilters] = useState<Filters>(emptyFilters());
   const [sort, setSort] = useState<SortKey>("eqi");

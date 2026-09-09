@@ -8,10 +8,13 @@ export const metadata: Metadata = {
     "按城市、学校类型、办学性质、公平指数 EQI 与是否接受 2 岁以下等条件筛选新西兰幼儿园，支持地图与对比。",
 };
 
-// 幼儿园（ECE）库页面：服务端读取本地预清洗 JSON，SSR 首屏直出。
-export const dynamic = "force-dynamic";
+// 首屏 SSR 只直出前 100 所（SEO + 立即可用）；
+// 全量数据由客户端 EcePreloader 预热进 store/localStorage 后无缝补全。
+// 页面静态预渲染（无 force-dynamic），导航即秒出。
+const SSR_SLICE = 100;
 
 export default async function EcePage() {
   const all = await getEceFrontendAll();
-  return <EceExplorer initialSchools={all} />;
+  const initialSchools = all.slice(0, SSR_SLICE);
+  return <EceExplorer initialSchools={initialSchools} />;
 }

@@ -1,43 +1,83 @@
 "use client";
 
+// 幼儿园（ECE）数据的客户端全局缓存层，与 schools-store 同构。
+// 进入网站（根布局挂载 EcePreloader）即触发预热拉取 /api/ece-all，
+// 结果存入内存 + localStorage（带 TTL），ECE 页首屏用本地兜底秒开，
+// 接口数据到达后通过订阅机制无缝替换，实现「优先接口、本地兜底」。
 import type { SchoolFrontend } from "./types";
 
-// 与 schools-store 一致：模块级缓存 ECE 前端数据，按需从 /api/ece-all 拉取一次。
-let eceCache: SchoolFrontend[] | null = null;
-let ecePromise: Promise<SchoolFrontend[] | null> | null = null;
-const eceListeners: Set<() => void> = new Set();
+const LS_KEY = "wollyn:ece:all";
+const LS_TTL = 5 * 60 * 1000; // 5min，避免一直用过期数据但减少接口压力
 
-function emitEce() {
-  eceListeners.forEach((l) => l());
+type Listener = (list: SchoolFrontend[]) => void;
+
+const state: {
+  data: SchoolFrontend[] | null;
+  loading: boolean;
+  listeners: Set<Listener>;
+} = {
+  data: null,
+  loading: false,
+  listeners: new Set(),
+};
+
+function emit() {
+  for (const l of state.listeners) l(state.data!);
 }
 
-/** 订阅 ECE 数据集变化（主要由 loadEceSnapshot 完成后触发）。 */
-export function subscribeEce(cb: () => void): () => void {
-  eceListeners.add(cb);
-  return () => eceListeners.delete(cb);
+function readLocalStorage(): SchoolFrontend[] | null {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { ts: number; data: SchoolFrontend[] };
+    if (Date.now() - parsed.ts > LS_TTL) return null;
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+function writeLocalStorage(data: SchoolFrontend[]) {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({ ts: Date.now(), data }));
+  } catch {
+    // 忽略隐私模式等写入失败
+  }
+}
+
+export function subscribeEce(cb: Listener): () => void {
+  state.listeners.add(cb);
+  return () => state.listeners.delete(cb);
 }
 
 export function getEceSnapshot(): SchoolFrontend[] | null {
-  return eceCache;
+  return state.data;
 }
 
-export async function loadEceSnapshot(): Promise<SchoolFrontend[] | null> {
-  if (eceCache) return eceCache;
-  if (ecePromise) return ecePromise;
-  ecePromise = fetch("/api/ece-all")
-    .then((r) => (r.ok ? r.json() : null))
-    .then((data) => {
-      const arr =
-        data && Array.isArray(data.schools)
-          ? (data.schools as SchoolFrontend[])
-          : null;
-      eceCache = arr;
-      emitEce();
-      return arr;
-    })
-    .catch(() => null)
-    .finally(() => {
-      ecePromise = null;
-    });
-  return ecePromise;
+// 预热：进网站即调用，结果写内存+localStorage 并通知订阅者。
+// 已加载 / 加载中则跳过，避免重复请求。
+export async function preloadEce(): Promise<void> {
+  if (state.data || state.loading) return;
+  // 先用 localStorage 快照填充，保证秒开且跨会话复用
+  const ls = readLocalStorage();
+  if (ls && ls.length) {
+    state.data = ls;
+    emit();
+    return;
+  }
+  state.loading = true;
+  try {
+    const res = await fetch("/api/ece-all");
+    if (!res.ok) return;
+    const json = (await res.json()) as { schools: SchoolFrontend[] };
+    const list = json.schools ?? [];
+    if (!list.length) return;
+    state.data = list;
+    writeLocalStorage(list);
+    emit();
+  } catch {
+    // 拉取失败不影响：首屏已有本地兜底
+  } finally {
+    state.loading = false;
+  }
 }

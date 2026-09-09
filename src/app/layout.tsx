@@ -6,6 +6,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { SchoolsPreloader } from "@/components/schools-preloader";
+import { EcePreloader } from "@/components/ece-preloader";
 import { AuthProvider } from "@/components/auth-provider";
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function RootLayout({
     <html lang="zh-CN" data-scroll-behavior="smooth">
       <body className="min-h-screen">
         <SchoolsPreloader />
+        <EcePreloader />
         <AuthProvider />
         <SiteHeader />
         <main className="site-main">{children}</main>
