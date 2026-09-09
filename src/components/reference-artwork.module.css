@@ -1,0 +1,38 @@
+.art {
+  display: block;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  /* The original paper remains opaque. Fade only its perimeter into the page. */
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 2%, #000 98%, transparent),
+    linear-gradient(to bottom, transparent, #000 3%, #000 98%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent, #000 2%, #000 98%, transparent),
+    linear-gradient(to bottom, transparent, #000 3%, #000 98%, transparent);
+  mask-composite: intersect;
+}
+
+/* The homepage's existing artwork-school class supplies its responsive width. */
+.art:where(:not(:global(.artwork))) { width: 100%; }
+
+.villa, .conversation, .school { mix-blend-mode: normal; }
+
+/* Use one narrow mask on this element, overriding the older atlas's wider fade. */
+.school:global(.artwork.artwork-school) {
+  /* Let the page paper replace the lighter atlas paper without multiplying it. */
+  mix-blend-mode: darken;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 2%, #000 98%, transparent),
+    linear-gradient(to bottom, transparent, #000 3%, #000 99%, transparent);
+  mask-image:
+    linear-gradient(to right, transparent, #000 2%, #000 98%, transparent),
+    linear-gradient(to bottom, transparent, #000 3%, #000 99%, transparent);
+}
+
+.communityLamb, .communityLambMobile {
+  mix-blend-mode: normal;
+  /* Keep the sheep's lower edge intact where it meets the live section rule. */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 3%, #000 97%, transparent);
+}

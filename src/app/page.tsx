@@ -59,7 +59,7 @@ export default function HomePage() {
 
       <section
         id="explore"
-        className="directory page-width border-t border-[#789491]"
+        className="directory content-width border-t border-[#789491]"
         aria-labelledby="explore-title"
       >
         <div className="section-heading flex items-center justify-between border-b border-[#789491]">
@@ -97,7 +97,7 @@ export default function HomePage() {
 
       <section
         id="community"
-        className="community page-width relative border-y border-[#789491]"
+        className="community content-width relative border-t border-[#789491]"
         aria-labelledby="community-title"
       >
         <div className="community-art">

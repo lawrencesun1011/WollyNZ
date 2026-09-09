@@ -557,31 +557,92 @@ textarea.input {
   transform: translateY(-3px);
 }
 
-/* 长文攻略：延续服务页的色彩，但以稳定阅读体验为先 */
+/* 长文攻略：与首页编辑风对齐（纸色 + 衬线 + 墨绿/朱红） */
 .guide-page {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 8% 16%, rgba(156, 203, 189, 0.2), transparent 22rem),
-    radial-gradient(circle at 92% 38%, rgba(91, 163, 196, 0.1), transparent 24rem),
-    var(--color-bg);
+  /* 在攻略页作用域内，把湖水蓝绿 token 重映射为编辑风调色板，
+     这样正文里既有的 Tailwind 颜色类无需逐处改写即可整体换色。 */
+  --color-ink: #102e2c;
+  --color-ink-soft: #3a554e;
+  --color-caption: #6c7a75;
+  --color-primary: #986043;
+  --color-stroke: #c7d1c8;
+  --color-border: #c7d1c8;
+  --color-warning: #b44427;
+  --color-bg: #f9f6f0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-editorial);
+  -webkit-font-smoothing: antialiased;
 }
-
-.guide-article,
+.guide-article {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+/* 标题层级（衬线 + 墨绿；h2 下方细分隔线） */
+.guide-article h1 {
+  font-family: var(--font-editorial);
+  color: #06262b;
+  font-size: clamp(32px, 4.4vw, 46px);
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+.guide-article h2 {
+  font-family: var(--font-editorial);
+  color: #102e2c;
+  font-size: clamp(23px, 2.8vw, 30px);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-bottom: 1px solid var(--color-rule);
+  padding-bottom: 12px;
+  scroll-margin-top: calc(var(--header-height) + 24px);
+}
+.guide-article h3 {
+  font-family: var(--font-editorial);
+  color: #102e2c;
+  font-size: 21px;
+  font-weight: 700;
+}
+.guide-article li::marker {
+  color: var(--color-rule);
+}
+/* Hero 分隔线对齐规则色 */
+.guide-article > header {
+  border-bottom: 1px solid var(--color-rule);
+}
+/* 眉标 chip 对齐编辑风 */
+.guide-page .service-eyebrow {
+  border: 1px solid var(--color-rule);
+  background: transparent;
+  color: #986043;
+  letter-spacing: 0.14em;
+}
+/* 图片框改用规则线描边 */
+.guide-article .my-6.overflow-hidden {
+  border-color: var(--color-rule) !important;
+}
+/* 提示框圆角统一 */
+.guide-article .rounded-xl.border {
+  border-radius: 10px;
+}
+/* 目录对齐编辑风 */
 .guide-toc {
-  border: 1px solid rgba(255, 255, 255, 0.76);
-  background: rgba(255, 255, 255, 0.76);
-  box-shadow: var(--shadow-1);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
-
 .guide-toc a {
   border-radius: 0.5rem;
   padding: 0.25rem 0.5rem;
 }
-
 .guide-toc a:hover {
-  background: rgba(40, 126, 110, 0.08);
+  background: rgba(152, 96, 67, 0.1);
 }
 
 /* ============================================================
@@ -626,6 +687,14 @@ textarea.input {
 }
 .page-width {
   width: calc(100% - 44px);
+  margin-inline: auto;
+}
+
+/* 内容区统一宽度：与找住宿 / 加入社群的 .page 同一套体系。
+   用于首页内容区块与游学攻略，页眉页脚仍用 .page-width（1440 体系）。 */
+.content-width {
+  width: calc(100% - 88px);
+  max-width: 1280px;
   margin-inline: auto;
 }
 
@@ -913,6 +982,7 @@ textarea.input {
 .site-footer {
   background: var(--color-paper);
   color: #102e2c;
+  border-top: 1px solid #789491;
 }
 .footer-main {
   display: grid;
@@ -1011,6 +1081,11 @@ textarea.input {
     min-height: 165px;
   }
 }
+@media (max-width: 1100px) {
+  .content-width {
+    width: calc(100% - 64px);
+  }
+}
 @media (max-width: 1000px) {
   .site-header {
     padding-inline: 8px;
@@ -1068,6 +1143,9 @@ textarea.input {
   }
   .page-width {
     width: calc(100% - 36px);
+  }
+  .content-width {
+    width: calc(100% - 44px);
   }
   .site-header {
     min-height: 104px;
@@ -1295,6 +1373,9 @@ textarea.input {
 @media (max-width: 359px) {
   .page-width {
     width: calc(100% - 28px);
+  }
+  .content-width {
+    width: calc(100% - 32px);
   }
   .main-nav {
     gap: 12px;

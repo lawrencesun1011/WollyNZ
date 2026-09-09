@@ -118,7 +118,7 @@ const TOC = [
 export default function GuidePage() {
   return (
     <main className="guide-page">
-      <div className="mx-auto max-w-6xl px-5 py-12 sm:py-16">
+      <div className="content-width py-12 sm:py-16">
         <div className="grid gap-10 lg:grid-cols-[1fr_220px]">
           {/* 主内容 */}
           <article className="guide-article min-w-0 rounded-3xl p-6 sm:p-10">
