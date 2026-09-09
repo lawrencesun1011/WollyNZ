@@ -13,19 +13,13 @@ export const metadata = {
 const SSR_SLICE = 100;
 
 export default async function SchoolsPage() {
-  const t0 =
-    typeof performance !== "undefined" ? performance.now() : 0;
   const all = await getSchoolFrontendAll();
   const initialSchools = all.slice(0, SSR_SLICE);
-  const serverFetchMs = Math.round(
-    (typeof performance !== "undefined" ? performance.now() : 0) - t0
-  );
 
   return (
     <SchoolsExplorer
       initialSchools={initialSchools}
       fetchedAt={null}
-      serverFetchMs={serverFetchMs}
     />
   );
 }

@@ -17,7 +17,6 @@ import { CompareBar } from "./compare-bar";
 import { CompareModal } from "./compare-modal";
 import { subscribeSchools, getSchoolsSnapshot } from "@/lib/schools-store";
 import { useFavorites, useCompare } from "@/lib/user-collections";
-import { perfMark, perfValue } from "@/lib/perf";
 
 
 const SchoolMap = dynamic(
@@ -36,11 +35,9 @@ const PAGE_SIZE = 60;
 
 export function SchoolsExplorer({
   initialSchools,
-  serverFetchMs,
 }: {
   initialSchools: SchoolFrontend[];
   fetchedAt: string | null;
-  serverFetchMs: number;
 }) {
   // 订阅全局学校库：PG 数据由全局预热层（布局内 SchoolsPreloader）拉取就绪后，
   // 通过外部 store 即时同步；首帧即为真实值，避免「先空后填充」的级联渲染。
@@ -54,24 +51,6 @@ export function SchoolsExplorer({
     cloudSchools && cloudSchools.length >= initialSchools.length
       ? cloudSchools
       : initialSchools;
-
-  // ── 临时性能打点（用完删除）──
-  const mountLogged = useRef(false);
-  const ssrDataLogged = useRef(false);
-  const cloudLogged = useRef(false);
-  if (!mountLogged.current) {
-    mountLogged.current = true;
-    perfMark("① 探索器挂载(hydration完成)");
-    perfValue("服务器SSR拉取耗时", serverFetchMs, `${initialSchools.length}所`);
-  }
-  if (schools.length > 0 && !ssrDataLogged.current) {
-    ssrDataLogged.current = true;
-    perfMark("② 首屏SSR数据就绪", `${schools.length}所`);
-  }
-  if (cloudSchools && !cloudLogged.current) {
-    cloudLogged.current = true;
-    perfMark("③ 客户端PG数据到达", `${cloudSchools.length}所`);
-  }
 
   const [filters, setFilters] = useState<Filters>(emptyFilters());
   const [sort, setSort] = useState<SortKey>("eqi");
