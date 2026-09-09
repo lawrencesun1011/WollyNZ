@@ -52,6 +52,16 @@
   --shadow-2: 0 12px 30px rgba(40, 126, 110, 0.18);
 }
 
+/* 编辑风（Editorial / Storybook）专用 token。
+   与上面的湖水蓝绿体系并存，仅用于首页与全局 Header / Footer。
+   注意：不要在这里重定义 --color-ink，内页仍在用它。 */
+@theme {
+  --color-paper: #f9f6f0;
+  --color-rule: #789491;
+  --color-accent: #b44427;
+  --font-editorial: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+}
+
 :root {
   color-scheme: light;
 }
@@ -61,7 +71,9 @@ html {
 }
 
 body {
-  background: var(--color-bg);
+  /* body 默认米纸色（与参考项目一致）。
+     湖水蓝绿的内页通过各自根 div 的 .bg-bg / .service-page / .guide-page 显式覆盖。 */
+  background: var(--color-paper);
   color: var(--color-ink-soft);
   font-family: var(--font-sans);
   font-size: 1rem;
@@ -570,4 +582,745 @@ textarea.input {
 
 .guide-toc a:hover {
   background: rgba(40, 126, 110, 0.08);
+}
+
+/* ============================================================
+   编辑风首页体系 (Editorial / Storybook)
+   复刻自已定稿的首页设计：暖白纸色 + 墨绿衬线 + 细分隔线。
+   只作用于首页与全局 Header / Footer；内页的 .service-page /
+   .guide-page 等湖水蓝绿样式原样保留。
+   ============================================================ */
+
+/* Header 保持 fixed，高度随断点变化，由 main 的 padding-top 让位 */
+:root {
+  --header-height: 70px;
+}
+
+.editorial {
+  background: var(--color-paper);
+  color: #102e2c;
+  font-family: var(--font-editorial);
+  -webkit-font-smoothing: antialiased;
+}
+.editorial button,
+.editorial a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.editorial button {
+  cursor: pointer;
+}
+.editorial button:focus-visible,
+.editorial a:focus-visible {
+  outline: 2px solid #a13b23;
+  outline-offset: 6px;
+}
+
+.site-main {
+  padding-top: var(--header-height);
+}
+.site-shell {
+  max-width: 1440px;
+  margin-inline: auto;
+  overflow: clip;
+}
+.page-width {
+  width: calc(100% - 44px);
+  margin-inline: auto;
+}
+
+/* ── 顶部导航 ── */
+.site-header {
+  min-height: 70px;
+  gap: 26px;
+  padding: 8px 24px;
+}
+.brand {
+  gap: 10px;
+  color: #08232b;
+  text-decoration: none;
+}
+.brand svg {
+  width: 51px;
+  height: 51px;
+}
+.brand span {
+  font: 600 43px/1 Georgia, "Times New Roman", serif;
+  letter-spacing: -1.8px;
+}
+.main-nav {
+  gap: 35px;
+  margin-left: auto;
+  margin-right: 40px;
+}
+.nav-link {
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration-color: transparent;
+  text-underline-offset: 6px;
+  transition: color 0.2s, text-decoration-color 0.2s;
+  white-space: nowrap;
+}
+.nav-link:hover {
+  color: #986043;
+  text-decoration: underline;
+}
+.nav-link[data-active="true"] {
+  color: #986043;
+  text-decoration: underline;
+}
+.icon-button {
+  display: inline-flex;
+  width: 45px;
+  height: 45px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #537770;
+  border-radius: 7px;
+  background: var(--color-paper);
+  color: #113d34;
+  box-shadow: inset 0 1px 2px #fff8;
+  transition: background 0.2s, transform 0.2s;
+}
+.icon-button:hover {
+  background: #eeeede;
+  transform: translateY(-1px);
+}
+.icon-button svg {
+  width: 24px;
+  height: 24px;
+}
+/* 心愿单数量角标（沿用站点现有计数） */
+.icon-button-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: flex;
+  min-width: 19px;
+  height: 19px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #b44427;
+  color: #faf8ee;
+  font: 600 11px/1 system-ui, sans-serif;
+}
+
+/* ── Hero ── */
+.hero-copy {
+  padding-top: 39px;
+}
+.hero-eyebrow {
+  font-size: 23px;
+  line-height: 1.5;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+.hero h1 {
+  margin: 9px 0 14px;
+  font-size: clamp(49px, 6.77vw, 88px);
+  line-height: 1.09;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+  color: #06262b;
+}
+.hero-description {
+  font-size: 20px;
+  line-height: 1.65;
+  letter-spacing: 0.05em;
+}
+.primary-button {
+  min-width: 162px;
+  min-height: 46px;
+  padding: 10px 24px;
+  border: 1px solid #16433a;
+  border-radius: 7px;
+  background: linear-gradient(115deg, #163e35, #123d34);
+  color: #faf8ee;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: 0.035em;
+  box-shadow: inset 0 1px 1px #ffffff15;
+  transition: background 0.25s, box-shadow 0.25s, transform 0.25s;
+}
+.primary-button:hover {
+  background: #245044;
+  box-shadow: 0 5px 15px #123d341b;
+  transform: translateY(-1px);
+}
+.primary-button svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.hero .primary-button {
+  margin-top: 13px;
+}
+.hero-art {
+  width: 100%;
+  margin-top: -63px;
+  margin-bottom: 12px;
+  pointer-events: none;
+}
+.hero-art img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ── 三入口目录 ── */
+.section-heading {
+  padding: 15px 16px 16px;
+  gap: 20px;
+}
+.section-heading h2 {
+  font-size: clamp(25px, 3.2vw, 38px);
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+}
+.section-index {
+  padding-right: 8px;
+  font: 500 14px/1.4 Georgia, serif;
+  flex-shrink: 0;
+}
+.section-index span {
+  width: 24px;
+  height: 1px;
+  background: #789491;
+}
+.entry-grid {
+  padding: 20px 0 16px;
+}
+.entry + .entry {
+  border-left: 1px solid var(--color-rule);
+}
+.entry {
+  scroll-margin-top: 24px;
+}
+.entry-button {
+  padding: 0 24px 0;
+  border-radius: 2px;
+}
+.entry-art {
+  height: clamp(110px, 11.6vw, 165px);
+  margin-bottom: 7px;
+}
+.artwork {
+  display: block;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+  mix-blend-mode: multiply;
+}
+/* 图集自带暖白纸底，正片叠底会二次压暗；
+   改用窄边羽化融合纸纹，且不裁切主体。 */
+.entry-art .artwork {
+  mix-blend-mode: normal;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 5%, #000 95%, transparent),
+    linear-gradient(to bottom, transparent, #000 4%, #000 97%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent, #000 5%, #000 95%, transparent),
+    linear-gradient(to bottom, transparent, #000 4%, #000 97%, transparent);
+  mask-composite: intersect;
+}
+.artwork-notebook {
+  width: min(215px, 80%);
+}
+.artwork-school {
+  width: min(292px, 95%);
+}
+.artwork-keys {
+  width: min(220px, 85%);
+}
+.entry-number {
+  font: 500 20px/1.5 Georgia, serif;
+}
+.entry h3 {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.entry p {
+  margin-top: 1px;
+  font-size: 18px;
+  line-height: 1.65;
+  letter-spacing: 0.025em;
+}
+.entry-arrow {
+  width: 27px;
+  height: 27px;
+  margin-top: 9px;
+  margin-bottom: 2px;
+}
+
+/* ── 社群横条 ── */
+.community {
+  display: grid;
+  grid-template-columns: 27% 1fr auto;
+  align-items: center;
+  min-height: 135px;
+  padding: 13px 47px 13px 0;
+}
+.community-art {
+  height: 100%;
+  align-self: stretch;
+  position: relative;
+}
+.community-art .artwork {
+  width: 100%;
+  position: absolute;
+  bottom: -13px;
+  left: 0;
+  /* 裁掉图集自带横线所在的两角，保留羊头轮廓，
+     让真实的分隔线落在插画后面。 */
+  mix-blend-mode: normal;
+  clip-path: polygon(
+    0 11.6%,
+    40% 11.6%,
+    40% 0,
+    69% 0,
+    69% 11.6%,
+    100% 11.6%,
+    100% 100%,
+    0 100%
+  );
+}
+.community-copy {
+  border-left: 1px solid var(--color-rule);
+  padding: 0 24px 0 44px;
+}
+.community h2 {
+  font-size: clamp(23px, 2.6vw, 31px);
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: -0.035em;
+}
+.community p {
+  font-size: 20px;
+  margin-top: 5px;
+  line-height: 1.4;
+}
+.community-button {
+  min-width: 143px;
+  font-size: 18px;
+  padding-inline: 18px;
+}
+
+/* ── 页脚 ── */
+.site-footer {
+  background: var(--color-paper);
+  color: #102e2c;
+}
+.footer-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 80px;
+  padding: 48px 26px 46px;
+}
+.footer-about {
+  max-width: 440px;
+}
+.footer-brand {
+  display: inline-block;
+  color: #102e2c;
+  font: 600 27px/1.25 Georgia, "Times New Roman", serif;
+  letter-spacing: -0.7px;
+}
+.footer-about p {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.85;
+}
+.footer-nav h2 {
+  margin-bottom: 5px;
+  color: #102e2c;
+  font-size: 16px;
+  line-height: 1.7;
+  font-weight: 700;
+}
+.footer-nav a,
+.footer-nav button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  font-size: 15px;
+  line-height: 1.6;
+  text-align: left;
+}
+.site-footer a,
+.footer-nav button {
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: color 0.2s, text-decoration-color 0.2s;
+}
+.site-footer a:hover,
+.footer-nav button:hover {
+  color: #986043;
+  text-decoration: underline;
+}
+.footer-bottom {
+  border-top: 1px solid var(--color-rule);
+}
+.footer-bottom-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 30px;
+  padding: 16px 26px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.footer-bottom-inner > p:first-child {
+  flex-shrink: 0;
+}
+.footer-sources {
+  text-align: right;
+  text-wrap: pretty;
+}
+
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 12px;
+  z-index: 100;
+  transform: translateY(-200%);
+  background: #163e35;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 5px;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* ── 断点 ── */
+@media (min-width: 1300px) {
+  .hero-copy {
+    padding-top: 46px;
+  }
+  .hero-art {
+    margin-top: -70px;
+  }
+  .entry-grid {
+    padding-block: 24px;
+  }
+  .community {
+    min-height: 165px;
+  }
+}
+@media (max-width: 1000px) {
+  .site-header {
+    padding-inline: 8px;
+    gap: 20px;
+  }
+  .main-nav {
+    margin-right: 10px;
+    gap: 24px;
+  }
+  .brand span {
+    font-size: 36px;
+  }
+  .brand svg {
+    width: 44px;
+    height: 44px;
+  }
+  .hero-description {
+    font-size: 18px;
+  }
+  .hero-art {
+    margin-top: -38px;
+  }
+  .entry-button {
+    padding-inline: 16px;
+  }
+  .entry h3 {
+    font-size: 26px;
+  }
+  .entry p {
+    font-size: 16px;
+  }
+  .community {
+    padding-right: 16px;
+    grid-template-columns: 26% 1fr auto;
+  }
+  .community-copy {
+    padding-left: 25px;
+    padding-right: 16px;
+  }
+  .community h2 {
+    font-size: 24px;
+  }
+  .community p {
+    font-size: 16px;
+  }
+  .community-button {
+    min-width: auto;
+    font-size: 16px;
+    padding-inline: 12px;
+  }
+}
+@media (max-width: 767px) {
+  :root {
+    --header-height: 104px;
+  }
+  .page-width {
+    width: calc(100% - 36px);
+  }
+  .site-header {
+    min-height: 104px;
+    flex-wrap: wrap;
+    column-gap: 12px;
+    row-gap: 0;
+    padding: 10px 0 8px;
+  }
+  .brand {
+    gap: 7px;
+  }
+  .brand span {
+    font-size: 31px;
+    letter-spacing: -1.2px;
+  }
+  .brand svg {
+    width: 38px;
+    height: 38px;
+  }
+  .account-actions {
+    gap: 9px;
+    margin-left: auto;
+  }
+  .icon-button {
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+  }
+  .icon-button svg {
+    width: 21px;
+    height: 21px;
+  }
+  .main-nav {
+    order: 3;
+    width: 100%;
+    margin: 11px 0 0;
+    justify-content: center;
+    gap: 16px;
+  }
+  .nav-link {
+    font-size: 13px;
+  }
+  .hero-copy {
+    padding-top: 32px;
+  }
+  .hero-eyebrow {
+    font-size: 16px;
+    letter-spacing: 0.13em;
+  }
+  .hero h1 {
+    font-size: clamp(40px, 10.5vw, 66px);
+    margin-top: 13px;
+    margin-bottom: 13px;
+    line-height: 1.18;
+    letter-spacing: -0.055em;
+  }
+  .hero-description {
+    font-size: 14px;
+    letter-spacing: 0.005em;
+  }
+  .hero .primary-button {
+    min-height: 43px;
+    min-width: 139px;
+    font-size: 17px;
+    margin-top: 18px;
+  }
+  .hero-art {
+    width: 128%;
+    max-width: none;
+    margin-left: -14%;
+    margin-top: 7px;
+    margin-bottom: 15px;
+  }
+  .section-heading {
+    padding: 17px 0;
+    gap: 8px;
+  }
+  .section-heading h2 {
+    font-size: clamp(23px, 5.3vw, 32px);
+    letter-spacing: -0.04em;
+  }
+  .section-index {
+    gap: 6px;
+    font-size: 12px;
+    padding-right: 0;
+  }
+  .section-index span {
+    width: 13px;
+  }
+  .entry-grid {
+    padding: 0;
+  }
+  .entry + .entry {
+    border-left: 0;
+    border-top: 1px solid #c7d1c8;
+  }
+  .entry-button {
+    display: grid;
+    grid-template-columns: 112px 1fr 24px;
+    grid-template-rows: auto auto auto;
+    text-align: left;
+    padding: 22px 2px;
+    column-gap: 19px;
+    align-content: center;
+  }
+  .entry-art {
+    grid-column: 1;
+    grid-row: 1 / 4;
+    height: 93px;
+    margin: 0;
+  }
+  .entry-art .artwork {
+    width: 118px;
+  }
+  .entry-art .artwork-school {
+    width: 130px;
+  }
+  .entry-art .artwork-keys {
+    width: 113px;
+  }
+  .entry-number {
+    grid-column: 2;
+    align-self: end;
+    font-size: 16px;
+  }
+  .entry h3 {
+    grid-column: 2;
+    font-size: 24px;
+    line-height: 1.5;
+  }
+  .entry p {
+    grid-column: 2;
+    font-size: 13px;
+    margin: 0;
+    letter-spacing: -0.03em;
+    line-height: 1.7;
+  }
+  .entry-arrow {
+    grid-column: 3;
+    grid-row: 1 / 4;
+    width: 23px;
+    height: 23px;
+    margin: 0;
+  }
+  .community {
+    grid-template-columns: 32% 1fr;
+    min-height: 198px;
+    padding: 26px 0 22px;
+    gap: 0;
+  }
+  .community-art {
+    grid-column: 1;
+    grid-row: 1 / 3;
+  }
+  .community-art .artwork {
+    width: 163%;
+    left: -26%;
+    bottom: -22px;
+  }
+  .community-copy {
+    grid-column: 2;
+    padding-left: 19px;
+    padding-right: 0;
+    border-left: 0;
+    z-index: 1;
+  }
+  .community h2 {
+    max-width: 235px;
+    font-size: 22px;
+    line-height: 1.5;
+    text-wrap: balance;
+  }
+  .community p {
+    font-size: 14px;
+    margin-top: 9px;
+  }
+  .community-button {
+    grid-column: 2;
+    justify-self: start;
+    margin: 17px 0 0 19px;
+    font-size: 14px;
+    min-height: 39px;
+    padding: 9px 13px;
+    z-index: 1;
+  }
+  .community-button svg {
+    width: 18px;
+    height: 18px;
+  }
+  .footer-main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 25px 24px;
+    padding: 32px 0 27px;
+  }
+  .footer-about {
+    grid-column: 1 / -1;
+    max-width: 460px;
+  }
+  .footer-brand {
+    font-size: 26px;
+  }
+  .footer-about p {
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  .footer-nav h2 {
+    font-size: 15px;
+  }
+  .footer-nav a,
+  .footer-nav button {
+    min-height: 44px;
+    font-size: 14px;
+  }
+  .footer-bottom-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 17px 0 21px;
+    font-size: 12px;
+  }
+  .footer-sources {
+    text-align: left;
+  }
+}
+@media (max-width: 359px) {
+  .page-width {
+    width: calc(100% - 28px);
+  }
+  .main-nav {
+    gap: 12px;
+  }
+  .entry-button {
+    grid-template-columns: 91px 1fr 20px;
+    column-gap: 12px;
+  }
+  .entry-art .artwork {
+    width: 94px;
+  }
+  .entry-art .artwork-school {
+    width: 108px;
+  }
+  .entry p {
+    font-size: 12px;
+  }
+  .hero h1 {
+    font-size: 37px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .editorial *,
+  .editorial *::before,
+  .editorial *::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }

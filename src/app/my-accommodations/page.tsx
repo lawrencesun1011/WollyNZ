@@ -37,7 +37,8 @@ function MyAccommodationsInner() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
+    <div className="min-h-screen bg-bg">
+      <div className="mx-auto max-w-5xl px-4 py-8 pb-16">
       {/* 标题 */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -104,6 +105,7 @@ function MyAccommodationsInner() {
           )}
         </div>
       )}
+    </div>
     </div>
   );
 }

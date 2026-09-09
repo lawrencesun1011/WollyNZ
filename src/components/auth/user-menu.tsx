@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { User, LogOut, Mail, FileText, BedDouble } from "lucide-react";
+import { LogOut, Mail, FileText, BedDouble } from "lucide-react";
 import { signOut, useAuthUser } from "@/lib/auth";
+import { User } from "@/components/editorial/icons";
 
 /** 顶栏右侧用户区：点击小人弹出下拉菜单（注册/登录、我的申请、退出登录）。 */
 export function UserMenu() {
@@ -26,9 +27,9 @@ export function UserMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-label="账户菜单"
         aria-expanded={open}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-stroke text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary"
+        className="icon-button"
       >
-        <User className="h-[18px] w-[18px]" />
+        <User />
       </button>
 
       {open && (

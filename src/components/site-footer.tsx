@@ -1,46 +1,77 @@
 import Link from "next/link";
 
+/** 信息页脚：与首页同一套纸色 / 墨绿衬线语言。
+ *
+ *  与参考稿一致的两层结构：
+ *  外层 = 居中的 1440 上限容器（对应参考的 .site-shell）；
+ *  内层 = .page-width（相对 1440 容器再内缩 44px），承载上边框与纸色底。
+ *  因此宽屏下边框距视口边缘 = (视口 - 1440)/2 + 22px，不会顶到头，
+ *  且与首页社群条 / 目录区的左右端点完全对齐。 */
 export function SiteFooter() {
   return (
-    <footer className="mt-24 border-t border-primary/10 bg-primary/[0.04]">
-      <div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-12 md:flex-row md:items-start md:justify-between">
-        <div className="max-w-sm space-y-2">
-          <p className="text-base font-bold text-ink">GoalNZ</p>
-          <p className="text-sm leading-relaxed text-ink-soft">
-            面向中国游学家庭的新西兰优质教育机构查询平台，帮助您按地区、类型、语言等条件筛选合适的学校。
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-10 text-sm">
-          <div className="space-y-2">
-            <p className="font-semibold text-ink">学校库</p>
-            <Link
-              href="/schools"
-              className="block text-ink-soft transition-colors hover:text-primary"
-            >
-              中小学
+    <footer className="editorial mx-auto w-full max-w-[1440px]">
+      <div className="site-footer page-width">
+        <div className="footer-main">
+          <div className="footer-about">
+            <Link href="/" className="footer-brand" aria-label="GoalNZ 首页">
+              GoalNZ
             </Link>
-            <Link
-              href="/ece"
-              className="block text-ink-soft transition-colors hover:text-primary"
-            >
-              幼儿园
-            </Link>
+            <p>
+              面向中国游学家庭的新西兰优质教育机构查询平台，帮助您按地区、类型、语言等条件筛选合适的学校。
+            </p>
           </div>
-          <div className="space-y-2">
-            <p className="font-semibold text-ink">数据</p>
-            <Link
-              href="https://data.govt.nz"
-              className="block text-ink-soft transition-colors hover:text-primary"
-            >
-              数据来源
-            </Link>
-          </div>
+
+          <nav className="footer-nav" aria-labelledby="footer-schools-title">
+            <h2 id="footer-schools-title">学校库</h2>
+            <ul>
+              <li>
+                <Link href="/schools">中小学</Link>
+              </li>
+              <li>
+                <Link href="/ece">幼儿园</Link>
+              </li>
+            </ul>
+          </nav>
+
+          <nav className="footer-nav" aria-labelledby="footer-data-title">
+            <h2 id="footer-data-title">数据</h2>
+            <ul>
+              <li>
+                <a
+                  href="https://www.educationcounts.govt.nz/directories"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  数据来源<span className="sr-only">（在新窗口打开）</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
         </div>
-      </div>
-      <div className="border-t border-primary/10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-1 px-5 py-4 text-xs text-ink-soft sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 GoalNZ · 仅供信息参考</p>
-          <p>数据来源：data.govt.nz（CC BY 4.0）· 新西兰教育机构目录</p>
+
+        <div className="footer-bottom">
+          <div className="footer-bottom-inner">
+            <p>© 2026 GoalNZ · 仅供信息参考</p>
+            <p className="footer-sources">
+              公开数据参考：
+              <a
+                href="https://data.govt.nz/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                data.govt.nz<span className="sr-only">（在新窗口打开）</span>
+              </a>
+              <span aria-hidden="true"> · </span>
+              <a
+                href="https://www.educationcounts.govt.nz/directories"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                新西兰教育机构目录
+                <span className="sr-only">（在新窗口打开）</span>
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

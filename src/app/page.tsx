@@ -1,84 +1,120 @@
+"use client";
+
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Baby, BookOpen, Compass, School } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "@/components/editorial/icons";
+import { Artwork } from "@/components/editorial/artwork";
+import { editorialEntries } from "@/lib/editorial-entries";
 
+/** 首页：立体书主视觉 + 三入口目录 + 社群横条（编辑刊物风）。 */
 export default function HomePage() {
+  /** 「出发吧」滚动到学校入口并把键盘焦点移进去。 */
+  function startExploring() {
+    const school = document.getElementById("school-entry");
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    school?.scrollIntoView({
+      behavior: reduceMotion ? "instant" : "smooth",
+      block: "center",
+    });
+    school?.focus({ preventScroll: true });
+  }
+
   return (
-    <main className="service-page">
-      {/* Hero */}
-      <section className="mx-auto max-w-5xl px-5 pb-14 pt-16 text-center sm:pb-16 sm:pt-24">
-        <span className="service-eyebrow chip mb-5 inline-flex items-center gap-1.5 px-3 py-1">
-          <Compass className="h-3.5 w-3.5" />
-          新西兰教育体验规划
-        </span>
-        <h1 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight text-ink sm:text-5xl">
-          把新西兰教育体验，规划得更清楚
-        </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-7 text-ink-soft sm:text-base">
-          从选校、插班到住宿，用清晰的资料与真实经验，帮家庭找到适合自己的下一步。
-        </p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="#library"
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+    <div className="editorial site-shell" id="top">
+      <a className="skip-link" href="#explore">
+        跳转到首页内容
+      </a>
+
+      <section className="hero relative text-center" aria-labelledby="hero-title">
+        <div className="hero-copy relative z-10 mx-auto flex flex-col items-center px-5">
+          <p className="hero-eyebrow">新西兰亲子游学</p>
+          <h1 id="hero-title">
+            让好奇心
+            <br />
+            在新西兰长大
+          </h1>
+          <p className="hero-description">免费找学校，开启新的成长体验。</p>
+          <button
+            type="button"
+            className="primary-button group inline-flex items-center justify-center gap-3"
+            onClick={startExploring}
           >
-            浏览学校库
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-          <Link
-            href="/guide"
-            className="inline-flex items-center gap-2 rounded-xl border border-stroke/80 bg-white/45 px-7 py-3.5 text-sm font-medium text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary"
-          >
-            阅读游学攻略
-            <BookOpen className="h-4 w-4" />
-          </Link>
+            出发吧
+            <ArrowUpRight className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </button>
+        </div>
+        <div className="hero-art relative mx-auto">
+          <Image
+            src="/images/storybook.png"
+            alt="背着书包的小女孩与小羊并肩坐在立体书中的草坡上，望向新西兰雪山、湖泊和学校。"
+            width={2087}
+            height={754}
+            priority
+            className="h-auto w-full"
+          />
         </div>
       </section>
 
-      {/* 学校库入口 */}
-      <section id="library" className="mx-auto max-w-5xl px-5 pb-20 pt-6">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-medium text-primary">从这里开始</p>
-          <h2 className="mt-1 text-2xl font-bold tracking-tight text-ink sm:text-3xl">找到适合孩子的学校</h2>
-          <p className="mt-3 text-[15px] leading-7 text-ink-soft">选择机构类型，进入可筛选、可地图查看的学校库。</p>
+      <section
+        id="explore"
+        className="directory page-width border-t border-[#789491]"
+        aria-labelledby="explore-title"
+      >
+        <div className="section-heading flex items-center justify-between border-b border-[#789491]">
+          <h2 id="explore-title">在出发之前，找到答案。</h2>
+          <span
+            className="section-index inline-flex items-center gap-4"
+            aria-hidden="true"
+          >
+            01 <span /> 03
+          </span>
         </div>
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
-          <Link
-            href="/schools"
-            className="service-panel service-panel-hover group relative flex flex-col overflow-hidden rounded-2xl p-7 sm:p-8"
-          >
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-light text-white shadow-sm transition-transform group-hover:scale-110">
-              <School className="h-7 w-7" />
-            </div>
-            <h3 className="mt-6 text-2xl font-bold text-ink">中小学</h3>
-            <p className="mt-1 text-sm font-medium text-ink-soft">Schools</p>
-            <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-              新西兰小学至高中（Year 1–13），支持地区、类型、公私立、寄宿、教学语言等多维筛选与地图查看。
-            </p>
-            <span className="mt-6 flex items-center gap-1 text-sm font-medium text-primary transition-all group-hover:gap-2">
-              进入学校库
-              <ArrowRight className="h-4 w-4" />
-            </span>
-          </Link>
-
-          <Link
-            href="/ece"
-            className="service-panel service-panel-hover group relative flex flex-col overflow-hidden rounded-2xl p-7 sm:p-8"
-          >
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary-light to-primary-soft text-white shadow-sm transition-transform group-hover:scale-110">
-              <Baby className="h-7 w-7" />
-            </div>
-            <h3 className="mt-6 text-2xl font-bold text-ink">幼儿园</h3>
-            <p className="mt-1 text-sm font-medium text-ink-soft">Early Childhood Services</p>
-            <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-              新西兰早期儿童服务机构，含托儿所、幼儿园、家庭日托等，支持城市、学校类型、办学性质、EQI 与接受 2 岁以下筛选。
-            </p>
-            <span className="mt-6 flex items-center gap-1 text-sm font-medium text-primary transition-all group-hover:gap-2">
-              进入幼儿园库
-              <ArrowRight className="h-4 w-4" />
-            </span>
-          </Link>
+        <div className="entry-grid grid grid-cols-1 md:grid-cols-3">
+          {editorialEntries.map(({ key, number, art, title, description, href }) => (
+            <article id={key} className="entry relative" key={key}>
+              <Link
+                id={key === "schools" ? "school-entry" : undefined}
+                href={href}
+                className="entry-button group flex h-full w-full flex-col items-center text-center"
+              >
+                <div className="entry-art flex w-full items-center justify-center">
+                  <Artwork
+                    name={art}
+                    className="transition-transform duration-500 group-hover:-translate-y-1"
+                  />
+                </div>
+                <span className="entry-number text-[#b44427]">{number}</span>
+                <h3>{title}</h3>
+                <p>{description}</p>
+                <ArrowRight className="entry-arrow transition-transform duration-300 group-hover:translate-x-1.5" />
+              </Link>
+            </article>
+          ))}
         </div>
       </section>
-    </main>
+
+      <section
+        id="community"
+        className="community page-width relative border-y border-[#789491]"
+        aria-labelledby="community-title"
+      >
+        <div className="community-art">
+          <Artwork name="lamb" />
+        </div>
+        <div className="community-copy">
+          <h2 id="community-title">成长这一页，我们一起翻开。</h2>
+          <p>GoalNZ 家长社群</p>
+        </div>
+        <Link
+          href="/community"
+          className="primary-button community-button group inline-flex items-center justify-center gap-3"
+        >
+          加入社群
+          <ArrowUpRight className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+        </Link>
+      </section>
+    </div>
   );
 }
