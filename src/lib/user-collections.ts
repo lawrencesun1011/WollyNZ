@@ -42,6 +42,10 @@ const compareState: {
 
 // 当前登录用户 uid；null 表示未登录态，此时对比走 localStorage。
 let currentUid: string | null = null;
+/** 是否处于登录态；登录态下的本地写入只同步云端，避免污染游客桶。 */
+function isCompareLoggedIn() {
+  return currentUid != null;
+}
 
 /** 依据 id 判断属于中小学还是幼儿园（用于旧 localStorage 仅有 id 时回填 kind）。 */
 function resolveKind(id: string): CompareKind {
@@ -124,7 +128,6 @@ export function applyCloudCompare(items: { id: string; kind?: CompareKind }[]) {
     })
     .filter((x): x is CompareItem => x !== null);
   compareState.items = arr;
-  writeCompareLocalStorage(arr);
   emitCompare();
 }
 
@@ -168,7 +171,7 @@ function toggleCompareState(id: string, kind: CompareKind): void {
     if (compareState.items.length >= COMPARE_MAX) return;
     compareState.items = [...compareState.items, { id, kind }];
   }
-  writeCompareLocalStorage(compareState.items);
+  if (!isCompareLoggedIn()) writeCompareLocalStorage(compareState.items);
   emitCompare();
   void syncCloud();
 }
@@ -177,7 +180,7 @@ function removeCompareState(id: string): void {
   const next = compareState.items.filter((e) => e.id !== id);
   if (next.length === compareState.items.length) return;
   compareState.items = next;
-  writeCompareLocalStorage(compareState.items);
+  if (!isCompareLoggedIn()) writeCompareLocalStorage(compareState.items);
   emitCompare();
   void syncCloud();
 }
@@ -189,6 +192,13 @@ function clearCompareState(kind?: CompareKind): void {
   writeCompareLocalStorage(compareState.items);
   emitCompare();
   void syncCloud();
+}
+
+/** 登出时清空本地对比（内存 + localStorage），【不】同步云端，避免误清空账号数据。 */
+export function clearCompareLocal() {
+  compareState.items = [];
+  writeCompareLocalStorage([]);
+  emitCompare();
 }
 
 /** 订阅心愿单列表（{id,kind} 数组），组件卸载自动退订。 */
@@ -238,4 +248,4 @@ export function useCompare(): {
 }
 
 // 导出供 auth 初始化时绑定登录态切换入口
-export { setFavoritesUser, applyCloudFavorites } from "./favorites";
+export { setFavoritesUser, applyCloudFavorites, clearFavoritesLocal } from "./favorites";

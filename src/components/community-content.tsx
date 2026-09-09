@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
 import type { SVGProps } from "react";
-import { ArrowUpRight, Close } from "@/components/icons";
 import { ReferenceArtwork } from "@/components/reference-artwork";
 import { communityConfig } from "@/lib/community-config";
 import styles from "./community.module.css";
@@ -44,18 +42,7 @@ const topics = [
 ] as const;
 
 export function CommunityContent() {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const [qrOpen, setQrOpen] = useState(false);
   const qrCodeSrc = communityConfig.qrCodeSrc;
-
-  useEffect(() => {
-    const node = dialogRef.current;
-    if (!qrOpen || !node) return;
-    node.showModal();
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { node.close(); document.body.style.overflow = previousOverflow; };
-  }, [qrOpen]);
 
   return (
     <div id="main-content" className={styles.page}>
@@ -84,7 +71,6 @@ export function CommunityContent() {
             {qrCodeSrc ? <img className={styles.qrImage} src={qrCodeSrc} alt="GoalNZ 家长社群二维码，请使用微信扫描" /> : <><InvitationMark /><p id="qr-unavailable">社群二维码待更新</p></>}
           </div>
           <div className={styles.qrActions}>
-            <button type="button" disabled={!qrCodeSrc} aria-describedby={!qrCodeSrc ? "qr-unavailable" : undefined} className={styles.qrButton} onClick={() => setQrOpen(true)}>查看二维码 <ArrowUpRight /></button>
             {qrCodeSrc ? <a className={`${styles.qrButton} ${styles.saveQr}`} href={qrCodeSrc} download={communityConfig.qrCodeDownloadName}>保存二维码 <DownloadIcon /></a> : <button type="button" className={`${styles.qrButton} ${styles.saveQr}`} disabled aria-describedby="qr-unavailable">保存二维码 <DownloadIcon /></button>}
           </div>
         </div>
@@ -117,20 +103,6 @@ export function CommunityContent() {
           <p className={styles.privacyDescription}>请勿在群内公开个人敏感信息。</p>
         </div>
       </aside>
-
-      {qrCodeSrc ? <dialog ref={dialogRef} className={styles.qrDialog} aria-labelledby="qr-dialog-title" onCancel={() => setQrOpen(false)} onClose={() => setQrOpen(false)} onClick={event => {
-        if (event.target !== event.currentTarget) return;
-        const bounds = event.currentTarget.getBoundingClientRect();
-        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) setQrOpen(false);
-      }}>
-        <div className={styles.dialogContent}>
-          <button type="button" className={styles.dialogClose} aria-label="关闭二维码" onClick={() => setQrOpen(false)} autoFocus><Close /></button>
-          <h2 id="qr-dialog-title">GoalNZ 家长社群</h2>
-          <img src={qrCodeSrc} alt="GoalNZ 家长社群二维码，请使用微信扫描" />
-          <p>使用微信扫描，按提示申请加入。</p>
-          <a className={styles.qrButton} href={qrCodeSrc} download={communityConfig.qrCodeDownloadName}>保存二维码 <DownloadIcon /></a>
-        </div>
-      </dialog> : null}
     </div>
   );
 }

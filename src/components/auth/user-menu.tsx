@@ -5,12 +5,23 @@ import Link from "next/link";
 import { LogOut, Mail, FileText, BedDouble } from "lucide-react";
 import { signOut, useAuthUser } from "@/lib/auth";
 import { User } from "@/components/editorial/icons";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 /** 顶栏右侧用户区：点击小人弹出下拉菜单（注册/登录、我的申请、退出登录）。 */
 export function UserMenu() {
   const user = useAuthUser();
   const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  async function handleLogout() {
+    setSigningOut(true);
+    await signOut();
+    // 登录态变 null 后，auth 桥接已同步清空本地心愿单/对比镜像；
+    // 硬刷新回首页，确保以游客态干净重渲染（不残留任何登录态）。
+    window.location.assign("/");
+  }
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -33,7 +44,7 @@ export function UserMenu() {
       </button>
 
       {open && (
-        <div className="glass absolute right-0 top-11 w-64 rounded-[--radius-sm] p-2 shadow-[--shadow-2] animate-fade-up">
+        <div className="bg-paper absolute right-0 top-[calc(100%+10px)] z-[1100] w-64 origin-top-right overflow-hidden rounded-2xl border border-stroke p-2 shadow-xl animate-popover">
           {!user && (
             <>
               <div className="px-2 pb-1 pt-1 text-xs text-caption">
@@ -76,9 +87,9 @@ export function UserMenu() {
           {user && (
             <button
               type="button"
-              onClick={async () => {
+              onClick={() => {
                 setOpen(false);
-                await signOut();
+                setConfirmOpen(true);
               }}
               className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-error/10 hover:text-error"
             >
@@ -88,6 +99,16 @@ export function UserMenu() {
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="确认退出登录？"
+        confirmText="退出登录"
+        cancelText="取消"
+        pending={signingOut}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={handleLogout}
+      />
     </div>
   );
 }

@@ -31,6 +31,8 @@ import {
   setCompareUser,
   applyCloudFavorites,
   applyCloudCompare,
+  clearFavoritesLocal,
+  clearCompareLocal,
 } from "./user-collections";
 import { setApplicationsUser } from "./applications";
 import { setAccommodationUser } from "./accommodation";
@@ -73,11 +75,13 @@ export function useAuthBridge() {
           console.warn("[auth-init] 云端合并失败", e);
         }
       } else {
-        // 登出 / 未登录：恢复本地兜底
+        // 登出 / 未登录：清空本地心愿单与对比镜像，避免上一个账号的数据残留在游客态
         setFavoritesUser(null);
         setCompareUser(null);
         setApplicationsUser(null);
         setAccommodationUser(null);
+        clearFavoritesLocal();
+        clearCompareLocal();
       }
     });
 

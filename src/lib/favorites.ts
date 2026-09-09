@@ -58,8 +58,16 @@ export function subscribeFavorites(cb: (ids: FavoriteEntry[]) => void): () => vo
   return () => favSubs.delete(cb);
 }
 
+// 当前登录用户 uid；null 表示游客态。游客态才允许写入本地心愿单（LS_KEY），
+// 登录态下的写入一律只同步云端，避免云端数据污染游客桶、造成登出/关页后残留。
+let favUserUid: string | null = null;
+function isFavLoggedIn() {
+  return favUserUid != null;
+}
+
 // 登录态变化：替换当前登录用户，并应用云端收藏（如有）
 export function setFavoritesUser(uid: string | null) {
+  favUserUid = uid;
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem("wollyn:auth:uid", JSON.stringify(uid));
@@ -100,7 +108,7 @@ export function toggleFavorite(id: string, kind: FavoriteKind) {
       ? favState.ids.filter((_, i) => i !== idx)
       : [...favState.ids, { id, kind }];
   favState.ids = next;
-  writeLocalStorage(next);
+  if (!isFavLoggedIn()) writeLocalStorage(next);
   emit();
   void syncCloud(next);
 }
@@ -108,7 +116,7 @@ export function toggleFavorite(id: string, kind: FavoriteKind) {
 export function removeFavorite(id: string, kind: FavoriteKind) {
   const next = favState.ids.filter((e) => !(e.id === id && e.kind === kind));
   favState.ids = next;
-  writeLocalStorage(next);
+  if (!isFavLoggedIn()) writeLocalStorage(next);
   emit();
   void syncCloud(next);
 }
@@ -120,11 +128,18 @@ export function clearFavorites() {
   void syncCloud([]);
 }
 
+/** 登出时清空本地心愿单（内存 + localStorage），【不】同步云端，避免误清空账号数据。 */
+export function clearFavoritesLocal() {
+  favState.ids = [];
+  writeLocalStorage([]);
+  emit();
+}
+
 /** 清空某一类（中小学 / 幼儿园）的心愿单，不影响另一类。 */
 export function removeFavoritesByKind(kind: FavoriteKind) {
   const next = favState.ids.filter((e) => e.kind !== kind);
   favState.ids = next;
-  writeLocalStorage(next);
+  if (!isFavLoggedIn()) writeLocalStorage(next);
   emit();
   void syncCloud(next);
 }
@@ -147,7 +162,6 @@ export function applyCloudFavorites(items?: unknown) {
       entries.push({ id: it.id, kind: it.kind === "ece" ? "ece" : "school" });
   }
   favState.ids = entries;
-  writeLocalStorage(entries);
   emit();
 }
 

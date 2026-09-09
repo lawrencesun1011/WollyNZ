@@ -86,7 +86,7 @@ export function FavoritesPopover({ onClose }: Props) {
       data-fav-popover
       className="animate-popover absolute right-0 top-[calc(100%+10px)] z-[1100] w-[340px] origin-top-right"
     >
-      <div className="glass overflow-hidden rounded-2xl border border-white/60 shadow-xl">
+      <div className="bg-paper overflow-hidden rounded-2xl border border-stroke shadow-xl">
         {/* 标题栏 */}
         <div className="flex items-center justify-between border-b border-stroke/70 px-4 py-3">
           <div className="flex items-center gap-2 text-[#EF4444]">

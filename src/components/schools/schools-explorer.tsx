@@ -146,7 +146,7 @@ export function SchoolsExplorer({
     .filter(Boolean) as SchoolFrontend[];
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen editorial">
       {/* ── 热门地区 + 筛选栏 ── */}
       <div className="px-6 py-5 lg:px-10">
         <div className="mx-auto max-w-[1400px]">

@@ -117,7 +117,7 @@ export function EceExplorer({ initialSchools }: { initialSchools: SchoolFrontend
     .filter(Boolean) as SchoolFrontend[];
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen editorial">
       <div className="px-6 py-5 lg:px-10">
         <div className="mx-auto max-w-[1400px]">
           <EceFilterBar

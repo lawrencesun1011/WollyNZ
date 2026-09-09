@@ -69,15 +69,6 @@ function gatewayBase(): string {
   return `https://${envId}.api.tcloudbasegateway.com/v1/rdb/rest`;
 }
 
-function writeLS(key: string, value: unknown) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    /* 忽略 */
-  }
-}
-
 /** 从云端拉取当前用户集合（4 列）；owner 由 RLS 过滤。返回 null 表示无云端数据/未登录/失败。 */
 export async function fetchCloudCollections(): Promise<CloudCollectionRow | null> {
   const token = await getAccessToken();
@@ -189,6 +180,11 @@ function readCmpLS(): { id: string; kind: "school" | "ece" }[] {
  * - 云端已有 → 用云端覆盖本地（以云端为准），返回合并后数据供上层使用。
  * 对比项携带 kind，分别落 school_compare / ece_compare 列。
  */
+/**
+ * 登录合并：游客本地心愿单/对比 与 云端账号数据取【并集】，
+ * 互不覆盖、互不丢失。合并结果写回云端（持久化游客心愿到账号），
+ * 并写回 localStorage 作为本地镜像。登出时由 auth 层清空本地镜像。
+ */
 export async function mergeLocalToCloudOnLogin(
   resolveName?: (id: string) => string | undefined
 ): Promise<MergedCollections | null> {
@@ -202,52 +198,59 @@ export async function mergeLocalToCloudOnLogin(
     kind: "school" | "ece";
   }[] => entries.map((e) => ({ id: e.id, kind: e.kind ?? "school" }));
 
-  if (!cloud) {
-    // 云端无文档：将本地数据上传（补充名字供后台分析）
-    const favorites = favEntries(localFav);
-    const compare = localCmp.map((e) => ({ id: e.id, kind: e.kind }));
-    if (favorites.length || compare.length) {
-      await saveCloudCollections({
-        favorites: favorites.map((e) => ({
-          id: e.id,
-          kind: e.kind,
-          name: resolveName?.(e.id) ?? "",
-        })),
-        compare: compare.map((e) => ({
-          id: e.id,
-          kind: e.kind,
-          name: resolveName?.(e.id) ?? "",
-        })),
-      });
+  const localFavMerged = favEntries(localFav);
+  const localCmpMerged = localCmp.map((e) => ({ id: e.id, kind: e.kind }));
+
+  const cloudFav = cloud
+    ? [
+        ...cloud.school_favorites.map((x) => ({ id: x.id, kind: "school" as const })),
+        ...cloud.ece_favorites.map((x) => ({ id: x.id, kind: "ece" as const })),
+      ]
+    : [];
+  const cloudCmp = cloud
+    ? [
+        ...cloud.school_compare.map((x) => ({ id: x.id, kind: "school" as const })),
+        ...cloud.ece_compare.map((x) => ({ id: x.id, kind: "ece" as const })),
+      ]
+    : [];
+
+  // 并集：按 id+kind 去重，游客心愿与账号心愿合并
+  const union = (
+    a: { id: string; kind: "school" | "ece" }[],
+    b: { id: string; kind: "school" | "ece" }[]
+  ) => {
+    const seen = new Set<string>();
+    const out: { id: string; kind: "school" | "ece" }[] = [];
+    for (const it of [...a, ...b]) {
+      const key = `${it.kind}:${it.id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(it);
     }
-    writeLS(
-      LS_FAV,
-      favorites.map((e) => ({ id: e.id, kind: e.kind }))
-    );
-    writeLS(
-      LS_CMP,
-      compare.map((e) => ({ id: e.id, kind: e.kind }))
-    );
-    return { favorites, compare };
+    return out;
+  };
+
+  const favorites = union(localFavMerged, cloudFav);
+  const compare = union(localCmpMerged, cloudCmp);
+
+  // 合并结果写回云端（登录态下带 token，新建或更新 user_collections 行）
+  if (favorites.length || compare.length) {
+    await saveCloudCollections({
+      favorites: favorites.map((e) => ({
+        id: e.id,
+        kind: e.kind,
+        name: resolveName?.(e.id) ?? "",
+      })),
+      compare: compare.map((e) => ({
+        id: e.id,
+        kind: e.kind,
+        name: resolveName?.(e.id) ?? "",
+      })),
+    });
   }
 
-  // 云端有数据：以云端为准，回写本地镜像（按列分别合并 kind）。
-  const favorites: MergedCollections["favorites"] = [
-    ...cloud.school_favorites.map((x) => ({ id: x.id, kind: "school" as const })),
-    ...cloud.ece_favorites.map((x) => ({ id: x.id, kind: "ece" as const })),
-  ];
-  const compare: MergedCollections["compare"] = [
-    ...cloud.school_compare.map((x) => ({ id: x.id, kind: "school" as const })),
-    ...cloud.ece_compare.map((x) => ({ id: x.id, kind: "ece" as const })),
-  ];
-  writeLS(
-    LS_FAV,
-    favorites.map((e) => ({ id: e.id, kind: e.kind }))
-  );
-  writeLS(
-    LS_CMP,
-    compare.map((e) => ({ id: e.id, kind: e.kind }))
-  );
+  // 注意：不再把并集写回游客桶（LS_FAV / LS_CMP），避免云端账号数据残留在游客态。
+  // 游客桶只保存用户登录前的本地数据；登录态由 onUserChanged 重新合并云端。
   return { favorites, compare };
 }
 
