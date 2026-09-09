@@ -54,10 +54,9 @@ export function getEceSnapshot(): SchoolFrontend[] | null {
   return state.data;
 }
 
-// 预热：进网站即调用，结果写内存+localStorage 并通知订阅者。
-// 已加载 / 加载中则跳过，避免重复请求。
-export async function preloadEce(): Promise<void> {
-  if (state.data || state.loading) return;
+let loadPromise: Promise<void> | null = null;
+
+async function doLoad(): Promise<void> {
   // 先用 localStorage 快照填充，保证秒开且跨会话复用
   const ls = readLocalStorage();
   if (ls && ls.length) {
@@ -80,4 +79,21 @@ export async function preloadEce(): Promise<void> {
   } finally {
     state.loading = false;
   }
+}
+
+// 预热：进网站即调用，结果写内存+localStorage 并通知订阅者。
+// 已加载 / 加载中则复用同一 promise，避免重复请求。
+export async function preloadEce(): Promise<void> {
+  if (state.data) return;
+  if (loadPromise) return loadPromise;
+  loadPromise = doLoad().finally(() => {
+    loadPromise = null;
+  });
+  return loadPromise;
+}
+
+// 触发加载并在数据就绪后回传（供 application-form / favorites-popover 等使用）。
+export async function loadEceSnapshot(): Promise<SchoolFrontend[] | null> {
+  await preloadEce();
+  return getEceSnapshot();
 }
