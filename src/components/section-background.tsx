@@ -47,11 +47,13 @@ export function SectionBackgroundLayer({
         // contain 模式：用原生 img，浏览器按图片原始宽高比显示，绝不拉伸变形
         // 图片完整呈现，区域多余空间由 bgColor 填充
         // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={bg.src}
           alt=""
-          className="h-full w-full object-contain"
+          fill
+          className="object-contain"
           style={{ objectPosition: bg.position || "center" }}
+          sizes="100vw"
         />
       ) : bg.videoSrc ? (
         // cover 模式 + 视频：静音自动循环播放，src(静态图) 作为首帧 poster 防白屏

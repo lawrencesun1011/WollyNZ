@@ -27,7 +27,7 @@ export function Artwork({
   const { x, y, w, h } = regions[name];
   const style = {
     aspectRatio: `${w} / ${h}`,
-    backgroundImage: "url('/images/design-atlas.png')",
+    backgroundImage: "url('/images/design-atlas.webp')",
     backgroundSize: `${(ATLAS_W / w) * 100}% ${(ATLAS_H / h) * 100}%`,
     backgroundPosition: `${(x / (ATLAS_W - w)) * 100}% ${
       (y / (ATLAS_H - h)) * 100

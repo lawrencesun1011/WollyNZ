@@ -4,19 +4,19 @@ import styles from "./reference-artwork.module.css";
 /** Windows into the user-approved artwork; all page text remains live HTML. */
 const artworkRegions = {
   villa: {
-    image: "accommodation-atlas.png", canvas: [1374, 1145],
+    image: "accommodation-atlas.webp", canvas: [1374, 1145],
     x: 738, y: 98, width: 588, height: 405,
   },
   conversation: {
-    image: "community-desktop-atlas.png", canvas: [1374, 1145],
+    image: "community-desktop-atlas.webp", canvas: [1374, 1145],
     x: 967, y: 108, width: 332, height: 195,
   },
   communityLamb: {
-    image: "community-desktop-atlas.png", canvas: [1374, 1145],
+    image: "community-desktop-atlas.webp", canvas: [1374, 1145],
     x: 82, y: 884, width: 271, height: 125,
   },
   communityLambMobile: {
-    image: "community-mobile-atlas.png", canvas: [836, 1881],
+    image: "community-mobile-atlas.webp", canvas: [836, 1881],
     x: 56, y: 1624, width: 170, height: 110,
   },
   school: {

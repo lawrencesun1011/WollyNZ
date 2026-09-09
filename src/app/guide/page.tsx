@@ -173,7 +173,7 @@ export default function GuidePage() {
             </P>
             <div className="my-6 overflow-hidden rounded-2xl border border-primary/10 shadow-sm">
               <Image
-                src="/images/guide/program-comparison.png"
+                src="/images/guide/program-comparison.webp"
                 alt="新西兰研学与留学项目对比"
                 width={1024}
                 height={559}
@@ -182,7 +182,7 @@ export default function GuidePage() {
             </div>
             <div className="my-6 overflow-hidden rounded-2xl border border-primary/10 shadow-sm">
               <Image
-                src="/images/guide/school-campus.jpg"
+                src="/images/guide/school-campus.webp"
                 alt="新西兰学校真实校园环境"
                 width={1080}
                 height={583}
@@ -228,7 +228,7 @@ export default function GuidePage() {
             </P>
             <div className="my-6 overflow-hidden rounded-2xl border border-primary/10 shadow-sm">
               <Image
-                src="/images/guide/term-calendar.png"
+                src="/images/guide/term-calendar.webp"
                 alt="新西兰中小学学期日历示意（2027-2028 校历参考）"
                 width={1024}
                 height={559}
@@ -278,7 +278,7 @@ export default function GuidePage() {
             <H2 id="city">四、城市怎么选（五大城市对比）</H2>
             <div className="my-6 overflow-hidden rounded-2xl border border-primary/10 shadow-sm">
               <Image
-                src="/images/guide/city-map.png"
+                src="/images/guide/city-map.webp"
                 alt="新西兰主要城市分布示意（北岛与南岛）"
                 width={1024}
                 height={559}

@@ -47,7 +47,7 @@ export default function HomePage() {
         </div>
         <div className="hero-art relative mx-auto">
           <Image
-            src="/images/storybook.png"
+            src="/images/storybook.webp"
             alt="背着书包的小女孩与小羊并肩坐在立体书中的草坡上，望向新西兰雪山、湖泊和学校。"
             width={2087}
             height={754}
