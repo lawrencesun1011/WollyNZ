@@ -37,7 +37,7 @@ export function UserMenu() {
           {!user && (
             <>
               <div className="px-2 pb-1 pt-1 text-xs text-caption">
-                未登录，登录后可同步心愿单
+                未登录，登录后可同步云端数据
               </div>
               <Link
                 href="/login"

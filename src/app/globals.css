@@ -646,6 +646,55 @@ textarea.input {
 }
 
 /* ============================================================
+   住宿业务页编辑风作用域 (Editorial / Storybook)
+   用于 /my-accommodations 与 /apply/accommodation。
+   在作用域内把湖水蓝绿 token 重映射为编辑风调色板，
+   使页面与其专属组件（accommodation-form / accommodation-card）
+   中既有的 Tailwind 颜色类自动整体换色，无需逐处改写。
+   手法同 .guide-page。
+   ============================================================ */
+.accom-editorial {
+  min-height: 100vh;
+  background: var(--color-paper);
+  color: #102e2c;
+  font-family: var(--font-editorial);
+  -webkit-font-smoothing: antialiased;
+  /* —— token 重映射 —— */
+  --color-ink: #102e2c;
+  --color-ink-soft: #3a554e;
+  --color-caption: #6c7a75;
+  --color-primary: #16433a;
+  --color-primary-hover: #1d554a;
+  --color-primary-active: #123d34;
+  --color-stroke: #c7d1c8;
+  --color-border: #c7d1c8;
+  --color-bg: #f9f6f0;
+  --color-bg-soft: #eef0ea;
+  --color-rule: #789491;
+  --color-warning: #b44427;
+  --color-error: #b44427;
+  --color-success: #5bab8e;
+}
+
+/* 主按钮：编辑风深湖绿渐变 + 7px 圆角。
+   .bg-primary 在两页中仅用于真实按钮（提交 / 新建 / 继续编辑），
+   不影响输入框或图标底纹。 */
+.accom-editorial .bg-primary {
+  background-color: transparent;
+  background-image: linear-gradient(115deg, #163e35, #123d34);
+  border: 1px solid #16433a;
+  border-radius: 7px;
+  box-shadow: inset 0 1px 1px #ffffff15;
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.accom-editorial .bg-primary:hover {
+  background-color: transparent;
+  background-image: linear-gradient(115deg, #245044, #1c4a3e);
+  box-shadow: 0 5px 15px #123d341b;
+  transform: translateY(-1px);
+}
+
+/* ============================================================
    编辑风首页体系 (Editorial / Storybook)
    复刻自已定稿的首页设计：暖白纸色 + 墨绿衬线 + 细分隔线。
    只作用于首页与全局 Header / Footer；内页的 .service-page /

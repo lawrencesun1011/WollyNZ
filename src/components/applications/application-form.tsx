@@ -55,7 +55,7 @@ const START_YEARS: number[] = [CUR_YEAR, CUR_YEAR + 1];
 const END_YEARS: number[] = [CUR_YEAR, CUR_YEAR + 1, CUR_YEAR + 2];
 
 function selectCls(extra = "") {
-  return `w-full appearance-none rounded-xl border border-stroke bg-white/80 px-3 py-2.5 text-sm text-ink outline-none transition-colors hover:border-primary/40 focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft disabled:opacity-70 ${extra}`;
+  return `w-full appearance-none rounded-xl border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors hover:border-primary/40 focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft disabled:opacity-70 ${extra}`;
 }
 
 function Section({
@@ -69,7 +69,7 @@ function Section({
 }) {
   return (
     <div className="space-y-2.5">
-      <h3 className="flex items-center gap-1 text-sm font-semibold text-primary">
+      <h3 className="flex items-center gap-1 text-sm font-semibold text-ink">
         {title}
         {required ? (
           <span className="text-error">*</span>
@@ -485,7 +485,7 @@ export function ApplicationForm({
               type="button"
               onClick={handleSendCode}
               disabled={codeSending || cooldown > 0}
-              className="mt-0.5 shrink-0 rounded-xl border border-primary/30 px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-0.5 shrink-0 rounded-xl border border-[#789491]/50 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {codeSending ? <Loader2 className="h-4 w-4 animate-spin" /> : cooldown > 0 ? `${cooldown}s` : "验证"}
             </button>
@@ -496,9 +496,9 @@ export function ApplicationForm({
         )}
 
         {needAuth && !user?.email && (
-          <div className="mt-3 rounded-2xl border border-primary/20 bg-primary/5 p-4">
+          <div className="mt-3 rounded-lg border border-[#789491]/40 bg-white p-4">
             <p className="mb-2 flex items-center gap-2 text-sm text-ink">
-              <Mail className="h-4 w-4 text-primary" />
+              <Mail className="h-4 w-4 text-ink" />
               验证码已发送至 <span className="font-medium">{email}</span>
             </p>
             <div className="flex gap-2">
@@ -731,7 +731,7 @@ export function ApplicationForm({
             {calendarOpen && (
               <div className="absolute left-0 right-0 z-30 mt-2">
                 <div className="fixed inset-0 z-20" onClick={() => setCalendarOpen(false)} />
-                <div className="relative z-30 rounded-2xl border border-stroke bg-white p-4 shadow-xl">
+                <div className="relative z-30 rounded-lg border border-[#789491]/50 bg-white p-4 shadow-xl">
                   <DateRangeCalendar
                     start={exStart}
                     end={exEnd}
@@ -745,7 +745,7 @@ export function ApplicationForm({
                     <button
                       type="button"
                       onClick={() => setCalendarOpen(false)}
-                      className="rounded-xl border border-primary/30 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+                      className="rounded-xl border border-[#789491]/50 px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8]"
                     >
                       确认
                     </button>
@@ -855,7 +855,7 @@ export function ApplicationForm({
             type="button"
             onClick={importFavorites}
             disabled={locked}
-            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-primary/30 px-3 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5 disabled:opacity-50"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-[#789491]/50 px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8] disabled:opacity-50"
           >
             <Heart className="h-4 w-4" />
             一键导入心愿单
@@ -866,7 +866,7 @@ export function ApplicationForm({
             {schools.map((s) => (
               <span
                 key={s.name}
-                className="chip flex items-center gap-1.5 border border-primary/20 bg-primary/5 text-primary"
+                className="chip flex items-center gap-1.5 border border-[#789491]/40 bg-white text-ink"
               >
                 <Layers className="h-3 w-3" />
                 {s.name}
@@ -902,7 +902,7 @@ export function ApplicationForm({
         <button
           type="button"
           onClick={() => onCancel?.()}
-          className="rounded-xl px-4 py-2.5 text-sm text-ink-soft transition-colors hover:bg-primary/5"
+          className="rounded-xl px-4 py-2.5 text-sm text-ink-soft transition-colors hover:bg-[#f5f1e8]"
         >
           取消
         </button>
@@ -910,7 +910,7 @@ export function ApplicationForm({
           type="button"
           onClick={handleSaveDraft}
           disabled={locked || submitting}
-          className="flex items-center gap-2 rounded-xl border border-primary/30 px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5 disabled:opacity-60"
+          className="flex items-center gap-2 rounded-xl border border-[#789491]/50 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8] disabled:opacity-60"
         >
           <Save className="h-4 w-4" />
           保存草稿

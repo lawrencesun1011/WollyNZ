@@ -8,9 +8,9 @@ export const ACCOMMODATION_STATUS_META: Record<
   AccommodationStatus,
   { label: string; className: string }
 > = {
-  draft: { label: "草稿", className: "bg-ink/10 text-ink-soft" },
-  submitted: { label: "已提交", className: "bg-blue-100 text-blue-700" },
-  closed: { label: "已结束", className: "bg-red-100 text-red-700" },
+  draft: { label: "草稿", className: "bg-[#eef0ea] text-ink-soft" },
+  submitted: { label: "已提交", className: "bg-[#f0ddd0] text-[#b44427]" },
+  closed: { label: "已结束", className: "bg-ink/10 text-ink-soft" },
 };
 
 /** 已提交后超过入住开始时间 30 天视为已结束。 */

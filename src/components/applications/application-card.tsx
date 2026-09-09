@@ -21,14 +21,14 @@ export function ApplicationCard({ item, onRemove, onEdit }: Props) {
   const status = getEffectiveStatus(item);
   const statusBadge =
     status === "draft"
-      ? { label: "草稿", cls: "border border-ink/20 bg-ink/5 text-ink-soft" }
+      ? { label: "草稿", cls: "border border-[#789491]/40 bg-[#eef0ea] text-ink-soft" }
       : status === "closed"
-        ? { label: "已结束", cls: "border border-red-200 bg-red-100 text-red-700" }
-        : { label: "已提交", cls: "border border-blue-200 bg-blue-100 text-blue-700" };
+        ? { label: "已结束", cls: "border border-ink/20 bg-ink/5 text-ink-soft" }
+        : { label: "已提交", cls: "border border-[#b44427]/30 bg-[#f0ddd0] text-[#b44427]" };
 
   return (
     <>
-      <div className="animate-fade-up glass flex flex-col rounded-2xl border border-white/60 p-4 shadow-[--shadow-1]">
+      <div className="animate-fade-up flex flex-col rounded-lg border border-[#789491]/50 bg-white p-4 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <h3 className="truncate text-base font-semibold text-ink">
             {item.parentTitle || "未填写称呼"}
@@ -65,7 +65,7 @@ export function ApplicationCard({ item, onRemove, onEdit }: Props) {
             <button
               type="button"
               onClick={() => setShowEmail(true)}
-              className="flex-1 rounded-lg border border-primary/20 py-2 text-sm text-primary transition-colors hover:bg-primary/5"
+              className="flex-1 rounded-lg border border-[#789491]/50 py-2 text-sm text-ink transition-colors hover:bg-[#f5f1e8]"
             >
               查看详情
             </button>
@@ -83,7 +83,7 @@ export function ApplicationCard({ item, onRemove, onEdit }: Props) {
               <button
                 type="button"
                 onClick={() => setShowEmail(true)}
-                className="flex-1 rounded-lg border border-primary/20 py-2 text-sm text-primary transition-colors hover:bg-primary/5"
+                className="flex-1 rounded-lg border border-[#789491]/50 py-2 text-sm text-ink transition-colors hover:bg-[#f5f1e8]"
               >
                 查看详情
               </button>
@@ -92,7 +92,7 @@ export function ApplicationCard({ item, onRemove, onEdit }: Props) {
                   type="button"
                   onClick={() => onEdit(item.id)}
                   aria-label="编辑"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/20 text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#789491]/50 text-ink-soft transition-colors hover:bg-[#f5f1e8] hover:text-ink"
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
@@ -104,7 +104,7 @@ export function ApplicationCard({ item, onRemove, onEdit }: Props) {
               type="button"
               onClick={() => onRemove(item.id)}
               aria-label="移除申请"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/20 text-ink-soft transition-colors hover:bg-error/5 hover:text-error"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#789491]/50 text-ink-soft transition-colors hover:bg-[#f5f1e8] hover:text-[#b44427]"
             >
               <Trash2 className="h-4 w-4" />
             </button>

@@ -26,7 +26,7 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
 
   return (
     <>
-      <div className="animate-fade-up glass flex flex-col rounded-2xl border border-white/60 p-4 shadow-[--shadow-1]">
+      <div className="animate-fade-up flex flex-col rounded-lg border border-[#789491]/50 bg-white p-4 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <h3 className="truncate text-base font-semibold text-ink">
             {item.name || "未填写称呼"}
@@ -80,7 +80,7 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
             <button
               type="button"
               onClick={() => setDetail(true)}
-              className="flex-1 rounded-lg border border-primary/20 py-2 text-sm text-primary transition-colors hover:bg-primary/5"
+              className="flex-1 rounded-lg border border-[#789491]/50 py-2 text-sm text-ink transition-colors hover:bg-[#f5f1e8]"
             >
               查看详情
             </button>
@@ -97,7 +97,7 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
             <button
               type="button"
               onClick={() => setDetail(true)}
-              className="flex-1 rounded-lg border border-primary/20 py-2 text-sm text-primary transition-colors hover:bg-primary/5"
+              className="flex-1 rounded-lg border border-[#789491]/50 py-2 text-sm text-ink transition-colors hover:bg-[#f5f1e8]"
             >
               查看详情
             </button>
@@ -107,7 +107,7 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
               type="button"
               onClick={() => onRemove(item.id)}
               aria-label="移除意向"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/20 text-ink-soft transition-colors hover:bg-error/5 hover:text-error"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#789491]/50 text-ink-soft transition-colors hover:bg-[#f5f1e8] hover:text-[#b44427]"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -121,19 +121,19 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
           onClick={() => setDetail(false)}
         >
           <div
-            className="animate-fade-up relative max-h-[90vh] w-[460px] max-w-full overflow-y-auto rounded-3xl bg-white shadow-2xl scroll-thin"
+            className="animate-fade-up relative max-h-[90vh] w-[460px] max-w-full overflow-y-auto rounded-lg border border-[#789491]/50 bg-white shadow-2xl scroll-thin"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-stroke/70 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-[#789491]/50 px-5 py-4">
               <h3 className="flex items-center gap-2 text-lg font-bold text-ink">
-                <Home className="h-5 w-5 text-primary" />
+                <Home className="h-5 w-5 text-ink" />
                 住宿意向详情
               </h3>
               <button
                 type="button"
                 onClick={() => setDetail(false)}
                 aria-label="关闭"
-                className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-primary/10 hover:text-primary"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-[#f5f1e8] hover:text-ink"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -193,7 +193,7 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-stroke/50 pb-3 last:border-0">
+    <div className="flex items-start justify-between gap-4 border-b border-[#789491]/40 pb-3 last:border-0">
       <span className="shrink-0 text-ink-soft">{label}</span>
       <span className="text-right text-ink">{children}</span>
     </div>

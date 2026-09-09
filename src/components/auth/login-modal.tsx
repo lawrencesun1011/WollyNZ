@@ -282,7 +282,7 @@ export function LoginModal({ open, mode, onSwitchMode, onClose }: Props) {
         <div className="mt-4 flex items-start gap-2 rounded-[--radius-sm] bg-bg-soft/60 px-3 py-2.5 text-xs text-caption">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <span>
-            登录后心愿单与对比将同步至云端，支持跨设备查看。后续将支持微信扫码一键登录。
+            登录后数据将同步至云端，支持跨设备查看。
           </span>
         </div>
       </div>

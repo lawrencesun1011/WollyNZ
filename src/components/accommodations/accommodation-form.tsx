@@ -63,7 +63,7 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="flex items-center gap-1 text-sm font-medium text-primary">
+      <label className="flex items-center gap-1 text-sm font-medium text-ink">
         {label}
         {required && <span className="text-error">*</span>}
       </label>
@@ -82,7 +82,7 @@ function SectionTitle({
   required?: boolean;
 }) {
   return (
-    <h3 className="flex items-center gap-1 text-sm font-semibold text-primary">
+    <h3 className="flex items-center gap-1 text-sm font-semibold text-ink">
       {title}
       {required ? (
         <span className="text-error">*</span>
@@ -531,7 +531,7 @@ export function AccommodationForm({
           )}
 
           {needAuth && !user?.email && (
-            <div className="mt-3 rounded-2xl border border-primary/20 bg-primary/5 p-4">
+            <div className="mt-3 rounded-lg border border-[#789491]/40 bg-white p-4">
               <p className="mb-2 flex items-center gap-2 text-sm text-ink">
                 <Mail className="h-4 w-4 text-primary" />
                 验证码已发送至 <span className="font-medium">{email}</span>
@@ -654,7 +654,7 @@ export function AccommodationForm({
                     className={cn(
                       "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
                       selected
-                        ? "border-primary bg-primary/10 text-primary"
+                        ? "border-primary bg-white text-primary"
                         : "border-stroke bg-white text-ink hover:border-primary/40"
                     )}
                   >
@@ -836,7 +836,7 @@ export function AccommodationForm({
                     className={cn(
                       "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
                       selected
-                        ? "border-primary bg-primary/10 text-primary"
+                        ? "border-primary bg-white text-primary"
                         : "border-stroke bg-white text-ink hover:border-primary/40"
                     )}
                   >
@@ -866,7 +866,7 @@ export function AccommodationForm({
                     className={cn(
                       "rounded-full border px-3 py-1.5 text-sm transition-colors",
                       selected
-                        ? "border-primary bg-primary/10 text-primary"
+                        ? "border-primary bg-white text-primary"
                         : "border-stroke bg-white text-ink hover:border-primary/40"
                     )}
                   >

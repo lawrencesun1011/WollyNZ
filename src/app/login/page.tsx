@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Mail, KeyRound, ShieldCheck, RotateCcw, GraduationCap } from "lucide-react";
+import { Mail, KeyRound, ShieldCheck, RotateCcw } from "lucide-react";
+import { LambMark } from "@/components/editorial/icons";
 import { sendEmailCode, signInWithEmailCode } from "@/lib/auth";
 
 /** 登录 / 注册独立页面：邮箱 + 验证码同屏，居中卡片布局。 */
@@ -92,18 +93,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-bg px-4 py-24 pt-28">
-      {/* 顶部 Logo */}
-      <Link href="/" className="mb-8 flex items-center gap-2">
-        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-light text-white shadow-sm">
-          <GraduationCap className="h-5 w-5" />
-        </span>
-        <span className="text-xl font-bold tracking-tight text-ink">GoalNZ</span>
+    <div className="accom-editorial flex min-h-screen flex-col items-center justify-center bg-bg px-4 py-20 pt-28">
+      {/* 顶部 Logo：与 Header 同款小羊线描标 */}
+      <Link href="/" className="mb-8 inline-flex items-center gap-2.5">
+        <LambMark className="h-10 w-10 text-ink" />
+        <span className="text-[26px] font-semibold tracking-tight text-ink">GoalNZ</span>
       </Link>
 
-      <div className="glass w-full max-w-md rounded-[--radius-md] p-7 shadow-[--shadow-2] animate-fade-up">
+      <div className="w-full max-w-md rounded-[20px] border border-[#789491]/30 bg-white p-7 shadow-[--shadow-2] animate-fade-up">
         <div className="mb-5">
-          <h1 className="text-xl font-bold text-ink">登录 / 注册</h1>
+          <h1 className="text-2xl font-bold text-ink">登录 / 注册</h1>
           <p className="mt-1 text-sm text-caption">
             邮箱验证码登录，首次即自动注册
           </p>
@@ -122,7 +121,7 @@ export default function LoginPage() {
               邮箱
             </span>
             <div className="flex items-center gap-2">
-              <div className="flex h-11 flex-1 items-center gap-2 rounded-[--radius-sm] border border-stroke bg-white/70 px-3">
+              <div className="flex h-11 flex-1 items-center gap-2 rounded-[--radius-sm] border border-stroke bg-white px-3">
                 <Mail className="h-4 w-4 shrink-0 text-caption" />
                 <input
                   ref={emailRef}
@@ -139,7 +138,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={handleSend}
                 disabled={busy || !validEmail || cooldown > 0}
-                className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-[--radius-sm] border border-primary/40 px-3 text-sm font-medium text-primary transition-colors hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-[--radius-sm] border border-[#789491]/50 px-3 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {sending ? (
                   "发送中…"
@@ -161,7 +160,7 @@ export default function LoginPage() {
               验证码
             </span>
             <div
-              className={`flex h-11 items-center gap-2 rounded-[--radius-sm] border bg-white/70 px-3 transition-colors ${
+              className={`flex h-11 items-center gap-2 rounded-[--radius-sm] border bg-white px-3 transition-colors ${
                 sent ? "border-stroke" : "border-stroke/50 opacity-60"
               }`}
             >
@@ -197,7 +196,7 @@ export default function LoginPage() {
         <div className="mt-5 flex items-start gap-2 rounded-[--radius-sm] bg-bg-soft/60 px-3 py-2.5 text-xs text-caption">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <span>
-            登录后心愿单与对比将同步至云端，支持跨设备查看。后续将支持微信扫码一键登录。
+            登录后数据将同步至云端，支持跨设备查看。
           </span>
         </div>
 

@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Inbox, Pencil, Mail, History } from "lucide-react";
+import { Plus, Pencil, Mail, History } from "lucide-react";
 import { useAuthBridge } from "@/lib/auth-init";
 import { useAuthUser, useAuthReady } from "@/lib/auth";
 import {
@@ -37,13 +37,15 @@ function MyAccommodationsInner() {
   }
 
   return (
-    <div className="min-h-screen bg-bg">
-      <div className="mx-auto max-w-5xl px-4 py-8 pb-16">
+    <div className="accom-editorial min-h-screen bg-bg">
+      <div className="mx-auto max-w-7xl px-6 py-8 pb-16 md:px-10">
       {/* 标题 */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-ink">我的住宿意向</h1>
-          <p className="mt-1 text-sm text-ink-soft">
+          <h1 className="text-[clamp(26px,3.4vw,40px)] font-bold leading-tight tracking-tight text-ink">
+            我的住宿意向
+          </h1>
+          <p className="mt-2 text-base text-ink-soft">
             管理您在新西兰的住宿意向，提交后我们将为您匹配合作物业房源
           </p>
         </div>
@@ -126,7 +128,7 @@ function Section({
   return (
     <section>
       <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-ink">
-        <span className="text-primary">{icon}</span>
+        <span className="text-ink">{icon}</span>
         {title}
       </h2>
       {children}
@@ -146,10 +148,20 @@ function LoadingState() {
 /** 未登录时的墙：与空态同款卡片，保留“新建意向”按钮（走邮箱验证），不展示意向列表 */
 function LoginWall({ onAdd }: { onAdd: () => void }) {
   return (
-    <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-3xl border border-dashed border-stroke bg-white/50 px-6 py-16 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-        <Inbox className="h-7 w-7" />
-      </div>
+    <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[#789491]/50 bg-white/60 px-6 py-16 text-center">
+      <svg
+        className="h-14 w-14 text-ink"
+        viewBox="0 0 64 64"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <rect x="6" y="14" width="52" height="36" rx="4" />
+        <path d="M6 18l26 20 26-20" />
+      </svg>
       <p className="text-base font-semibold text-ink">还没有住宿意向</p>
       <p className="max-w-sm text-sm text-ink-soft">
         填写住宿需求，我们会为您匹配合作的物业公司房源，如有合适房源将主动联系您。
@@ -170,10 +182,20 @@ function LoginWall({ onAdd }: { onAdd: () => void }) {
 
 function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
-    <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-3xl border border-dashed border-stroke bg-white/50 px-6 py-16 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-        <Inbox className="h-7 w-7" />
-      </div>
+    <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[#789491]/50 bg-white/60 px-6 py-16 text-center">
+      <svg
+        className="h-14 w-14 text-ink"
+        viewBox="0 0 64 64"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <rect x="6" y="14" width="52" height="36" rx="4" />
+        <path d="M6 18l26 20 26-20" />
+      </svg>
       <p className="text-base font-semibold text-ink">还没有住宿意向</p>
       <p className="max-w-sm text-sm text-ink-soft">
         填写住宿需求，我们会为您匹配合作的物业公司房源，如有合适房源将主动联系您。

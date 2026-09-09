@@ -3,7 +3,7 @@
 import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, Sparkles, Inbox, Pencil, Mail, History } from "lucide-react";
+import { Plus, Pencil, Mail, History } from "lucide-react";
 import { useApplications, removeApplication, getEffectiveStatus, type ApplicationCategory } from "@/lib/applications";
 import { ApplicationCard } from "@/components/applications/application-card";
 import { useAuthUser, useAuthReady } from "@/lib/auth";
@@ -45,13 +45,15 @@ function MyApplicationsInner() {
   }
 
   return (
-    <div className="min-h-screen bg-bg">
-      <div className="mx-auto max-w-5xl px-4 py-8 pb-16">
+    <div className="accom-editorial min-h-screen bg-bg">
+      <div className="mx-auto max-w-7xl px-6 py-8 pb-16 md:px-10">
       {/* 标题 */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-ink">我的学校申请</h1>
-          <p className="mt-1 text-sm text-ink-soft">
+          <h1 className="text-[clamp(26px,3.4vw,40px)] font-bold leading-tight tracking-tight text-ink">
+            我的学校申请
+          </h1>
+          <p className="mt-2 text-base text-ink-soft">
             管理您在新西兰的游学申请，可生成邮件模板直接联系学校
           </p>
         </div>
@@ -66,13 +68,13 @@ function MyApplicationsInner() {
       </div>
 
       {/* 分类 Tab：幼儿园在前 */}
-      <div className="mt-5 inline-flex rounded-2xl border border-stroke bg-white/70 p-1 text-sm shadow-[--shadow-1]">
+      <div className="mt-5 inline-flex rounded-[12px] border border-[#789491]/50 bg-white p-1 text-sm shadow-sm">
         {TABS.map((t) => (
           <button
             key={t.key}
             type="button"
             onClick={() => setTab(t.key)}
-            className={`rounded-xl px-4 py-2 transition-colors ${
+            className={`rounded-[8px] px-4 py-2 transition-colors ${
               tab === t.key ? "bg-primary text-white" : "text-ink-soft hover:text-primary"
             }`}
           >
@@ -156,7 +158,7 @@ function Section({
   return (
     <section>
       <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-ink">
-        <span className="text-primary">{icon}</span>
+        <span className="text-ink">{icon}</span>
         {title}
       </h2>
       {children}
@@ -177,9 +179,19 @@ function LoadingState() {
 function LoginWall({ tab, onAdd }: { tab: Tab; onAdd: () => void }) {
   return (
     <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-3xl border border-dashed border-stroke bg-white/50 px-6 py-16 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-        <Inbox className="h-7 w-7" />
-      </div>
+      <svg
+        className="h-14 w-14 text-ink"
+        viewBox="0 0 64 64"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <rect x="6" y="14" width="52" height="36" rx="4" />
+        <path d="M6 18l26 20 26-20" />
+      </svg>
       <p className="text-base font-semibold text-ink">还没有申请记录</p>
       <p className="max-w-sm text-sm text-ink-soft">
         填写申请，我们会为你生成邮件模板，方便直接联系新西兰{tab === "ece" ? "幼儿园" : "中小学"}。
@@ -195,9 +207,8 @@ function LoginWall({ tab, onAdd }: { tab: Tab; onAdd: () => void }) {
         </button>
         <Link
           href={tab === "ece" ? "/ece" : "/schools"}
-          className="flex items-center gap-2 rounded-xl border border-primary/30 px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+          className="flex items-center gap-2 rounded-xl border border-[#789491]/50 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8]"
         >
-          <Sparkles className="h-4 w-4" />
           去找{tab === "ece" ? "幼儿园" : "中小学"}看看
         </Link>
       </div>
@@ -208,9 +219,19 @@ function LoginWall({ tab, onAdd }: { tab: Tab; onAdd: () => void }) {
 function EmptyState({ tab, onAdd }: { tab: Tab; onAdd: () => void }) {
   return (
     <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-3xl border border-dashed border-stroke bg-white/50 px-6 py-16 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-        <Inbox className="h-7 w-7" />
-      </div>
+      <svg
+        className="h-14 w-14 text-ink"
+        viewBox="0 0 64 64"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <rect x="6" y="14" width="52" height="36" rx="4" />
+        <path d="M6 18l26 20 26-20" />
+      </svg>
       <p className="text-base font-semibold text-ink">还没有申请记录</p>
       <p className="max-w-sm text-sm text-ink-soft">
         填写申请，我们会为你生成邮件模板，方便直接联系新西兰{tab === "ece" ? "幼儿园" : "中小学"}。
@@ -226,9 +247,8 @@ function EmptyState({ tab, onAdd }: { tab: Tab; onAdd: () => void }) {
         </button>
         <Link
           href={tab === "ece" ? "/ece" : "/schools"}
-          className="flex items-center gap-2 rounded-xl border border-primary/30 px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+          className="flex items-center gap-2 rounded-xl border border-[#789491]/50 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8]"
         >
-          <Sparkles className="h-4 w-4" />
           去找{tab === "ece" ? "幼儿园" : "中小学"}看看
         </Link>
       </div>
