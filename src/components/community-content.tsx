@@ -98,6 +98,10 @@ export function CommunityContent() {
       </section>
 
       <aside className={styles.privacy} aria-label="社群交流约定">
+        <svg className={styles.privacyIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M3 6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H8l-3 3z" />
+          <path d="M13 8a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2l-3 3v-3h-2" />
+        </svg>
         <div className={styles.privacyCopy}>
           <p className={styles.privacyTitle}>免费交流<span aria-hidden="true"> · </span>尊重隐私<span aria-hidden="true"> · </span>友善分享</p>
           <p className={styles.privacyDescription}>请勿在群内公开个人敏感信息。</p>
