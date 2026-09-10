@@ -1,8 +1,8 @@
 "use client";
 
-import { saveCloudAccommodation, fetchCloudAccommodation, deleteCloudAccommodation } from "./user-data";
+import { saveCloudAccommodation, fetchCloudAccommodation } from "./user-data";
 
-export type AccommodationStatus = "draft" | "submitted" | "closed";
+export type AccommodationStatus = "draft" | "submitted" | "closed" | "deleted";
 
 export const ACCOMMODATION_STATUS_META: Record<
   AccommodationStatus,
@@ -11,6 +11,7 @@ export const ACCOMMODATION_STATUS_META: Record<
   draft: { label: "草稿", className: "bg-[#eef0ea] text-ink-soft" },
   submitted: { label: "已提交", className: "bg-[#f0ddd0] text-[#b44427]" },
   closed: { label: "已结束", className: "bg-ink/10 text-ink-soft" },
+  deleted: { label: "已删除", className: "bg-ink/10 text-ink-soft" },
 };
 
 /** 已提交后超过入住开始时间 30 天视为已结束。 */
@@ -166,11 +167,21 @@ export function updateAccommodation(id: string, patch: Partial<AccommodationForm
   return updated;
 }
 
+/**
+ * 删除住宿意向（软删除）：数据库保留留档，仅把状态置为 deleted，不再真正删除行。
+ * 前端按状态过滤，deleted 项不会展示，但审核后台可按 status 筛选到。
+ */
 export function removeAccommodation(id: string) {
-  state.items = state.items.filter((it) => it.id !== id);
+  let updated: AccommodationItem | undefined;
+  state.items = state.items.map((it) => {
+    if (it.id !== id) return it;
+    updated = { ...it, status: "deleted", updatedAt: new Date().toISOString() };
+    return updated;
+  });
   persist();
   emit();
-  if (state.uid) deleteCloudAccommodation(id).catch(() => {});
+  // 软删除：云端保留留档，仅把状态更新为 deleted（不再调用 DELETE 真正删行）
+  if (updated && state.uid) saveCloudAccommodation(updated).catch(() => {});
 }
 
 /** 登录合并：用云端数据覆盖本地。 */

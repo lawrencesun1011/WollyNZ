@@ -41,6 +41,7 @@ import { getEceSnapshot, loadEceSnapshot, subscribeEce } from "@/lib/ece-store";
 import type { SchoolFrontend } from "@/lib/types";
 import { useAuthUser, sendEmailCode, signInWithEmailCode } from "@/lib/auth";
 import { EmailTemplateModal } from "./email-template-modal";
+import { inputCls, selectCls, Field, SectionTitle, primaryBtnCls, secondaryBtnCls, ghostBtnCls, primaryBtnSmCls, secondaryBtnSmCls } from "@/components/form-ui";
 
 const MONTHS: number[] = Array.from({ length: 12 }, (_, i) => i + 1);
 const DAYS: number[] = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -54,10 +55,6 @@ const START_YEARS: number[] = [CUR_YEAR, CUR_YEAR + 1];
 // 结束年份：今年、明年、后年
 const END_YEARS: number[] = [CUR_YEAR, CUR_YEAR + 1, CUR_YEAR + 2];
 
-function selectCls(extra = "") {
-  return `w-full appearance-none rounded-xl border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors hover:border-primary/40 focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft disabled:opacity-70 ${extra}`;
-}
-
 function Section({
   title,
   required,
@@ -69,14 +66,7 @@ function Section({
 }) {
   return (
     <div className="space-y-2.5">
-      <h3 className="flex items-center gap-1 text-sm font-semibold text-ink">
-        {title}
-        {required ? (
-          <span className="text-error">*</span>
-        ) : (
-          <span className="text-xs font-normal text-ink-soft">（选填）</span>
-        )}
-      </h3>
+      <SectionTitle title={title} required={required} />
       {children}
     </div>
   );
@@ -474,9 +464,7 @@ export function ApplicationForm({
               disabled={!!user?.email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="用于接收申请进度与学校沟通"
-              className={`w-full rounded-xl border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft ${
-                errors.email ? "border-error" : ""
-              }`}
+              className={inputCls(errors.email)}
             />
             {errors.email && <p className="mt-1 text-xs text-error">{errors.email}</p>}
           </div>
@@ -485,7 +473,7 @@ export function ApplicationForm({
               type="button"
               onClick={handleSendCode}
               disabled={codeSending || cooldown > 0}
-              className="mt-0.5 shrink-0 rounded-xl border border-[#789491]/50 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8] disabled:cursor-not-allowed disabled:opacity-60"
+              className={`${secondaryBtnSmCls} mt-0.5 shrink-0`}
             >
               {codeSending ? <Loader2 className="h-4 w-4 animate-spin" /> : cooldown > 0 ? `${cooldown}s` : "验证"}
             </button>
@@ -496,7 +484,7 @@ export function ApplicationForm({
         )}
 
         {needAuth && !user?.email && (
-          <div className="mt-3 rounded-lg border border-[#789491]/40 bg-white p-4">
+          <div className="mt-3 rounded-lg border border-stroke/40 bg-white p-4">
             <p className="mb-2 flex items-center gap-2 text-sm text-ink">
               <Mail className="h-4 w-4 text-ink" />
               验证码已发送至 <span className="font-medium">{email}</span>
@@ -507,13 +495,13 @@ export function ApplicationForm({
                 onChange={(e) => setCode(e.target.value)}
                 inputMode="numeric"
                 placeholder="请输入 6 位验证码"
-                className="w-full rounded-xl border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-primary"
+                className={inputCls()}
               />
               <button
                 type="button"
                 onClick={handleConfirm}
                 disabled={submitting || code.trim().length === 0}
-                className="shrink-0 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
+                className={`${primaryBtnSmCls} shrink-0`}
               >
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "确认"}
               </button>
@@ -530,9 +518,7 @@ export function ApplicationForm({
           disabled={locked}
           onChange={(e) => setParentTitle(e.target.value)}
           placeholder="如：Peter / San Zhang"
-          className={`w-full rounded-xl border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft ${
-            errors.parentTitle ? "border-error" : ""
-          }`}
+          className={inputCls(errors.parentTitle)}
         />
         <p className="mt-1 text-xs text-ink-soft">用于和学校沟通</p>
         {errors.parentTitle && <p className="mt-1 text-xs text-error">{errors.parentTitle}</p>}
@@ -546,8 +532,7 @@ export function ApplicationForm({
               {/* 出生日期 + 性别 + 英语水平（同一行） */}
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
                 {/* 出生日期：年 / 月 / 日 */}
-                <div className="min-w-0 flex-[1.6]">
-                  <label className="mb-1 block text-xs text-ink-soft">出生日期</label>
+                <Field label="出生日期" required className="min-w-0 flex-[1.6]">
                   <div className="grid grid-cols-3 gap-2">
                     <select
                       className={selectCls(errors.birth ? "border-error" : "")}
@@ -586,10 +571,9 @@ export function ApplicationForm({
                       ))}
                     </select>
                   </div>
-                </div>
+                </Field>
                 {/* 性别（选填） */}
-                <div className="min-w-0 flex-1">
-                  <label className="mb-1 block text-xs text-ink-soft">性别（选填）</label>
+                <Field label="性别" className="min-w-0 flex-1">
                   <select
                     className={selectCls("")}
                     value={st.gender ?? ""}
@@ -603,10 +587,9 @@ export function ApplicationForm({
                       </option>
                     ))}
                   </select>
-                </div>
+                </Field>
                 {/* 英语水平（选填） */}
-                <div className="min-w-0 flex-1">
-                  <label className="mb-1 block text-xs text-ink-soft">英语水平（选填）</label>
+                <Field label="英语水平" className="min-w-0 flex-1">
                   <select
                     className={selectCls("")}
                     value={st.englishLevel ?? ""}
@@ -620,7 +603,7 @@ export function ApplicationForm({
                       </option>
                     ))}
                   </select>
-                </div>
+                </Field>
               </div>
             </div>
             {idx > 0 && (
@@ -731,7 +714,7 @@ export function ApplicationForm({
             {calendarOpen && (
               <div className="absolute left-0 right-0 z-30 mt-2">
                 <div className="fixed inset-0 z-20" onClick={() => setCalendarOpen(false)} />
-                <div className="relative z-30 rounded-lg border border-[#789491]/50 bg-white p-4 shadow-xl">
+                <div className="relative z-30 rounded-lg border border-stroke/50 bg-white p-4 shadow-xl">
                   <DateRangeCalendar
                     start={exStart}
                     end={exEnd}
@@ -745,7 +728,7 @@ export function ApplicationForm({
                     <button
                       type="button"
                       onClick={() => setCalendarOpen(false)}
-                      className="rounded-xl border border-[#789491]/50 px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8]"
+                      className={secondaryBtnSmCls}
                     >
                       确认
                     </button>
@@ -828,9 +811,7 @@ export function ApplicationForm({
                 setSchoolSuggestOpen(true);
               }}
               placeholder="输入学校名，会出现相关候选"
-              className={`w-full rounded-xl border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-primary ${
-                errors.schools ? "border-error" : ""
-              }`}
+              className={inputCls(errors.schools)}
             />
             {schoolSuggestOpen && suggest.length > 0 && (
               <div className="absolute left-0 right-0 top-[48px] z-20 max-h-52 overflow-y-auto rounded-xl border border-stroke bg-white shadow-lg scroll-thin">
@@ -855,7 +836,7 @@ export function ApplicationForm({
             type="button"
             onClick={importFavorites}
             disabled={locked}
-            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-[#789491]/50 px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8] disabled:opacity-50"
+            className={`${secondaryBtnSmCls} shrink-0`}
           >
             <Heart className="h-4 w-4" />
             一键导入心愿单
@@ -866,7 +847,7 @@ export function ApplicationForm({
             {schools.map((s) => (
               <span
                 key={s.name}
-                className="chip flex items-center gap-1.5 border border-[#789491]/40 bg-white text-ink"
+                className="chip flex items-center gap-1.5 border border-stroke/40 bg-white text-ink"
               >
                 <Layers className="h-3 w-3" />
                 {s.name}
@@ -893,7 +874,7 @@ export function ApplicationForm({
           onChange={(e) => setExtraRequests(e.target.value)}
           rows={3}
           placeholder="可补充其它信息"
-          className="w-full resize-none rounded-xl border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft"
+          className={`${inputCls()} resize-none`}
         />
       </Section>
 
@@ -902,7 +883,7 @@ export function ApplicationForm({
         <button
           type="button"
           onClick={() => onCancel?.()}
-          className="rounded-xl px-4 py-2.5 text-sm text-ink-soft transition-colors hover:bg-[#f5f1e8]"
+          className={ghostBtnCls}
         >
           取消
         </button>
@@ -910,7 +891,7 @@ export function ApplicationForm({
           type="button"
           onClick={handleSaveDraft}
           disabled={locked || submitting}
-          className="flex items-center gap-2 rounded-xl border border-[#789491]/50 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8] disabled:opacity-60"
+          className={secondaryBtnCls}
         >
           <Save className="h-4 w-4" />
           保存草稿
@@ -919,7 +900,7 @@ export function ApplicationForm({
           type="button"
           onClick={handleGenerate}
           disabled={locked || submitting}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
+          className={`${primaryBtnCls} flex-1`}
         >
           {submitting ? (
             <Loader2 className="h-4 w-4 animate-spin" />

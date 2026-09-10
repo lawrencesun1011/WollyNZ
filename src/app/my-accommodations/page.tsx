@@ -13,6 +13,7 @@ import {
   type AccommodationItem,
 } from "@/lib/accommodation";
 import { AccommodationCard } from "@/components/accommodations/accommodation-card";
+import { primaryBtnSmCls } from "@/components/form-ui";
 
 function MyAccommodationsInner() {
   const router = useRouter();
@@ -32,6 +33,9 @@ function MyAccommodationsInner() {
   const history = useMemo(() => items.filter((i) => getEffectiveStatus(i) === "closed"), [items]);
   const hasAny = items.length > 0;
 
+  // 列表为空（未登录 / 空态）时，头部新建按钮与中间空态卡片按钮重复，故仅在已有意向时显示
+  const showHeaderAdd = authReady && !!user && hasAny;
+
   function handleAdd() {
     router.push("/apply/accommodation");
   }
@@ -45,18 +49,20 @@ function MyAccommodationsInner() {
           <h1 className="text-[clamp(26px,3.4vw,40px)] font-bold leading-tight tracking-tight text-ink">
             我的住宿意向
           </h1>
-          <p className="mt-2 text-base text-ink-soft">
+          <p className="mt-2 text-lg text-ink-soft">
             管理您在新西兰的住宿意向，提交后我们将为您匹配合作物业房源
           </p>
         </div>
-        <button
-          type="button"
-          onClick={handleAdd}
-          className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-[--shadow-1] transition-colors hover:bg-primary/90"
-        >
-          <Plus className="h-4 w-4" />
-          新建意向
-        </button>
+        {showHeaderAdd && (
+          <button
+            type="button"
+            onClick={handleAdd}
+            className={`${primaryBtnSmCls} shadow-[--shadow-1]`}
+          >
+            <Plus className="h-4 w-4" />
+            新建意向
+          </button>
+        )}
       </div>
 
       {/* 未登录：登录墙（与空态同款卡片，不展示意向列表）；邮箱验证放在新建意向流程中 */}
@@ -150,7 +156,7 @@ function LoginWall({ onAdd }: { onAdd: () => void }) {
   return (
     <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[#789491]/50 bg-white/60 px-6 py-16 text-center">
       <svg
-        className="h-14 w-14 text-ink"
+        className="h-16 w-16 text-ink"
         viewBox="0 0 64 64"
         fill="none"
         stroke="currentColor"
@@ -162,15 +168,15 @@ function LoginWall({ onAdd }: { onAdd: () => void }) {
         <rect x="6" y="14" width="52" height="36" rx="4" />
         <path d="M6 18l26 20 26-20" />
       </svg>
-      <p className="text-base font-semibold text-ink">还没有住宿意向</p>
-      <p className="max-w-sm text-sm text-ink-soft">
+      <p className="text-2xl font-semibold text-ink">还没有住宿意向</p>
+      <p className="max-w-sm text-lg text-ink-soft">
         填写住宿需求，我们会为您匹配合作的物业公司房源，如有合适房源将主动联系您。
       </p>
       <div className="mt-2 flex gap-2">
         <button
           type="button"
           onClick={onAdd}
-          className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+          className={primaryBtnSmCls}
         >
           <Plus className="h-4 w-4" />
           新建意向
@@ -184,7 +190,7 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
     <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[#789491]/50 bg-white/60 px-6 py-16 text-center">
       <svg
-        className="h-14 w-14 text-ink"
+        className="h-16 w-16 text-ink"
         viewBox="0 0 64 64"
         fill="none"
         stroke="currentColor"
@@ -196,15 +202,15 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
         <rect x="6" y="14" width="52" height="36" rx="4" />
         <path d="M6 18l26 20 26-20" />
       </svg>
-      <p className="text-base font-semibold text-ink">还没有住宿意向</p>
-      <p className="max-w-sm text-sm text-ink-soft">
+      <p className="text-2xl font-semibold text-ink">还没有住宿意向</p>
+      <p className="max-w-sm text-lg text-ink-soft">
         填写住宿需求，我们会为您匹配合作的物业公司房源，如有合适房源将主动联系您。
       </p>
       <div className="mt-2 flex gap-2">
         <button
           type="button"
           onClick={onAdd}
-          className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+          className={primaryBtnSmCls}
         >
           <Plus className="h-4 w-4" />
           新建意向

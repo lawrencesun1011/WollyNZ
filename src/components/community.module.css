@@ -7,8 +7,7 @@
 .conversationArt { width: 100%; max-width: 305px; justify-self: end; }
 .joinPanel { display: grid; grid-template-columns: 59% 41%; border: 1px solid #789491; border-radius: 7px; padding: 27px 40px 25px; }
 .panelHeading { grid-column: 1; padding-right: 25px; }
-.accentHeading { display: flex; align-items: center; gap: 22px; font-size: clamp(30px, 3.3vw, 42px); font-weight: 700; line-height: 1.4; letter-spacing: -.025em; }
-.accentHeading::after { content: ""; display: inline-block; width: 32px; height: 1px; background: #b44427; flex-shrink: 0; }
+.accentHeading { display: flex; align-items: center; font-size: clamp(30px, 3.3vw, 42px); font-weight: 700; line-height: 1.4; letter-spacing: -.025em; }
 .panelHeading p { margin-top: 8px; font-size: 21px; line-height: 1.75; }
 .qrArea { grid-column: 2; grid-row: 1 / 3; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid #789491; padding-left: 38px; }
 .qrCard { width: min(100%, 275px); aspect-ratio: 1.075; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; border: 1px solid #537770; border-radius: 8px; padding: 24px; }
@@ -37,7 +36,7 @@
 .topic h3 { font-size: 24px; font-weight: 700; line-height: 1.4; }
 .topic p { margin-top: 3px; font-size: 16px; line-height: 1.75; text-wrap: pretty; }
 .topicArrow { display: none; }
-.privacy { display: flex; align-items: center; justify-content: center; gap: 16px; border-top: 1px solid #789491; margin-top: 1px; padding: 28px 0; }
+.privacy { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 1px; padding: 28px 0; }
 .privacyCopy { padding: 8px 0; text-align: center; }
 .privacyIcon { width: 38px; height: 38px; color: #102e2c; flex-shrink: 0; }
 .privacyTitle { font-size: clamp(22px, 2.2vw, 29px); line-height: 1.65; font-weight: 600; letter-spacing: .015em; }
@@ -61,7 +60,7 @@
   .description { font-size: 17px; }
   .joinPanel { padding: 25px; grid-template-columns: 58% 42%; }
   .panelHeading p, .stepText { font-size: 17px; }
-  .accentHeading { font-size: 33px; gap: 15px; }
+  .accentHeading { font-size: 33px; }
   .qrArea { padding-left: 26px; }
   .qrCard { padding: 20px; }
   .qrCard p { font-size: 18px; }
@@ -82,8 +81,7 @@
   .conversationArt { position: absolute; right: 2px; bottom: 17px; width: 29%; max-width: 180px; }
   .joinPanel { display: flex; flex-direction: column; padding: 17px 19px 20px; border-radius: 6px; }
   .panelHeading { padding: 0; }
-  .accentHeading { font-size: clamp(27px, 6.2vw, 39px); line-height: 1.4; gap: 15px; }
-  .accentHeading::after { width: 22px; }
+  .accentHeading { font-size: clamp(27px, 6.2vw, 39px); line-height: 1.4; }
   .panelHeading p { margin-top: 7px; font-size: 16px; line-height: 1.8; }
   .qrArea { border-left: 0; padding: 0; margin-top: 20px; }
   .qrCard { width: 190px; aspect-ratio: 1; gap: 18px; padding: 22px; }
@@ -126,8 +124,7 @@
   .description { max-width: 76%; font-size: 16px; }
   .conversationArt { width: 26%; bottom: 20px; }
   .joinPanel { padding-inline: 14px; }
-  .accentHeading { font-size: 26px; gap: 10px; }
-  .accentHeading::after { width: 18px; }
+  .accentHeading { font-size: 26px; }
   .qrActions { gap: 8px; }
   .qrButton { font-size: 14px; }
   .stepText { font-size: 14px; }

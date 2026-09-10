@@ -7,7 +7,7 @@
 .intro { font-size: clamp(23px, 2.65vw, 33px); font-weight: 600; line-height: 1.7; letter-spacing: -.04em; white-space: nowrap; }
 .description { margin-top: 12px; font-size: 20px; line-height: 1.75; max-width: 665px; }
 .actions { display: flex; gap: 36px; align-items: center; margin-top: 31px; }
-.primaryButton { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 58px; padding: 12px 38px; border: 1px solid #16433a; border-radius: 7px; color: #f9f6f0; background: linear-gradient(115deg, #16433a, #123d34); font: inherit; font-size: 23px; line-height: 1.35; letter-spacing: .055em; text-decoration: none; transition: background .2s, transform .2s; }
+.primaryButton { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 58px; padding: 12px 38px; border: 1px solid #16433a; border-radius: 7px; color: #f9f6f0; background: linear-gradient(115deg, #16433a, #123d34); font: inherit; font-size: 20px; line-height: 1.35; letter-spacing: .055em; text-decoration: none; transition: background .2s, transform .2s; }
 .primaryButton:hover { background: #245044; transform: translateY(-1px); }
 .primaryButton svg { width: 24px; height: 24px; flex-shrink: 0; }
 .textButton { display: inline-flex; align-items: center; gap: 12px; min-height: 46px; font: inherit; font-size: 20px; font-weight: 600; text-decoration: underline; text-underline-offset: 5px; background: transparent; border: 0; white-space: nowrap; }
@@ -39,7 +39,7 @@
   .intro { font-size: 26px; white-space: normal; }
   .description { font-size: 17px; }
   .actions { gap: 23px; }
-  .actions .primaryButton { font-size: 19px; padding-inline: 25px; }
+  .actions .primaryButton { font-size: 17px; padding-inline: 25px; }
   .textButton { font-size: 17px; }
   .hero .villa { top: 37px; width: 44%; right: -10px; }
   .step { gap: 16px; grid-template-columns: 47px 1fr; padding-right: 23px; }
@@ -59,10 +59,10 @@
   .titleRow { gap: 18px; margin-bottom: 17px; }
   .titleRow h1 { font-size: clamp(38px, 9vw, 54px); line-height: 1.25; }
   .beta { font-size: 15px; padding: 3px 8px 4px; border-radius: 4px; }
-  .intro { font-size: 19px; font-weight: 600; line-height: 1.7; letter-spacing: -.035em; text-wrap: pretty; }
+  .intro { font-size: 17px; font-weight: 600; line-height: 1.7; letter-spacing: -.035em; text-wrap: pretty; }
   .description { margin-top: 8px; font-size: 16px; line-height: 1.8; }
   .actions { flex-direction: column; align-items: stretch; gap: 12px; margin-top: 21px; }
-  .actions .primaryButton { width: 100%; min-height: 49px; font-size: 19px; padding: 11px 18px; }
+  .actions .primaryButton { width: 100%; min-height: 49px; font-size: 17px; padding: 11px 18px; }
   .actions .primaryButton svg { width: 22px; height: 22px; }
   .textButton { align-self: center; font-size: 17px; gap: 10px; min-height: 40px; }
   .process { padding-top: 16px; }

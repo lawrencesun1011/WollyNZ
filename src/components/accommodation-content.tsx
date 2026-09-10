@@ -21,7 +21,7 @@ function ShieldIcon(props: IconProps) {
 }
 
 const steps = [
-  { number: "01", title: "填写意向", Icon: NoteIcon, desktop: "告诉我们意向地区、每周预算、卧室需求与入住安排。", mobile: "地区、每周预算、卧室需求与入住安排。" },
+  { number: "01", title: "填写意向", Icon: NoteIcon, desktop: "告诉我们意向地区、每周预算、卧室需求与入住安排。", mobile: "地区、每周预算、卧室需求与入住安排等。" },
   { number: "02", title: "匹配房源", Icon: HouseIcon, desktop: "我们从合作物业中寻找符合您需求的房源。", mobile: "从合作物业中寻找符合需求的房源。" },
   { number: "03", title: "邮件联系", Icon: MailIcon, desktop: "有合适房源时，我们会通过您留下的邮箱主动联系。", mobile: "有合适房源时，我们会主动联系您。" },
 ];
@@ -33,7 +33,7 @@ export function AccommodationContent() {
         <div className={styles.heroCopy}>
           <div className={styles.titleRow}><h1 id="accommodation-title">找住宿</h1><span className={styles.beta}>内测中</span></div>
           <p className={styles.intro}>提交住宿意向，寻找适合一家人的落脚点。</p>
-          <p className={styles.description}>我们从合作物业中匹配房源，有合适房源时通过邮箱联系您。</p>
+          <p className={styles.description}>我们从合作物业中匹配房源，若有合适房源时会通过邮件联系您。</p>
           <div className={styles.actions}>
             <Link className={styles.primaryButton} href="/apply/accommodation">填写住宿意向 <ArrowUpRight /></Link>
             <Link className={styles.textButton} href="/my-accommodations">管理我的意向 <ArrowRight /></Link>

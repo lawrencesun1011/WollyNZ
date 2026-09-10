@@ -37,9 +37,8 @@ export function CommunityContent() {
 
       <section className={styles.joinPanel} aria-labelledby="join-title">
         <div className={styles.panelHeading}>
-          <h2 id="join-title" className={styles.accentHeading}>找到同行的人。</h2>
-          <p className={styles.desktopOnly}>使用微信扫描社群二维码，查看加入方式。</p>
-          <p className={styles.mobileOnly}>{qrCodeSrc ? "保存二维码，在微信中识别加入。" : "社群入口更新后即可使用。"}</p>
+          <h2 id="join-title" className={styles.accentHeading}>找到同行的人</h2>
+          <p>网站官方社群</p>
         </div>
 
         <div className={styles.qrArea}>
@@ -53,11 +52,11 @@ export function CommunityContent() {
 
         <div className={styles.instructions}>
           <ol className={styles.stepList}>
-            <li><span className={styles.stepNumber}>01</span><span className={styles.stepText}><span className={styles.desktopOnly}>打开微信扫一扫</span><span className={styles.mobileOnly}>保存社群二维码</span></span></li>
-            <li><span className={styles.stepNumber}>02</span><span className={styles.stepText}><span className={styles.desktopOnly}>扫描右侧社群二维码</span><span className={styles.mobileOnly}>在微信中识别二维码</span></span></li>
-            <li><span className={styles.stepNumber}>03</span><span className={styles.stepText}>按提示申请加入</span></li>
+            <li><span className={styles.stepNumber}>01</span><span className={styles.stepText}>解答家长游学疑问</span></li>
+            <li><span className={styles.stepNumber}>02</span><span className={styles.stepText}>提供新西兰本地吃喝住行信息</span></li>
+            <li><span className={styles.stepNumber}>03</span><span className={styles.stepText}>互帮互助，信息共享</span></li>
           </ol>
-          {!qrCodeSrc ? <p className={`${styles.entryNotice} ${styles.desktopOnly}`}>社群入口更新后即可使用。</p> : null}
+          {!qrCodeSrc ? <p className={styles.entryNotice}>社群入口更新后即可使用。</p> : null}
         </div>
       </section>
 

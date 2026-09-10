@@ -18,7 +18,7 @@ export function SiteFooter() {
               <BrandLogo small style={{ width: 130 }} />
             </Link>
             <p>
-              面向中国游学家庭的新西兰亲子游学服务平台：免费查询中小学与幼儿园，阅读 DIY 攻略，提交住宿意向，并加入家长社群。
+              新西兰亲子游学服务平台：免费查询校园资料和真实游学攻略，对接平台房源，提供社群交流。
             </p>
           </div>
 
@@ -58,7 +58,7 @@ export function SiteFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  新西兰教育机构目录<span className="sr-only">（在新窗口打开）</span>
+                  Education Counts<span className="sr-only">（在新窗口打开）</span>
                 </a>
               </li>
               <li>

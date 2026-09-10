@@ -8,6 +8,7 @@ import { useApplications, removeApplication, getEffectiveStatus, type Applicatio
 import { ApplicationCard } from "@/components/applications/application-card";
 import { useAuthUser, useAuthReady } from "@/lib/auth";
 import { useAuthBridge } from "@/lib/auth-init";
+import { primaryBtnSmCls, secondaryBtnSmCls } from "@/components/form-ui";
 
 type Tab = ApplicationCategory;
 
@@ -35,6 +36,9 @@ function MyApplicationsInner() {
   const generated = filtered.filter((a) => getEffectiveStatus(a) === "generated");
   const history = filtered.filter((a) => getEffectiveStatus(a) === "closed");
 
+  // 列表为空（未登录 / 空态）时，头部新增按钮与中间空态卡片按钮重复，故仅在已有申请时显示
+  const showHeaderAdd = authReady && !!user && filtered.length > 0;
+
   function handleAdd() {
     router.push(`/apply?category=${tab}`);
   }
@@ -53,18 +57,20 @@ function MyApplicationsInner() {
           <h1 className="text-[clamp(26px,3.4vw,40px)] font-bold leading-tight tracking-tight text-ink">
             我的学校申请
           </h1>
-          <p className="mt-2 text-base text-ink-soft">
+          <p className="mt-2 text-lg text-ink-soft">
             管理您在新西兰的游学申请，可生成邮件模板直接联系学校
           </p>
         </div>
-        <button
-          type="button"
-          onClick={handleAdd}
-          className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-[--shadow-1] transition-colors hover:bg-primary/90"
-        >
-          <Plus className="h-4 w-4" />
-          新增申请
-        </button>
+        {showHeaderAdd && (
+          <button
+            type="button"
+            onClick={handleAdd}
+            className={`${primaryBtnSmCls} shadow-[--shadow-1]`}
+          >
+            <Plus className="h-4 w-4" />
+            新增申请
+          </button>
+        )}
       </div>
 
       {/* 分类 Tab：幼儿园在前 */}
@@ -180,7 +186,7 @@ function LoginWall({ tab, onAdd }: { tab: Tab; onAdd: () => void }) {
   return (
     <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-3xl border border-dashed border-stroke bg-white/50 px-6 py-16 text-center">
       <svg
-        className="h-14 w-14 text-ink"
+        className="h-16 w-16 text-ink"
         viewBox="0 0 64 64"
         fill="none"
         stroke="currentColor"
@@ -192,22 +198,22 @@ function LoginWall({ tab, onAdd }: { tab: Tab; onAdd: () => void }) {
         <rect x="6" y="14" width="52" height="36" rx="4" />
         <path d="M6 18l26 20 26-20" />
       </svg>
-      <p className="text-base font-semibold text-ink">还没有申请记录</p>
-      <p className="max-w-sm text-sm text-ink-soft">
+      <p className="text-2xl font-semibold text-ink">还没有申请记录</p>
+      <p className="max-w-sm text-lg text-ink-soft">
         填写申请，我们会为你生成邮件模板，方便直接联系新西兰{tab === "ece" ? "幼儿园" : "中小学"}。
       </p>
       <div className="mt-2 flex gap-2">
         <button
           type="button"
           onClick={onAdd}
-          className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+          className={primaryBtnSmCls}
         >
           <Plus className="h-4 w-4" />
           新增申请
         </button>
         <Link
           href={tab === "ece" ? "/ece" : "/schools"}
-          className="flex items-center gap-2 rounded-xl border border-[#789491]/50 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8]"
+          className={secondaryBtnSmCls}
         >
           去找{tab === "ece" ? "幼儿园" : "中小学"}看看
         </Link>
@@ -220,7 +226,7 @@ function EmptyState({ tab, onAdd }: { tab: Tab; onAdd: () => void }) {
   return (
     <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-3xl border border-dashed border-stroke bg-white/50 px-6 py-16 text-center">
       <svg
-        className="h-14 w-14 text-ink"
+        className="h-16 w-16 text-ink"
         viewBox="0 0 64 64"
         fill="none"
         stroke="currentColor"
@@ -232,22 +238,22 @@ function EmptyState({ tab, onAdd }: { tab: Tab; onAdd: () => void }) {
         <rect x="6" y="14" width="52" height="36" rx="4" />
         <path d="M6 18l26 20 26-20" />
       </svg>
-      <p className="text-base font-semibold text-ink">还没有申请记录</p>
-      <p className="max-w-sm text-sm text-ink-soft">
+      <p className="text-2xl font-semibold text-ink">还没有申请记录</p>
+      <p className="max-w-sm text-lg text-ink-soft">
         填写申请，我们会为你生成邮件模板，方便直接联系新西兰{tab === "ece" ? "幼儿园" : "中小学"}。
       </p>
       <div className="mt-2 flex gap-2">
         <button
           type="button"
           onClick={onAdd}
-          className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+          className={primaryBtnSmCls}
         >
           <Plus className="h-4 w-4" />
           新增申请
         </button>
         <Link
           href={tab === "ece" ? "/ece" : "/schools"}
-          className="flex items-center gap-2 rounded-xl border border-[#789491]/50 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8]"
+          className={secondaryBtnSmCls}
         >
           去找{tab === "ece" ? "幼儿园" : "中小学"}看看
         </Link>

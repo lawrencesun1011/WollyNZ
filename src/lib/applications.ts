@@ -11,7 +11,6 @@
 import { useEffect, useState } from "react";
 import {
   saveCloudApplication,
-  deleteCloudApplication,
   fetchCloudApplications,
   fetchCloudProfile,
   saveCloudProfile,
@@ -22,8 +21,8 @@ import { getEceSnapshot, loadEceSnapshot } from "./ece-store";
 
 export type ApplicationCategory = "school" | "ece";
 
-/** 状态：draft 草稿（尚未生成邮件模板），generated 已生成邮件模板。游学开始时间已过则视为 closed（已结束）。 */
-export type ApplicationStatus = "draft" | "generated" | "closed";
+/** 状态：draft 草稿（尚未生成邮件模板），generated 已生成邮件模板。游学开始时间已过则视为 closed（已结束）。deleted 为用户删除后的留档状态（数据库保留，前端不展示）。 */
+export type ApplicationStatus = "draft" | "generated" | "closed" | "deleted";
 
 /** 游学开始时间（ms），无法解析时返回 null。exact 用 start；fuzzy 用 fuzzyStart 的中旬近似。 */
 function studyStartMs(item: ApplicationItem): number | null {
@@ -164,7 +163,11 @@ function normalizeApplication(raw: unknown): ApplicationItem | null {
   const category =
     item.category === "ece" ? "ece" : item.category === "school" ? "school" : null;
   if (!category) return null;
-  const status: ApplicationStatus = item.status === "draft" ? "draft" : "generated";
+  // 仅允许白名单内的状态通过，旧数据/异常值统一降级为 generated
+  const validStatuses: ApplicationStatus[] = ["draft", "generated", "closed", "deleted"];
+  const status: ApplicationStatus = validStatuses.includes(item.status as ApplicationStatus)
+    ? (item.status as ApplicationStatus)
+    : "generated";
   // 旧数据兼容：birthDates(仅含出生日期) → students
   let students = Array.isArray(item.students) ? (item.students as Student[]) : undefined;
   if (!students || students.length === 0) {
@@ -368,11 +371,22 @@ export function updateApplication(id: string, patch: Partial<ApplicationItem>): 
   return updated;
 }
 
+/**
+ * 删除申请（软删除）：数据库保留留档，仅把状态置为 deleted，不再真正删除行。
+ * 前端按状态过滤，deleted 项不会展示，但审核后台可按 status 筛选到。
+ */
 export function removeApplication(id: string) {
-  items = items.filter((a) => a.id !== id);
+  const idx = items.findIndex((a) => a.id === id);
+  if (idx < 0) return;
+  const updated: ApplicationItem = {
+    ...items[idx],
+    status: "deleted",
+    updatedAt: new Date().toISOString(),
+  };
+  items = [updated, ...items.slice(0, idx), ...items.slice(idx + 1)];
   persist();
-  const u = uid;
-  if (u) deleteCloudApplication(id).then(() => markSynced(u)).catch(() => {});
+  // 软删除：云端保留留档，仅把状态更新为 deleted（不再调用 DELETE 真正删行）
+  pushCloud(updated);
 }
 
 // 每用户「是否已同步到云端」标记：用于区分「首次同步」与「云端被删除」。

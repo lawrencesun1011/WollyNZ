@@ -668,6 +668,20 @@ textarea.input {
   --color-success: #5bab8e;
 }
 
+/* 表单 / 账户页（登录 · 申请 · 我的）与编辑风主站统一字号刻度：
+   标题收口到 T2 / T3，正文收口到 T4（16px），主按钮对齐 20px。
+   用 .accom-editorial 后代选择器（特异性高于页面内 Tailwind text-* 工具类）一次性收口。 */
+.accom-editorial h1 { font-size: clamp(30px, 3.5vw, 40px); line-height: 1.3; font-weight: 700; }
+.accom-editorial h2 { font-size: 21px; line-height: 1.45; font-weight: 700; }
+@layer base {
+  /* 表单/账户页默认正文 16px（T4）、h3 区块标题 21px（T3）；
+     放入 base 层，使页面内的 Tailwind text-* 工具类能正常覆盖字号
+     （此前未分层会强制压住 h3/正文上的 text-* 类）。 */
+  .accom-editorial p { font-size: 16px; line-height: 1.7; }
+  .accom-editorial h3 { font-size: 21px; line-height: 1.5; font-weight: 700; }
+}
+.accom-editorial .bg-primary { font-size: 20px; }
+
 /* 主按钮：编辑风深湖绿渐变 + 7px 圆角。
    .bg-primary 在两页中仅用于真实按钮（提交 / 新建 / 继续编辑），
    不影响输入框或图标底纹。 */

@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarDays, Check, Loader2, Mail, MapPin, Save, Send } from "lucide-react";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { cn, inputCls, selectCls, Field, SectionTitle, primaryBtnCls, secondaryBtnCls, ghostBtnCls, primaryBtnSmCls, secondaryBtnSmCls } from "@/components/form-ui";
 import { useAuthUser, sendEmailCode, signInWithEmailCode } from "@/lib/auth";
 import { getUserInfo, ensureUserInfo } from "@/lib/user-info";
 import type { ExactDate } from "@/lib/applications";
@@ -17,10 +16,6 @@ import {
   type AccommodationForm,
   type AccommodationItem,
 } from "@/lib/accommodation";
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 const PROPERTY_TYPE_OPTIONS = [
   { value: "House", label: "独立住房 House" },
@@ -36,62 +31,6 @@ const CHILD_AGE_OPTIONS = [
   "<1",
   ...Array.from({ length: 17 }, (_, i) => String(i + 1)),
 ];
-
-function selectCls(extra = "") {
-  return `w-full appearance-none rounded-xl border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors hover:border-primary/40 focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft disabled:opacity-70 ${extra}`;
-}
-
-function inputCls(error?: string) {
-  return cn(
-    "w-full rounded-xl border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft disabled:opacity-70",
-    error && "border-error"
-  );
-}
-
-function Field({
-  label,
-  required,
-  error,
-  children,
-  hint,
-}: {
-  label: string;
-  required?: boolean;
-  error?: string;
-  children: React.ReactNode;
-  hint?: string;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <label className="flex items-center gap-1 text-sm font-medium text-ink">
-        {label}
-        {required && <span className="text-error">*</span>}
-      </label>
-      {children}
-      {hint && <p className="text-xs text-ink-soft">{hint}</p>}
-      {error && <p className="text-xs text-error">{error}</p>}
-    </div>
-  );
-}
-
-function SectionTitle({
-  title,
-  required,
-}: {
-  title: string;
-  required?: boolean;
-}) {
-  return (
-    <h3 className="flex items-center gap-1 text-sm font-semibold text-ink">
-      {title}
-      {required ? (
-        <span className="text-error">*</span>
-      ) : (
-        <span className="text-xs font-normal text-ink-soft">（选填）</span>
-      )}
-    </h3>
-  );
-}
 
 function todayDate(): ExactDate {
   const t = new Date();
@@ -468,7 +407,7 @@ export function AccommodationForm({
         <button
           type="button"
           onClick={() => router.push("/my-accommodations")}
-          className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+          className={primaryBtnCls}
         >
           查看我的住宿意向
         </button>
@@ -512,7 +451,7 @@ export function AccommodationForm({
                 type="button"
                 onClick={handleSendCode}
                 disabled={codeSending || cooldown > 0}
-                className="mt-0.5 shrink-0 rounded-xl border border-primary/30 px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-60"
+                className={`${secondaryBtnSmCls} mt-0.5 shrink-0`}
               >
                 {codeSending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -531,7 +470,7 @@ export function AccommodationForm({
           )}
 
           {needAuth && !user?.email && (
-            <div className="mt-3 rounded-lg border border-[#789491]/40 bg-white p-4">
+            <div className="mt-3 rounded-lg border border-stroke/40 bg-white p-4">
               <p className="mb-2 flex items-center gap-2 text-sm text-ink">
                 <Mail className="h-4 w-4 text-primary" />
                 验证码已发送至 <span className="font-medium">{email}</span>
@@ -542,13 +481,13 @@ export function AccommodationForm({
                   onChange={(e) => setCode(e.target.value)}
                   inputMode="numeric"
                   placeholder="请输入 6 位验证码"
-                  className="w-full rounded-xl border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-primary"
+                  className={inputCls()}
                 />
                 <button
                   type="button"
                   onClick={handleConfirm}
                   disabled={submitting || code.trim().length === 0}
-                  className="shrink-0 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
+                  className={`${primaryBtnSmCls} shrink-0`}
                 >
                   {submitting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -622,7 +561,7 @@ export function AccommodationForm({
                       <button
                         type="button"
                         onClick={() => setCalOpen(false)}
-                        className="rounded-xl border border-stroke px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-primary/5"
+                        className={secondaryBtnSmCls}
                       >
                         确定
                       </button>
@@ -886,7 +825,7 @@ export function AccommodationForm({
               onChange={(e) => setField("notes", e.target.value)}
               placeholder="其它需要说明的情况，如宠物、停车、学区偏好等"
               rows={4}
-              className="w-full resize-none rounded-xl border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft disabled:opacity-70"
+              className={inputCls()}
             />
           </div>
         </div>
@@ -896,7 +835,7 @@ export function AccommodationForm({
         <button
           type="button"
           onClick={() => onCancel?.()}
-          className="rounded-xl px-4 py-2.5 text-sm text-ink-soft transition-colors hover:bg-primary/5"
+          className={ghostBtnCls}
         >
           取消
         </button>
@@ -904,7 +843,7 @@ export function AccommodationForm({
           type="button"
           onClick={handleSaveDraft}
           disabled={locked || submitting}
-          className="flex items-center gap-1.5 rounded-xl border border-primary/30 px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5 disabled:opacity-60"
+          className={secondaryBtnCls}
         >
           <Save className="h-4 w-4" />
           保存草稿
@@ -913,7 +852,7 @@ export function AccommodationForm({
           type="button"
           onClick={handleSubmit}
           disabled={locked || submitting}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
+          className={`${primaryBtnCls} flex-1`}
         >
           {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
           <Send className="h-4 w-4" />
