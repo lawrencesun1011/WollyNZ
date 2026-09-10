@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, KeyRound, ShieldCheck, RotateCcw } from "lucide-react";
-import { LambMark } from "@/components/editorial/icons";
+import { BrandLogo } from "@/components/brand-logo";
 import { sendEmailCode, signInWithEmailCode } from "@/lib/auth";
 
 /** 登录 / 注册独立页面：邮箱 + 验证码同屏，居中卡片布局。 */
@@ -94,10 +94,9 @@ export default function LoginPage() {
 
   return (
     <div className="accom-editorial flex min-h-screen flex-col items-center justify-center bg-bg px-4 py-20 pt-28">
-      {/* 顶部 Logo：与 Header 同款小羊线描标 */}
+      {/* 顶部 Logo：GoalNZ 品牌 logo */}
       <Link href="/" className="mb-8 inline-flex items-center gap-2.5">
-        <LambMark className="h-10 w-10 text-ink" />
-        <span className="text-[26px] font-semibold tracking-tight text-ink">GoalNZ</span>
+        <BrandLogo style={{ width: 150 }} />
       </Link>
 
       <div className="w-full max-w-md rounded-[20px] border border-[#789491]/30 bg-white p-7 shadow-[--shadow-2] animate-fade-up">

@@ -53,7 +53,7 @@ export function UserMenu() {
               <Link
                 href="/login"
                 onClick={() => setOpen(false)}
-                className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary"
+                className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-[#eeeede]"
               >
                 <Mail className="h-4 w-4" />
                 注册 / 登录
@@ -70,7 +70,7 @@ export function UserMenu() {
           <Link
             href="/my-applications"
             onClick={() => setOpen(false)}
-            className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary"
+            className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-[#eeeede]"
           >
             <FileText className="h-4 w-4" />
             学校申请
@@ -78,7 +78,7 @@ export function UserMenu() {
           <Link
             href="/my-accommodations"
             onClick={() => setOpen(false)}
-            className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary"
+            className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-[#eeeede]"
           >
             <BedDouble className="h-4 w-4" />
             住宿意向
@@ -91,7 +91,7 @@ export function UserMenu() {
                 setOpen(false);
                 setConfirmOpen(true);
               }}
-              className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-error/10 hover:text-error"
+              className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-[#eeeede] hover:text-error"
             >
               <LogOut className="h-4 w-4" />
               退出登录

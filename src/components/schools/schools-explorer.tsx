@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useRef, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import type { SchoolFrontend, Filters, SortKey } from "@/lib/types";
 import {
   applyFilters,
@@ -147,6 +148,18 @@ export function SchoolsExplorer({
 
   return (
     <div className="min-h-screen editorial">
+      {/* 面包屑：首页 / 找学校 / 中小学（与全站内容页同宽对齐） */}
+      <nav aria-label="面包屑导航" className="content-shell pt-6">
+        <div className="flex items-center gap-2 text-sm text-ink-soft">
+          <Link href="/" className="transition-colors hover:text-ink hover:underline">首页</Link>
+          <span aria-hidden="true">/</span>
+          <Link href="/schools" className="transition-colors hover:text-ink hover:underline">找学校</Link>
+          <span aria-hidden="true">/</span>
+          <span className="font-medium text-ink" aria-current="page">中小学</span>
+        </div>
+      </nav>
+
+      <div className="schools-func">
       {/* ── 热门地区 + 筛选栏 ── */}
       <div className="px-6 py-5 lg:px-10">
         <div className="mx-auto max-w-[1400px]">
@@ -230,6 +243,7 @@ export function SchoolsExplorer({
       {compareView && compareSchools.length >= 2 && (
         <CompareModal schools={compareSchools} onClose={() => setCompareView(false)} />
       )}
+      </div>
     </div>
   );
 }

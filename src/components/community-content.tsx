@@ -1,22 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import type { SVGProps } from "react";
 import { ReferenceArtwork } from "@/components/reference-artwork";
 import { communityConfig } from "@/lib/community-config";
 import styles from "./community.module.css";
-
-type IconProps = SVGProps<SVGSVGElement>;
-
-function TopicIcon({ type, ...props }: IconProps & { type: "book" | "list" | "home" }) {
-  return (
-    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
-      {type === "book" ? <><path d="M24 10c-6-5-13-5-19-3v31c6-2 13-2 19 3 6-5 13-5 19-3V7c-6-2-13-2-19 3Z" /><path d="M24 10v31" /></> : null}
-      {type === "list" ? <><rect x="10" y="4" width="28" height="39" rx="2" /><path d="M17 14h14M17 22h14M17 30h8" /></> : null}
-      {type === "home" ? <><path d="m3 23 21-19 21 19M9 18v25h30V18" /><path d="M19 43V29h10v14" /></> : null}
-    </svg>
-  );
-}
 
 function InvitationMark() {
   return (
@@ -34,12 +21,6 @@ function InvitationMark() {
 function DownloadIcon() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v13m-5-5 5 5 5-5M5 21h14" /></svg>;
 }
-
-const topics = [
-  { title: "选校交流", description: "分享选择思路与学校体验", icon: "book" },
-  { title: "行前准备", description: "一起梳理清单与安排", icon: "list" },
-  { title: "生活经验", description: "交流住宿、通勤与亲子日常", icon: "home" },
-] as const;
 
 export function CommunityContent() {
   const qrCodeSrc = communityConfig.qrCodeSrc;
@@ -83,18 +64,6 @@ export function CommunityContent() {
           </ol>
           {!qrCodeSrc ? <p className={`${styles.entryNotice} ${styles.desktopOnly}`}>社群入口更新后即可使用。</p> : null}
         </div>
-      </section>
-
-      <section className={styles.topics} aria-labelledby="topics-title">
-        <h2 id="topics-title" className={styles.accentHeading}>在这里，聊聊这些。</h2>
-        <ul className={styles.topicList}>
-          {topics.map((topic, index) => <li className={styles.topic} key={topic.title}>
-            <TopicIcon type={topic.icon} className={styles.topicIcon} />
-            <span className={styles.topicNumber} aria-hidden="true">0{index + 1}</span>
-            <div><h3>{topic.title}</h3><p>{topic.description}</p></div>
-            <svg className={styles.topicArrow} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="m9 4 8 8-8 8" /></svg>
-          </li>)}
-        </ul>
       </section>
 
       <aside className={styles.privacy} aria-label="社群交流约定">

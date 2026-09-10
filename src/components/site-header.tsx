@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
-import { Heart, LambMark } from "@/components/editorial/icons";
+import { Heart } from "@/components/editorial/icons";
+import { BrandLogo } from "@/components/brand-logo";
 import { useFavorites } from "@/lib/user-collections";
 import { FavoritesPopover } from "./favorites-popover";
 import { UserMenu } from "./auth/user-menu";
@@ -27,14 +28,13 @@ export function SiteHeader() {
   return (
     <header className="editorial fixed inset-x-0 top-0 z-[900] mx-auto w-full max-w-[1440px]">
       <div className="site-header page-width flex items-center justify-between border-b border-[#789491]">
-        {/* 左侧：小羊标志 + 衬线品牌字 */}
+        {/* 左侧：GoalNZ 品牌 logo */}
         <Link
           href="/"
-          className="brand inline-flex shrink-0 items-center"
+          className="inline-flex shrink-0 items-center"
           aria-label="GoalNZ 首页"
         >
-          <LambMark />
-          <span>GoalNZ</span>
+          <BrandLogo />
         </Link>
 
         {/* 中间：主导航 */}

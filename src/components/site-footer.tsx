@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 
 /** 信息页脚：与首页同一套纸色 / 墨绿衬线语言。
  *
@@ -13,11 +14,11 @@ export function SiteFooter() {
       <div className="site-footer page-width">
         <div className="footer-main">
           <div className="footer-about">
-            <Link href="/" className="footer-brand" aria-label="GoalNZ 首页">
-              GoalNZ
+            <Link href="/" aria-label="GoalNZ 首页">
+              <BrandLogo small style={{ width: 130 }} />
             </Link>
             <p>
-              面向中国游学家庭的新西兰优质教育机构查询平台，帮助您按地区、类型、语言等条件筛选合适的学校。
+              面向中国游学家庭的新西兰亲子游学服务平台：免费查询中小学与幼儿园，阅读 DIY 攻略，提交住宿意向，并加入家长社群。
             </p>
           </div>
 
@@ -33,6 +34,21 @@ export function SiteFooter() {
             </ul>
           </nav>
 
+          <nav className="footer-nav" aria-labelledby="footer-services-title">
+            <h2 id="footer-services-title">探索</h2>
+            <ul>
+              <li>
+                <Link href="/guide">游学攻略</Link>
+              </li>
+              <li>
+                <Link href="/accommodation">找住宿</Link>
+              </li>
+              <li>
+                <Link href="/community">家长社群</Link>
+              </li>
+            </ul>
+          </nav>
+
           <nav className="footer-nav" aria-labelledby="footer-data-title">
             <h2 id="footer-data-title">数据</h2>
             <ul>
@@ -42,7 +58,16 @@ export function SiteFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  数据来源<span className="sr-only">（在新窗口打开）</span>
+                  新西兰教育机构目录<span className="sr-only">（在新窗口打开）</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://data.govt.nz/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  data.govt.nz<span className="sr-only">（在新窗口打开）</span>
                 </a>
               </li>
             </ul>
@@ -53,23 +78,7 @@ export function SiteFooter() {
           <div className="footer-bottom-inner">
             <p>© 2026 GoalNZ · 仅供信息参考</p>
             <p className="footer-sources">
-              公开数据参考：
-              <a
-                href="https://data.govt.nz/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                data.govt.nz<span className="sr-only">（在新窗口打开）</span>
-              </a>
-              <span aria-hidden="true"> · </span>
-              <a
-                href="https://www.educationcounts.govt.nz/directories"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                新西兰教育机构目录
-                <span className="sr-only">（在新窗口打开）</span>
-              </a>
+              公开数据来自新西兰教育部 Education Counts 及 data.govt.nz；学校招生信息以官方最新公布为准。
             </p>
           </div>
         </div>

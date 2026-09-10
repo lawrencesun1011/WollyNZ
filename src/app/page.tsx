@@ -64,12 +64,6 @@ export default function HomePage() {
       >
         <div className="section-heading flex items-center justify-between border-b border-[#789491]">
           <h2 id="explore-title">在出发之前，找到答案。</h2>
-          <span
-            className="section-index inline-flex items-center gap-4"
-            aria-hidden="true"
-          >
-            01 <span /> 03
-          </span>
         </div>
         <div className="entry-grid grid grid-cols-1 md:grid-cols-3">
           {editorialEntries.map(({ key, number, art, title, description, href }) => (

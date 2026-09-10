@@ -44,7 +44,7 @@ export function AccommodationContent() {
       </section>
 
       <section className={styles.process} aria-labelledby="matching-title">
-        <div className={styles.sectionHeading}><h2 id="matching-title">如何匹配</h2><span className={styles.sectionCount} aria-hidden="true">01 <i /> 03</span></div>
+        <div className={styles.sectionHeading}><h2 id="matching-title">如何匹配</h2></div>
         <ol className={styles.steps}>
           {steps.map(({ number, title, Icon, desktop, mobile }) => <li key={number} className={styles.step}>
             <Icon className={styles.stepIcon} />

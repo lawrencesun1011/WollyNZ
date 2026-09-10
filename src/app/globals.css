@@ -703,7 +703,7 @@ textarea.input {
 
 /* Header 保持 fixed，高度随断点变化，由 main 的 padding-top 让位 */
 :root {
-  --header-height: 70px;
+  --header-height: 80px;
 }
 
 .editorial {
@@ -724,6 +724,13 @@ textarea.input {
 .editorial a:focus-visible {
   outline: 2px solid #a13b23;
   outline-offset: 6px;
+}
+
+/* 找学校功能区的字体：沿用游学计划模板（微软雅黑 / 苹方无衬线栈），
+   仅作用于功能区，面包屑与 footer 仍保留 .editorial 衬线。 */
+.schools-func {
+  font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+  line-height: 1.55;
 }
 
 .site-main {
@@ -749,22 +756,9 @@ textarea.input {
 
 /* ── 顶部导航 ── */
 .site-header {
-  min-height: 70px;
+  min-height: 80px;
   gap: 26px;
-  padding: 8px 24px;
-}
-.brand {
-  gap: 10px;
-  color: #08232b;
-  text-decoration: none;
-}
-.brand svg {
-  width: 51px;
-  height: 51px;
-}
-.brand span {
-  font: 600 43px/1 Georgia, "Times New Roman", serif;
-  letter-spacing: -1.8px;
+  padding: 0 24px;
 }
 .main-nav {
   gap: 35px;
@@ -772,7 +766,7 @@ textarea.input {
   margin-right: 40px;
 }
 .nav-link {
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 600;
   text-decoration-color: transparent;
   text-underline-offset: 6px;
@@ -823,6 +817,19 @@ textarea.input {
   background: #b44427;
   color: #faf8ee;
   font: 600 11px/1 system-ui, sans-serif;
+}
+
+/* 内容页统一容器：面包屑等元素跨页面横向对齐（与 community/accommodation 的 .page 同宽） */
+.content-shell {
+  width: calc(100% - 88px);
+  max-width: 1280px;
+  margin-inline: auto;
+}
+@media (max-width: 1100px) {
+  .content-shell { width: calc(100% - 64px); }
+}
+@media (max-width: 767px) {
+  .content-shell { width: calc(100% - 44px); }
 }
 
 /* ── Hero ── */
@@ -897,16 +904,6 @@ textarea.input {
   font-weight: 700;
   line-height: 1.45;
   letter-spacing: 0.02em;
-}
-.section-index {
-  padding-right: 8px;
-  font: 500 14px/1.4 Georgia, serif;
-  flex-shrink: 0;
-}
-.section-index span {
-  width: 24px;
-  height: 1px;
-  background: #789491;
 }
 .entry-grid {
   padding: 20px 0 16px;
@@ -1035,8 +1032,8 @@ textarea.input {
 }
 .footer-main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 80px;
+  grid-template-columns: minmax(0, 1.25fr) repeat(3, auto);
+  gap: 64px;
   padding: 48px 26px 46px;
 }
 .footer-about {
@@ -1144,13 +1141,6 @@ textarea.input {
     margin-right: 10px;
     gap: 24px;
   }
-  .brand span {
-    font-size: 36px;
-  }
-  .brand svg {
-    width: 44px;
-    height: 44px;
-  }
   .hero-description {
     font-size: 18px;
   }
@@ -1203,17 +1193,6 @@ textarea.input {
     row-gap: 0;
     padding: 10px 0 8px;
   }
-  .brand {
-    gap: 7px;
-  }
-  .brand span {
-    font-size: 31px;
-    letter-spacing: -1.2px;
-  }
-  .brand svg {
-    width: 38px;
-    height: 38px;
-  }
   .account-actions {
     gap: 9px;
     margin-left: auto;
@@ -1235,7 +1214,7 @@ textarea.input {
     gap: 16px;
   }
   .nav-link {
-    font-size: 13px;
+    font-size: 15px;
   }
   .hero-copy {
     padding-top: 32px;
@@ -1275,14 +1254,6 @@ textarea.input {
   .section-heading h2 {
     font-size: clamp(23px, 5.3vw, 32px);
     letter-spacing: -0.04em;
-  }
-  .section-index {
-    gap: 6px;
-    font-size: 12px;
-    padding-right: 0;
-  }
-  .section-index span {
-    width: 13px;
   }
   .entry-grid {
     padding: 0;
