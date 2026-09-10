@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, KeyRound, ShieldCheck, RotateCcw } from "lucide-react";
-import { BrandLogo } from "@/components/brand-logo";
 import { sendEmailCode, signInWithEmailCode } from "@/lib/auth";
 
 /** 登录 / 注册独立页面：邮箱 + 验证码同屏，居中卡片布局。 */
@@ -93,12 +92,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="accom-editorial flex min-h-screen flex-col items-center justify-center bg-bg px-4 py-20 pt-28">
-      {/* 顶部 Logo：GoalNZ 品牌 logo */}
-      <Link href="/" className="mb-8 inline-flex items-center gap-2.5">
-        <BrandLogo style={{ width: 150 }} />
-      </Link>
-
+    <div className="accom-editorial flex min-h-screen flex-col items-center justify-start bg-bg px-4 pb-20 pt-24">
       <div className="w-full max-w-md rounded-[20px] border border-[#789491]/30 bg-white p-7 shadow-[--shadow-2] animate-fade-up">
         <div className="mb-5">
           <h1 className="text-2xl font-bold text-ink">登录 / 注册</h1>
