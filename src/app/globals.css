@@ -97,14 +97,6 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* 渐变文字 */
-.text-gradient {
-  background: linear-gradient(120deg, var(--color-primary), var(--color-secondary) 60%, var(--color-tertiary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
 /* 细滚动条 */
 .scroll-thin::-webkit-scrollbar {
   width: 6px;
@@ -565,7 +557,7 @@ textarea.input {
   --color-ink: #102e2c;
   --color-ink-soft: #3a554e;
   --color-caption: #6c7a75;
-  --color-primary: #986043;
+  --color-primary: #16433a;
   --color-stroke: #c7d1c8;
   --color-border: #c7d1c8;
   --color-warning: #b44427;
@@ -618,7 +610,7 @@ textarea.input {
 .guide-page .service-eyebrow {
   border: 1px solid var(--color-rule);
   background: transparent;
-  color: #986043;
+  color: #b44427;
   letter-spacing: 0.14em;
 }
 /* 图片框改用规则线描边 */
@@ -681,7 +673,7 @@ textarea.input {
    不影响输入框或图标底纹。 */
 .accom-editorial .bg-primary {
   background-color: transparent;
-  background-image: linear-gradient(115deg, #163e35, #123d34);
+  background-image: linear-gradient(115deg, #16433a, #123d34);
   border: 1px solid #16433a;
   border-radius: 7px;
   box-shadow: inset 0 1px 1px #ffffff15;
@@ -727,7 +719,7 @@ textarea.input {
 }
 
 /* 找学校功能区的字体：沿用游学计划模板（微软雅黑 / 苹方无衬线栈），
-   仅作用于功能区，面包屑与 footer 仍保留 .editorial 衬线。 */
+   仅作用于功能区，footer 仍保留 .editorial 衬线。 */
 .schools-func {
   font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
   line-height: 1.55;
@@ -774,11 +766,11 @@ textarea.input {
   white-space: nowrap;
 }
 .nav-link:hover {
-  color: #986043;
+  color: #b44427;
   text-decoration: underline;
 }
 .nav-link[data-active="true"] {
-  color: #986043;
+  color: #b44427;
   text-decoration: underline;
 }
 .icon-button {
@@ -819,19 +811,6 @@ textarea.input {
   font: 600 11px/1 system-ui, sans-serif;
 }
 
-/* 内容页统一容器：面包屑等元素跨页面横向对齐（与 community/accommodation 的 .page 同宽） */
-.content-shell {
-  width: calc(100% - 88px);
-  max-width: 1280px;
-  margin-inline: auto;
-}
-@media (max-width: 1100px) {
-  .content-shell { width: calc(100% - 64px); }
-}
-@media (max-width: 767px) {
-  .content-shell { width: calc(100% - 44px); }
-}
-
 /* ── Hero ── */
 .hero-copy {
   padding-top: 39px;
@@ -844,11 +823,11 @@ textarea.input {
 }
 .hero h1 {
   margin: 9px 0 14px;
-  font-size: clamp(49px, 6.77vw, 88px);
-  line-height: 1.09;
-  letter-spacing: -0.025em;
+  font-size: clamp(48px, 5vw, 68px);
+  line-height: 1.25;
+  letter-spacing: -0.035em;
   font-weight: 700;
-  color: #06262b;
+  color: #102e2c;
 }
 .hero-description {
   font-size: 20px;
@@ -861,7 +840,7 @@ textarea.input {
   padding: 10px 24px;
   border: 1px solid #16433a;
   border-radius: 7px;
-  background: linear-gradient(115deg, #163e35, #123d34);
+  background: linear-gradient(115deg, #16433a, #123d34);
   color: #faf8ee;
   font-size: 20px;
   line-height: 1.2;
@@ -1074,7 +1053,7 @@ textarea.input {
 }
 .site-footer a:hover,
 .footer-nav button:hover {
-  color: #986043;
+  color: #b44427;
   text-decoration: underline;
 }
 .footer-bottom {
@@ -1103,7 +1082,7 @@ textarea.input {
   left: 12px;
   z-index: 100;
   transform: translateY(-200%);
-  background: #163e35;
+  background: #16433a;
   color: #fff;
   padding: 12px 18px;
   border-radius: 5px;
@@ -1224,11 +1203,11 @@ textarea.input {
     letter-spacing: 0.13em;
   }
   .hero h1 {
-    font-size: clamp(40px, 10.5vw, 66px);
+    font-size: clamp(38px, 9vw, 54px);
     margin-top: 13px;
     margin-bottom: 13px;
-    line-height: 1.18;
-    letter-spacing: -0.055em;
+    line-height: 1.25;
+    letter-spacing: -0.035em;
   }
   .hero-description {
     font-size: 14px;
@@ -1414,7 +1393,7 @@ textarea.input {
     font-size: 12px;
   }
   .hero h1 {
-    font-size: 37px;
+    font-size: 41px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

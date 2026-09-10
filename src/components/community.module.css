@@ -1,7 +1,4 @@
 .page { width: calc(100% - 88px); max-width: 1280px; margin-inline: auto; color: #102e2c; font-family: var(--font-editorial); }
-.breadcrumb { display: flex; align-items: center; gap: 20px; padding: 24px 0 0; font-size: 16px; line-height: 1.6; }
-.breadcrumb a { text-underline-offset: 5px; }
-.breadcrumb a:hover { text-decoration: underline; }
 .intro { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 29%; align-items: center; gap: 20px; padding: 27px 0 24px; }
 .introCopy { min-width: 0; }
 .intro h1 { font-size: clamp(48px, 5vw, 68px); font-weight: 700; line-height: 1.25; letter-spacing: -.035em; }
@@ -19,7 +16,7 @@
 .qrCard p { font-size: 20px; line-height: 1.6; text-align: center; white-space: nowrap; }
 .qrImage { display: block; width: 100%; height: 100%; object-fit: contain; }
 .qrActions { display: flex; width: min(100%, 275px); margin-top: 14px; gap: 12px; }
-.qrButton { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 45px; width: 100%; padding: 9px 12px; border: 1px solid #16433a; border-radius: 6px; color: #f9f6f0; background: #123d34; font-size: 20px; line-height: 1.4; text-decoration: none; }
+.qrButton { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 45px; width: 100%; padding: 9px 12px; border: 1px solid #16433a; border-radius: 6px; color: #f9f6f0; background: linear-gradient(115deg, #16433a, #123d34); font-size: 20px; line-height: 1.4; text-decoration: none; }
 .qrButton:enabled:hover, a.qrButton:hover { background: #245044; }
 .qrButton:disabled { cursor: not-allowed; border-color: transparent; background: #b4c2be; color: #f9f6f0; }
 .qrButton svg { width: 21px; height: 21px; flex-shrink: 0; }
@@ -78,7 +75,6 @@
 
 @media (max-width: 767px) {
   .page { width: calc(100% - 44px); }
-  .breadcrumb { padding: 18px 0 0; gap: 15px; font-size: 14px; }
   .intro { display: block; min-height: 155px; padding: 20px 3px 24px; }
   .intro h1 { font-size: clamp(38px, 9vw, 54px); line-height: 1.25; }
   .tagline { margin-top: 17px; max-width: 77%; font-size: 19px; line-height: 1.7; letter-spacing: -.035em; }

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { ReferenceArtwork } from "@/components/reference-artwork";
 import { communityConfig } from "@/lib/community-config";
 import styles from "./community.module.css";
@@ -27,10 +26,6 @@ export function CommunityContent() {
 
   return (
     <div id="main-content" className={styles.page}>
-      <nav aria-label="面包屑导航" className={styles.breadcrumb}>
-        <Link href="/">首页</Link><span aria-hidden="true">/</span><span aria-current="page">加入社群</span>
-      </nav>
-
       <section className={styles.intro} aria-labelledby="community-title">
         <div className={styles.introCopy}>
           <h1 id="community-title">加入家长社群</h1>

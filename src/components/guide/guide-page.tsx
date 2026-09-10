@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { ArrowRight } from "./icons";
 import { GuideDocument } from "./guide-document";
 import { chapterIds, parseGuideContent, type GuideContent } from "@/lib/guide-content";
@@ -48,7 +47,6 @@ export function GuidePage({ initialContent }: { initialContent: GuideContent }) 
       <section className={styles.hero} aria-labelledby="guide-heading">
         <Image className={styles.mapImage} src="/images/guide/guide-map.png" alt="山川、学校与小屋串联的新西兰游学准备地图" fill priority sizes="100vw" unoptimized />
         <div className={styles.heroCopy}>
-          <nav className={styles.breadcrumb} aria-label="面包屑"><Link href="/">首页</Link><span aria-hidden="true">/</span><span aria-current="page">游学攻略</span></nav>
           <h1 id="guide-heading">游学攻略</h1>
           <p className={styles.heroSubtitle}>一张地图，走好游学的每一步。</p>
           <p className={styles.heroDescription}>从初步了解，到安心出发，跟着六个章节逐步准备。</p>

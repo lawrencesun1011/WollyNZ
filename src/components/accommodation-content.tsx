@@ -30,7 +30,6 @@ export function AccommodationContent() {
   return <>
     <div id="main-content" className={styles.page}>
       <section className={styles.hero} aria-labelledby="accommodation-title">
-        <nav className={styles.breadcrumb} aria-label="面包屑"><Link href="/">首页</Link><span aria-hidden="true">/</span><span aria-current="page">找住宿</span></nav>
         <div className={styles.heroCopy}>
           <div className={styles.titleRow}><h1 id="accommodation-title">找住宿</h1><span className={styles.beta}>内测中</span></div>
           <p className={styles.intro}>提交住宿意向，寻找适合一家人的落脚点。</p>
