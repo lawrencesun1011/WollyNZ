@@ -44,7 +44,6 @@ async function main() {
   const files = await walk(SRC);
   let generated = 0;
   let skipped = 0;
-  let saved = 0;
 
   for (const src of files) {
     const rel = relative(SRC, src);
@@ -62,10 +61,8 @@ async function main() {
     // 全尺寸 WebP
     const fullDst = `${outBase}.webp`;
     if (await needsBuild(src, fullDst)) {
-      const before = (await stat(src)).size;
       await ensureDir(fullDst);
       await sharp(src).webp(opts).toFile(fullDst);
-      saved += before - (await stat(fullDst)).size;
       generated++;
       console.log(`webp  ${rel.padEnd(42)}`);
     } else {

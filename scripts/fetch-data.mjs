@@ -12,7 +12,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = join(__dirname, "..", "..", "data");
+const DATA_DIR = join(__dirname, "..", "data");
 
 const SCHOOL_SOURCE = {
   resourceId: "4b292323-9fcc-41f8-814b-3c7b19cf14b3",

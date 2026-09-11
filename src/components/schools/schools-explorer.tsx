@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useRef, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import type { SchoolFrontend, Filters, SortKey } from "@/lib/types";
 import {

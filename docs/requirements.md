@@ -1,18 +1,23 @@
-# NZ 游学库 · 需求文档
+# GoalNZ · 需求与技术文档
 
-> 本文件为项目的**单一事实来源（Single Source of Truth）**。
-> 每次与开发交互后都会增量更新，记录需求、决策与变更。
+> 本文件是项目的**单一事实来源**，记录目标、技术选型、目录结构与部署方式。
+> 架构或依赖发生调整时请同步更新。
 
 ---
 
 ## 1. 项目目标
 
-构建一个**面向中国游学家庭**的新西兰教育机构信息查询网站，核心能力是**学校库**——
-用户可按地区、类型、教学语言、寄宿条件等维度筛选幼儿园与中小学。
+面向**中国游学家庭**的新西兰教育机构信息查询网站：
 
-- 界面以**中文**呈现，机构名称保留**英文原文**（不翻译）。
-- 数据以新西兰政府开放数据（data.govt.nz，CC BY 4.0）为基础。
-- 少量图文内容（图片、介绍文本）由编辑手动低频维护。
+- 核心能力是**学校库**：按地区、类型、教学语言、寄宿条件等维度筛选幼儿园与中小学
+- 提供**游学攻略**长文内容（六个章节）
+- 支持心愿单、对比、申请记录与住宿意向的**云端同步**
+
+约束：
+
+- 界面以**中文**呈现，机构名称保留**英文原文**（不翻译）
+- 数据以新西兰政府开放数据（data.govt.nz，CC BY 4.0）为基础
+- 少量图文内容由编辑手动低频维护
 
 ---
 
@@ -20,138 +25,166 @@
 
 | 类别 | 选型 |
 | --- | --- |
-| 框架 | Next.js 15（App Router）+ TypeScript + React 19 |
+| 框架 | Next.js 16.3.2（App Router）+ TypeScript + React 19 |
 | 样式 | Tailwind CSS 4（`@theme` 配置，无 tailwind.config） |
 | 目录 | `src/` 为主目录，`@/*` → `./src/*` |
 | 包管理 | npm |
-| 部署 | **EdgeOne Makers**（支持 Next.js 构建产物） |
+| 渲染 | **静态导出**（`output: "export"`，无服务端运行时，因此没有 API Route） |
+| 部署 | **Cloudflare Pages** `https://goalnz.pages.dev` |
+| AI 代理 | **Cloudflare Worker** `workers/ai-proxy/`，转发 OpenRouter（`openrouter/free`） |
+| 数据库 | **Supabase** PostgreSQL，项目 ref `orwqyvjkcqnswpjnoeux`，区域 `ap-southeast-1`（新加坡） |
+| 认证 | Supabase Auth，**纯邮箱 6 位验证码 OTP**（无密码，首次登录即创建账号） |
+| 邮件 | Supabase SMTP → **Resend** |
 | 图标 | lucide-react |
-| 地图 | MapLibre GL JS 5 + OpenFreeMap（免 key 矢量瓦片）；卫星图用 Esri World Imagery 栅格 |
-| 图表 | Chart.js 4（类型饼图 / 地区柱图） |
+| 地图 | MapLibre GL JS 5 + OpenFreeMap（免 key 矢量瓦片）；卫星图用 Esri World Imagery |
+| 字体 | 正文 Inter / 苹方 / 微软雅黑（无衬线）；首页与攻略用 Noto Serif SC（衬线，本地打包） |
 
-设计风格：**新西兰自然风 + Glassmorphism 轻玻璃 + 清新渐变（teal 主色 #0E7C7B/#1B9AAA/#2BB1A8）**，Premium 且响应式。
+设计风格：暖白纸色 + 墨绿衬线的**编辑风（Editorial）**，内页为湖水蓝绿体系。
+
+> **历史**：项目先后使用过 CloudBase、EdgeOne，现统一为 Cloudflare + Supabase。
+> 旧架构遗留（Dockerfile、`cloudbase/` 目录等）已在 2026-09-12 的清理中移除，需要时可从 git 历史找回。
 
 ---
 
 ## 3. 数据源
 
-数据来自 data.govt.nz 的 **Directory of educational institutions** 数据集
-（Package ID：`c1923d33-e781-46c9-9ea1-d9b850082be4`，CC BY 4.0）。
+来自 data.govt.nz 的 **Directory of educational institutions**（CC BY 4.0）。
 
-### 3.1 全量拉取端点（CKAN Datastore dump）
+### 3.1 拉取端点（CKAN Datastore dump）
 
-每日凌晨**全量拉取一次**更新。
-
-| 分类 | Resource ID | JSON 拉取端点 |
-| --- | --- | --- |
-| 幼儿园（ECE） | `a9d65b07-8483-4b05-bdfd-d2abe4f38827` | `https://catalogue.data.govt.nz/datastore/dump/a9d65b07-8483-4b05-bdfd-d2abe4f38827?format=json` |
-| 中小学 | `4b292323-9fcc-41f8-814b-3c7b19cf14b3` | `https://catalogue.data.govt.nz/datastore/dump/4b292323-9fcc-41f8-814b-3c7b19cf14b3?format=json` |
-
-> 端点常量已落地于 `lib/data-sources.ts`，定时全量更新逻辑后续接入。
-
-### 3.2 幼儿园（ECE）资源关键字段
-
-`ECE_Id`、`Org_Name`、`Org_Type`、`Definition`、`Authority`、`Telephone`、
-`Email`、`Add1_Line1`、`Add1_Suburb`、`Add1_City`、`Latitude`、`Longitude`、
-`Territorial_Authority`、`Regional_Council`、`Education_Region`、
-`20_Hrs_ECE`、`Total`、`European`/`Māori`/`Pacific`/`Asian`/`Other`、`Roll_Date`。
-
-### 3.3 中小学资源关键字段
-
-`School_Id`、`Org_Name`、`Telephone`、`Email`、`URL`、`Add1_Suburb`、`Add1_City`、
-`Urban_Rural_Indicator`、`Org_Type`、`Authority`、`Territorial_Authority`、
-`Regional_Council`、`Education_Region`、`Latitude`、`Longitude`、`Total`、
-`European`/`Māori`/`Pacific`/`Asian`/`MELAA`/`Other`/`International`、
-`BoardingFacilities`、`Language_of_Instruction`、`Status`、`DateSchoolOpened`。
-
-### 3.4 其他数据
-
-图片、文本介绍等由编辑**手动低频维护**（来源待定，后续补充）。
-
----
-
-## 4. 本期范围（第 1 期：项目搭建 + 落地页 mock）
-
-- [x] Next.js + TS + Tailwind + shadcn/ui 工程脚手架与配置文件。
-- [x] 根布局 + 毛玻璃吸顶导航 + 页脚。
-- [x] 落地页（`/`）：Hero 主视觉 + **学校库入口模块**（幼儿园 / 中小学分类卡片，hover 动效 + 路由跳转）+ 关于区块。
-- [x] 占位列表页 `/ece`、`/schools`（"数据接入中"提示，预留筛选栏与列表栅格）。
-- [x] 数据层类型与常量：`lib/types.ts`、`lib/data-sources.ts`。
-- [x] 需求文档 `docs/requirements.md`。
-
-### 3.5 真实数据接入（已落地）
-
-- [x] `scripts/fetch-data.mjs`：全量拉取两个 CKAN Datastore JSON 端点，按 `fields`
-      顺序将数组记录映射为对象数组，落地到 `data/ece.json`、`data/schools.json`，
-      并生成 `data/_meta.json`（抓取时间 + 各源记录数）。
-- [x] `lib/institutions.ts`：服务端读取本地数据（`getEceList` / `getSchoolList` / `getDataMeta`），
-      定义 `EceRecord` / `SchoolRecord` 接口，页面在服务端组件读取，不进客户端 bundle。
-- [x] `package.json` 增加 `fetch:data` 脚本（`npm run fetch:data`）。
-- [x] `/ece`、`/schools` 占位页升级为真实数据列表（机构卡片网格 + 数据更新时间戳 + 样例前 60 条）。
-- [x] `.gitignore` 忽略 `/data`（由定时任务生成，不入库）。
-- **实测结果**：ECE 4371 条、Schools 2578 条，均 HTTP 200 拉取成功，构建通过。
-
-本期**不实现**：每日定时触发（EdgeOne 定时函数/cron 接线）、前端筛选与搜索交互、
-详情页、手动维护数据后台、中/EN 切换。
-
----
-
-## 5. 目录结构（当前）
-
-```
-src/
-  app/
-    layout.tsx              根布局（毛玻璃导航 + 页脚）
-    globals.css             Tailwind 4 @theme + glass/地图等自定义类
-    page.tsx                落地页（hero + 学校库入口 + 关于）
-    ece/page.tsx            幼儿园占位页
-    schools/page.tsx        中小学页（服务端读数据 -> SchoolsExplorer）
-  components/
-    site-header.tsx / site-footer.tsx
-    schools/
-      schools-explorer.tsx  客户端根组件（状态/过滤/排序/对比编排）
-      stats-bar.tsx         顶部统计（总数/公立/私立/平均EQI）
-      filter-bar.tsx        筛选栏（搜索/学段/公私立/寄宿/城乡/类型/语言/地区）
-      toolbar.tsx           排序 + 网格/列表视图切换 + 计数
-      school-card.tsx / school-card-list.tsx
-      school-modal.tsx      详情弹层（含族裔条形图）
-      ethnic-bar.tsx        族裔占比进度条
-      compare-bar.tsx       底部对比条
-      school-map.tsx        MapLibre GL JS 地图（dynamic ssr:false，聚合/联动）
-      charts.tsx            Chart.js 学段饼图 + 地区柱图
-  lib/
-    types.ts                SchoolFrontend / Filters / Stats 等类型
-    data.ts                 getSchoolFrontendList / getDataMeta（读 data/）
-    filters.ts              过滤/排序/统计/族裔/配色工具
-    data-sources.ts         数据源 resourceId 与 JSON 端点常量
-    maplibre-shared.ts      地图公共层：OpenFreeMap/Esri 底图、marker 与聚合构造、屏幕空间聚合
-  scripts/
-    fetch-data.mjs          全量拉取 + 中小学清洗过滤，输出 data/*.json
-data/                        （gitignore 忽略，由 fetch:data 生成）
-  schools-frontend.json     过滤后前端数据（约 2465 所）
-  schools.json / ece.json   原始落盘
-  _meta.json                抓取时间与来源
-docs/
-  requirements.md           本需求文档
-```
-
----
-
-## 6. 后续待办（Backlog）
-
-- [ ] 每日凌晨定时全量拉取（EdgeOne 定时函数/cron 调用 fetch:data，落盘 data/）。
-- [ ] 幼儿园列表页 `/ece`：复用中小学的筛选/地图/图表组件，接 ECE 前端数据。
-- [ ] 机构详情独立路由页 `/schools/[id]`（当前为弹层，后续可做 SEO 友好页）。
-- [ ] 手动维护的图文内容管理方案（图片、介绍文本）。
-- [ ] 中 / EN 语言切换。
-- [ ] EdgeOne Makers 部署配置与流水线。
-
----
-
-## 7. 变更记录
-
-| 日期 | 变更 |
+| 分类 | Resource ID |
 | --- | --- |
-| 2026-08-19 | 初始化需求文档；确认技术栈、语言（中文为主）、落地页范围（学校库入口）、需求文档形式（docs/requirements.md）；完成项目搭建与落地页 mock。 |
-| 2026-08-19 | 真实拉取数据：新增 `scripts/fetch-data.mjs`，落地 data/ 本地数据（ECE 4371 + Schools 2578 条），`/ece`、`/schools` 升级为真实数据列表，.gitignore 忽略 /data。 |
-| 2026-08-19 | 项目被重置为 Next.js 15 + React 19 + Tailwind 4（src/ 脚手架）。在 src/ 上重建：清理旧 app/ 与冲突配置；中小学页 `/schools` 完整复现参考 schools.html（统计区、筛选栏、排序、网格/列表、详情弹层+族裔图、对比条、Leaflet 地图、Chart.js 图表）；fetch 脚本增加中小学清洗过滤生成 schools-frontend.json（2465 所）；删除旧失效 cron 端点；更新需求文档。构建通过。 |
+| 幼儿园（ECE） | `a9d65b07-8483-4b05-bdfd-d2abe4f38827` |
+| 中小学 | `4b292323-9fcc-41f8-814b-3c7b19cf14b3` |
+
+端点形如 `https://catalogue.data.govt.nz/datastore/dump/<resourceId>?format=json`。
+
+### 3.2 数据流水线
+
+```bash
+npm run fetch:data            # scripts/fetch-data.mjs          拉取并清洗 -> data/
+npm run prepare:static-data   # scripts/prepare-static-data.mjs 生成 public/api/*.json
+npm run optimize:images       # scripts/optimize-images.mjs     assets-src/images -> public/images（WebP）
+```
+
+产物：
+
+| 文件 | 说明 |
+| --- | --- |
+| `data/schools.json`、`data/ece.json` | 原始落盘 |
+| `data/schools-frontend.json`、`data/ece-frontend.json` | 过滤派生，供前端直接使用 |
+| `data/_meta.json` | 抓取时间与各源记录数 |
+| `public/api/*.json` | 构建期生成，运行时由 `schools-store.ts` / `ece-store.ts` fetch（已 gitignore） |
+
+数据为**手动低频更新**：跑 `fetch:data` → 提交 git → 重新构建部署。
+
+---
+
+## 4. 认证与用户数据
+
+- 登录方式：**邮箱 6 位验证码**（Supabase OTP），无密码；首次登录自动创建账号
+- 邮件模板含 `{{ .Token }}`，OTP 长度已配置为 6 位，与前端校验一致
+- 数据表（均启用 RLS，`owner uuid DEFAULT auth.uid()`）：
+
+| 表 | 用途 |
+| --- | --- |
+| `user_info` | 称呼 / 邮箱 / 省份 / 城市 |
+| `user_collections` | 学校与幼儿园的心愿单、对比 |
+| `applications` | 学校申请记录 |
+| `accommodation_applications` | 住宿意向记录 |
+
+- 前端通过 `@supabase/supabase-js` 直连 PostgREST（带 `apikey` + 用户 JWT），由 RLS 保证数据隔离
+- 未登录时数据存 localStorage，登录后合并到云端
+
+---
+
+## 5. 攻略内容
+
+攻略正文以 **Markdown** 编写，构建时解析：
+
+```
+content/guide/
+  understand.md   了解游学
+  schools.md      确定学校
+  prepare.md      递交申请
+  stay.md         住宿贴士
+  packing.md      其它准备
+  life.md         入学事项
+```
+
+- 文件顶部用 YAML frontmatter 声明 `label`（章节小标签）与 `title`（章节大标题）
+- 正文支持：`##` / `###` 标题、段落、无序与有序列表、引用、分隔线、GFM 表格、`**粗体**`、链接、图片
+- 图片仅支持项目内路径 `/images/guide/...`（白名单校验）
+- 解析由 `src/lib/guide-markdown.ts` 完成，仍经 `parseGuideContent` 白名单校验
+
+**改内容只需编辑对应 `.md` 文件，然后重新构建部署。**
+
+---
+
+## 6. AI 能力
+
+- 「生成邮件模板」等 AI 功能经 Cloudflare Worker 代理调用，密钥不下发到浏览器
+- Worker 位于 `workers/ai-proxy/`，密钥以 `AI_API_KEY` Secret 注入（运行时生效，改密钥无需重新构建）
+- 模型走 OpenRouter 的 `openrouter/free` 免费路由；换供应商只需改 `AI_BASE_URL` / `AI_MODEL` 两个变量
+- 生产环境校验 Supabase 登录态，避免代理被滥用
+
+---
+
+## 7. 目录结构
+
+```
+content/guide/*.md        攻略正文源文件（Markdown）
+data/                     学校/幼儿园数据与抓取元数据
+scripts/                  构建与数据脚本（见 3.2）
+assets-src/images/        图片源文件（不部署）
+docs/requirements.md      本文档
+workers/ai-proxy/         Cloudflare Worker（AI 代理）
+src/
+  app/                    页面（静态导出）
+  components/             组件（guide/ schools/ ece/ editorial/ auth/ 等）
+  lib/                    数据、认证、工具与 Markdown 解析
+public/
+  api/                    构建期生成（gitignore）
+  images/                 构建期生成的 WebP（gitignore）
+```
+
+---
+
+## 8. 常用命令
+
+```bash
+npm run dev         # 本地开发
+npm run build       # 构建（prebuild 会自动准备数据与图片）
+npm run preview     # 用 wrangler 本地预览静态产物
+npm run lint        # 代码检查
+npm run fetch:data  # 更新学校/幼儿园数据
+
+# 部署静态站点
+npx wrangler pages deploy out --project-name=goalnz
+
+# 部署 AI 代理 Worker
+npx wrangler deploy -c workers/ai-proxy/wrangler.toml
+```
+
+> 在部分 IDE 内执行 `npm run build` 可能遇到批量删除保护误拦（清理 `.next` 时）。
+> 先手动 `rm -rf .next` 再构建即可，这不是项目问题，CI / 云端构建不会触发。
+
+---
+
+## 9. 环境变量
+
+见 `.env.example`（复制为 `.env.local` 后填写，`.env*` 已被 gitignore）：
+
+- `NEXT_PUBLIC_SUPABASE_URL`、`NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_AI_PROXY_URL`
+- Worker 侧：`AI_API_KEY`（Secret，不进仓库）
+
+---
+
+## 10. 后续待办（Backlog）
+
+- [ ] 每日定时全量拉取数据（当前为手动执行 `fetch:data`）
+- [ ] 机构详情独立路由页 `/schools/[id]`（当前为弹层，独立页更利于 SEO）
+- [ ] 绑定自定义域名（当前使用 `goalnz.pages.dev`）
+- [ ] 在 Resend 验证自有域名，替换测试发件人（当前只能发给注册邮箱）
+- [ ] 中 / EN 语言切换
