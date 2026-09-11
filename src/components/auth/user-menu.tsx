@@ -7,7 +7,7 @@ import { signOut, useAuthUser } from "@/lib/auth";
 import { User } from "@/components/editorial/icons";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
-/** 顶栏右侧用户区：点击小人弹出下拉菜单（注册/登录、我的申请、退出登录）。 */
+/** 顶栏右侧用户区：点击小人弹出下拉菜单（登录、我的申请、退出登录）。 */
 export function UserMenu() {
   const user = useAuthUser();
   const [open, setOpen] = useState(false);

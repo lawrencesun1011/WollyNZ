@@ -1,17 +1,18 @@
 "use client";
 
 /**
- * 浏览器端直接调用 CloudBase AI 网关生成邮件模板。
+ * 浏览器端经 Cloudflare Worker 代理调用第三方 AI，生成邮件模板。
  *
- * 背景：新加坡环境不支持云托管，站点改为静态导出（output: "export"），
- * 运行时没有 Node 进程，原 /api/generate-email（POST）无法被导出，线上会 404。
+ * 背景：站点为纯静态导出（output: "export"），浏览器里没有可信环境保存
+ * 供应商 API Key（放前端等于公开）。因此改由 workers/ai-proxy 这个
+ * Cloudflare Worker 在边缘持有 Key、转发请求，前端只与它对话。
  *
- * CloudBase AI 网关同时支持两种鉴权（见 ai_model OpenAPI）：
- *   - JWTAuth：Bearer <登录用户的 access token>
- *   - APIKey ：TC3-HMAC-SHA256 签名
- * 因此改由前端直连网关，token 取自已登录用户的会话，不再需要服务端保存密钥。
+ * 协议：Worker 采用 OpenAI 兼容透传（{ messages } → { content }），
+ * 更换模型供应商只需改 Worker 的环境变量（AI_BASE_URL / AI_MODEL），
+ * 本文件与前端代码都无需改动。
  *
- * 实测（新加坡环境）可用组合：provider=cloudbase、model=hy3。
+ * 鉴权：携带当前登录用户的 access token；Worker 侧在配置了
+ * SUPABASE_URL / SUPABASE_ANON_KEY 时会强制校验该 JWT。
  */
 
 import { getAccessToken } from "./auth";
@@ -21,16 +22,18 @@ import {
 } from "@/components/applications/ai-email-generator";
 import type { ApplicationItem } from "./applications";
 
-/** 已在环境实测通过的模型；hunyuan-v3 分组会返回 EXCEED_TOKEN_QUOTA_LIMIT。 */
-const AI_MODEL = "hy3";
-
-interface AiChatResponse {
-  choices?: { message?: { content?: string } }[];
+/** Worker 代理地址；未配置时直接报错，避免静默请求到错误地址。 */
+function proxyEndpoint(): string {
+  const url = process.env.NEXT_PUBLIC_AI_PROXY_URL;
+  if (!url) {
+    throw new Error("AI 代理未配置（缺少 NEXT_PUBLIC_AI_PROXY_URL）");
+  }
+  return url.replace(/\/+$/, "");
 }
 
-function aiEndpoint(): string {
-  const envId = process.env.NEXT_PUBLIC_CLOUDBASE_ENV_ID!;
-  return `https://${envId}.api.tcloudbasegateway.com/v1/ai/cloudbase/chat/completions`;
+interface AiProxyResponse {
+  content?: string;
+  error?: string;
 }
 
 /**
@@ -48,7 +51,7 @@ export async function generateEmailWithAi(
 
   let res: Response;
   try {
-    res = await fetch(aiEndpoint(), {
+    res = await fetch(proxyEndpoint(), {
       method: "POST",
       signal,
       headers: {
@@ -56,9 +59,6 @@ export async function generateEmailWithAi(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: AI_MODEL,
-        stream: false,
-        temperature: 1,
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
@@ -70,20 +70,21 @@ export async function generateEmailWithAi(
     throw new Error("网络请求失败，请检查网络后重试");
   }
 
+  const data = (await res.json().catch(() => null)) as AiProxyResponse | null;
+
   if (!res.ok) {
-    const errText = await res.text().catch(() => "");
-    // 超配额/未授权等场景给更明确的提示
-    if (res.status === 429 || errText.includes("EXCEED_TOKEN_QUOTA_LIMIT")) {
-      throw new Error("AI 用量已超配额，请稍后再试或检查资源包");
-    }
+    // Worker 已在服务端把供应商错误翻译为中文提示，这里优先透传
+    if (data?.error) throw new Error(data.error);
     if (res.status === 401 || res.status === 403) {
       throw new Error("当前账号无 AI 调用权限，请重新登录后重试");
+    }
+    if (res.status === 429) {
+      throw new Error("AI 用量已超配额，请稍后再试");
     }
     throw new Error(`AI 服务调用失败（${res.status}）`);
   }
 
-  const data = (await res.json()) as AiChatResponse;
-  const content = data?.choices?.[0]?.message?.content;
+  const content = data?.content;
   if (typeof content !== "string" || !content.trim()) {
     throw new Error("AI 返回内容为空");
   }

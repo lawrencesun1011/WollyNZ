@@ -7,7 +7,7 @@
 // PG 数据到达后通过订阅机制无缝替换，实现「优先 PG、本地兜底、该缓存缓存」。
 import type { SchoolFrontend } from "./types";
 
-const LS_KEY = "wollyn:schools:all";
+const LS_KEY = "goalnz:schools:all";
 const LS_TTL = 5 * 60 * 1000; // 5min，避免一直用过期数据但减少网关压力
 
 type Listener = (list: SchoolFrontend[]) => void;

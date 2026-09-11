@@ -3,8 +3,8 @@
 /**
  * 用户基础信息（user_info 表）读写层。
  *
- * 表结构（PostgreSQL，经 PostgREST 网关访问）：
- *   owner    text PK  —— 等于 auth.uid()
+ * 表结构（Supabase PostgreSQL，经 PostgREST 网关访问）：
+ *   owner    uuid PK  —— DEFAULT auth.uid()
  *   name     称呼
  *   email    邮箱
  *   province 省份
@@ -14,11 +14,13 @@
  * owner 由服务端 DEFAULT auth.uid() 注入（前端不传），避免本地 uid 与服务端不一致。
  *
  * 用法：
- * - 注册/登录成功后：ensureUserInfo(uid, { name, email, province, city }) 写入基础信息（uid 仅用于兼容，owner 实际由服务端注入）。
+ * - 登录成功后：ensureUserInfo(uid, { name, email, province, city }) 写入基础信息
+ *   （uid 仅用于兼容签名，owner 实际由服务端注入）。
  * - 新建申请表单预填：getUserInfo() 读取称呼/省份/城市（RLS 自动限定到本人行）。
  */
 
 import { getAccessToken } from "./auth";
+import { restAuthHeaders, restBase } from "./supabase";
 
 export interface UserInfo {
   owner: string;
@@ -28,9 +30,11 @@ export interface UserInfo {
   city: string;
 }
 
-function gatewayBase(): string {
-  const envId = process.env.NEXT_PUBLIC_CLOUDBASE_ENV_ID!;
-  return `https://${envId}.api.tcloudbasegateway.com/v1/rdb/rest`;
+/** 拼接 user_info 表地址；未配置 Supabase 时抛错，避免请求打到无效地址。 */
+function tableUrl(query = ""): string {
+  const base = restBase();
+  if (!base) throw new Error("[user-info] Supabase 未配置");
+  return `${base}/user_info${query}`;
 }
 
 /**
@@ -48,23 +52,19 @@ export async function ensureUserInfo(
   const token = await getAccessToken();
   if (!token) return false;
   try {
-    let res = await fetch(`${gatewayBase()}/user_info`, {
+    let res = await fetch(tableUrl(), {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: restAuthHeaders(token, { "Content-Type": "application/json" }),
       body: JSON.stringify({ ...fields }),
     });
     if (res.status === 409 || res.status === 400) {
       // owner 为主键且来自默认值，POST 无法按主键匹配重复行；已存在则 PATCH（RLS 仅作用于本人行）。
-      res = await fetch(`${gatewayBase()}/user_info`, {
+      res = await fetch(tableUrl(), {
         method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
+        headers: restAuthHeaders(token, {
           "Content-Type": "application/json",
           Prefer: "return=minimal",
-        },
+        }),
         body: JSON.stringify({ ...fields }),
       });
     }
@@ -84,10 +84,9 @@ export async function getUserInfo(): Promise<UserInfo | null> {
   const token = await getAccessToken();
   if (!token) return null;
   try {
-    const res = await fetch(
-      `${gatewayBase()}/user_info?select=owner,name,email,province,city`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    const res = await fetch(tableUrl("?select=owner,name,email,province,city"), {
+      headers: restAuthHeaders(token),
+    });
     if (!res.ok) return null;
     const data = (await res.json()) as UserInfo[];
     return data[0] ?? null;

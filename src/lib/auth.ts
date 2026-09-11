@@ -1,81 +1,32 @@
 "use client";
 
 /**
- * CloudBase Auth v2 客户端认证封装（邮箱验证码模式）。
+ * Supabase Auth 客户端认证封装（邮箱验证码模式）。
  *
- * 适配本项目的 @cloudbase/js-sdk 版本（官方邮箱验证码登录文档）：
- * - 监听登录态：auth.onLoginStateChanged(cb)
- * - 发码：auth.getVerification({ email }) → 返回 verificationInfo
- * - 验码 + 登录/注册：auth.signInWithEmail({ verificationInfo, verificationCode, email })
- *   内部按 verificationInfo.is_user 分支：已注册用户直接登录，新用户自动注册
- * - 匿名：auth.signInAnonymously() 返回 { data, error }
+ * 对齐本项目原有的登录交互：输入邮箱 → 收 6 位数字码 → 填码即登录/注册。
+ * - 发码：auth.signInWithOtp({ email, options: { shouldCreateUser: true } })
+ * - 验码：auth.verifyOtp({ email, token: code, type: "email" })
+ *   shouldCreateUser 为 true 时，未注册邮箱验码成功即自动注册并登录。
+ * - 登录态：SDK 自动把 session 持久化到 localStorage 并静默续期，
+ *   这里再包一层全局 store，保证所有组件共享同一份 user 状态。
  *
- * 控制台前置：身份认证/登录方式 开启「邮箱验证码」，并配置发件邮箱（SMTP 或零配置代发）。
+ * Supabase 控制台前置（缺一不可）：
+ * 1. Authentication → Providers → Email 保持开启。
+ * 2. Authentication → Email Templates：「Magic Link」模板正文里加入 {{ .Token }}，
+ *    否则用户只会收到一个 magic link，拿不到要填的 6 位数字。
+ * 3. Authentication → SMTP：配置自定义发信服务。Supabase 内置邮件服务每小时
+ *    仅 2 封且只能发给项目成员，无法用于正式环境。
  */
 
 import { useSyncExternalStore } from "react";
-import cloudbase from "@cloudbase/js-sdk";
-
-/**
- * CloudBase JS-SDK 的最小类型声明（官方 npm 包类型不完整，这里仅声明本项目用到的方法/字段）。
- * 用最小接口替代 any：既能消除 no-explicit-any，又能让 SDK 调用获得基本类型检查。
- */
-interface CloudBaseApp {
-  auth: () => CloudBaseAuth;
-}
-interface CloudBaseAuth {
-  getLoginState: () => Promise<CloudBaseLoginState>;
-  onLoginStateChanged: (cb: (state: CloudBaseLoginState) => void) => void;
-  getVerification: (opts: { email: string }) => Promise<CloudBaseVerificationResult>;
-  signInWithEmail: (opts: {
-    verificationInfo: CloudBaseVerificationInfo;
-    verificationCode: string;
-    email: string;
-  }) => Promise<CloudBaseSignInResult>;
-  signOut: () => Promise<unknown>;
-  getAccessToken: () => Promise<CloudBaseAccessTokenInfo>;
-}
-interface CloudBaseLoginState {
-  user?: {
-    uid?: string;
-    openid?: string;
-    customUserId?: string;
-    email?: string | null;
-    loginType?: string;
-  } | null;
-}
-interface CloudBaseVerificationInfo {
-  is_user?: boolean;
-  [key: string]: unknown;
-}
-interface CloudBaseVerificationResult {
-  data?: CloudBaseVerificationInfo;
-  error?: unknown;
-}
-interface CloudBaseSignInResult {
-  error?: unknown;
-  [key: string]: unknown;
-}
-interface CloudBaseAccessTokenInfo {
-  accessToken?: string;
-  [key: string]: unknown;
-}
-
-const ENV_ID = process.env.NEXT_PUBLIC_CLOUDBASE_ENV_ID!;
-const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLOUDBASE_PUBLISHABLE_KEY!;
-// 地域：新加坡环境用 ap-singapore，国内环境用 ap-shanghai。默认 ap-shanghai 保持原有行为。
-const REGION = process.env.NEXT_PUBLIC_CLOUDBASE_REGION || "ap-shanghai";
+import type { Session } from "@supabase/supabase-js";
+import { getSupabase } from "./supabase";
 
 export interface AuthUser {
   uid: string;
   email: string | null;
   isAnonymous: boolean;
 }
-
-let app: CloudBaseApp | null = null;
-let auth: CloudBaseAuth | null = null;
-let initialized = false;
-let emailVerifyCtx: { verificationInfo: CloudBaseVerificationInfo; email: string } | null = null;
 
 /**
  * 全局登录态 store：所有组件共享同一份 user 状态，登录/登出即时广播。
@@ -87,7 +38,7 @@ let storeStarted = false;
 
 /**
  * 登录态是否已完成「首次恢复」。用于区分两种情况：
- *   - false：尚未确定（SDK 还在异步恢复登录态）——此时不能判定为未登录
+ *   - false：尚未确定（SDK 还在异步恢复 session）——此时不能判定为未登录
  *   - true ：已确定（可能是已登录，也可能是确实未登录）
  * 页面据此避免「已登录用户首帧闪一下登录墙」。
  */
@@ -109,73 +60,49 @@ function emitUser(next: AuthUser | null) {
   userListeners.forEach((l) => l(next));
 }
 
-function startUserStore() {
-  const a = getAuth();
-  if (storeStarted) return;
-  // 未配置 CloudBase（缺 envId / key）时没有 auth 实例，直接视为「已确定未登录」
-  if (!a) {
-    emitReady();
-    return;
-  }
-  storeStarted = true;
-  // 同步当前态
-  a.getLoginState()
-    .then((state: CloudBaseLoginState) => emitUser(toAuthUser(state)))
-    .catch(() => emitUser(null))
-    .finally(() => emitReady());
-  // 订阅后续变化
-  a.onLoginStateChanged((loginState: CloudBaseLoginState) => emitUser(toAuthUser(loginState)));
-}
-
 /**
- * 将 CloudBase loginState 映射为本项目的登录态。
- * 口径：只有邮箱登录（user.email 存在且非匿名）才算「已登录」；
- * 匿名态、或没有邮箱的态一律视为「未登录」(返回 null)，小人区不显示退出登录。
+ * 将 Supabase session 映射为本项目的登录态。
+ * 口径：只有带邮箱的正式用户才算「已登录」；无邮箱的匿名会话视为未登录。
  */
-function toAuthUser(loginState: CloudBaseLoginState): AuthUser | null {
-  const u = loginState?.user;
-  if (!u) return null;
-  const isAnonymous = u.loginType === "ANONYMOUS" || !u.email;
-  if (isAnonymous) return null;
-  return {
-    uid: u.uid ?? u.openid ?? u.customUserId ?? "",
-    email: u.email ?? null,
-    isAnonymous: false,
-  };
+function toAuthUser(session: Session | null): AuthUser | null {
+  const u = session?.user;
+  if (!u?.id || !u.email) return null;
+  return { uid: u.id, email: u.email, isAnonymous: false };
 }
 
-/** 初始化 CloudBase 客户端（幂等），返回 auth 实例。 */
-export function initCloudBase(): CloudBaseAuth | null {
-  if (initialized && app && auth) return auth;
-  if (!ENV_ID || !PUBLISHABLE_KEY) {
-    console.warn(
-      "[auth] 缺少 NEXT_PUBLIC_CLOUDBASE_ENV_ID / PUBLISHABLE_KEY，登录功能不可用"
-    );
+/** 初始化 Supabase 客户端（幂等），并启动全局登录态 store。 */
+export function initSupabase() {
+  const supabase = getSupabase();
+  if (!supabase) {
+    // 未配置 Supabase（缺 URL / anon key）：直接视为「已确定未登录」
+    emitReady();
     return null;
   }
-  app = cloudbase.init({
-    env: ENV_ID,
-    accessKey: PUBLISHABLE_KEY,
-    region: REGION,
-  }) as unknown as CloudBaseApp;
-  auth = app.auth();
-  initialized = true;
-  startUserStore();
-  return auth;
-}
+  if (storeStarted) return supabase;
+  storeStarted = true;
 
-/** 获取当前 auth 实例（确保已初始化）。 */
-function getAuth(): CloudBaseAuth | null {
-  return initCloudBase();
+  // 同步当前态
+  supabase.auth
+    .getSession()
+    .then(({ data }) => emitUser(toAuthUser(data.session)))
+    .catch(() => emitUser(null))
+    .finally(() => emitReady());
+
+  // 订阅后续变化（登录、登出、token 续期）
+  supabase.auth.onAuthStateChange((_event, session) => {
+    emitUser(toAuthUser(session));
+    emitReady();
+  });
+
+  return supabase;
 }
 
 /**
  * 订阅登录态变化（基于全局 store）。返回取消订阅函数。
- * 注意：全局 store 由 initCloudBase 启动一次；若尚未初始化，这里兜底启动。
+ * 注意：全局 store 由 initSupabase 启动一次；若尚未初始化，这里兜底启动。
  */
 export function onUserChanged(cb: (u: AuthUser | null) => void): () => void {
-  initCloudBase();
-  startUserStore();
+  initSupabase();
   cb(currentUser);
   userListeners.add(cb);
   return () => {
@@ -191,7 +118,7 @@ export function useAuthUser(): AuthUser | null {
   return useSyncExternalStore(
     (cb) => onUserChanged(() => cb()),
     () => currentUser,
-    () => null, // SSR 快照：服务端无登录态
+    () => null // SSR 快照：服务端无登录态
   );
 }
 
@@ -201,8 +128,7 @@ export function useAuthUser(): AuthUser | null {
  * 否则只是「登录态尚未恢复」，此时应显示加载态而不是登录墙。
  */
 export function subscribeAuthReady(cb: () => void): () => void {
-  initCloudBase();
-  startUserStore();
+  initSupabase();
   readyListeners.add(cb);
   return () => {
     readyListeners.delete(cb);
@@ -214,94 +140,69 @@ export function useAuthReady(): boolean {
   return useSyncExternalStore(
     (cb) => subscribeAuthReady(() => cb()),
     () => authReady,
-    () => false, // SSR：服务端始终未就绪
+    () => false // SSR：服务端始终未就绪
   );
 }
 
-/** 返回原始 loginState（未经 toAuthUser 过滤），供 auth-init 判断是否匿名残留。 */
-export function getLoginStateRaw(): Promise<CloudBaseLoginState | null> {
-  const a = getAuth();
-  if (!a) return Promise.resolve(null);
-  return a.getLoginState().catch(() => null);
-}
-
-/** 发送邮箱验证码：调用 getVerification，缓存 verificationInfo 供后续登录/注册使用。 */
+/** 发送邮箱验证码（未注册邮箱会一并触发注册流程）。 */
 export async function sendEmailCode(email: string): Promise<void> {
-  const a = getAuth();
-  if (!a) throw new Error("认证未初始化");
+  const supabase = getSupabase();
+  if (!supabase) throw new Error("认证未初始化");
   try {
-    const res = await a.getVerification({ email });
-    if (res?.error) throw res.error;
-    const info = res?.data ?? (res as unknown as CloudBaseVerificationInfo);
-    emailVerifyCtx = { verificationInfo: info, email };
-  } catch (e: unknown) {
-    const err = e as { message?: string; code?: string; requestId?: string; status?: number };
-    console.error("[auth] sendEmailCode 失败:", {
-      message: err.message,
-      code: err.code,
-      requestId: err.requestId,
-      status: err.status,
-      error: e,
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: true,
+        // 用户若直接点邮件里的链接而非填码，也会回到本站
+        emailRedirectTo:
+          typeof window !== "undefined" ? window.location.origin : undefined,
+      },
     });
-    throw new Error(
-      err.message || `发送验证码失败${err.code ? ` (code=${err.code})` : ""}`,
-    );
+    if (error) throw error;
+  } catch (e: unknown) {
+    const err = e as { message?: string; status?: number; code?: string };
+    console.error("[auth] sendEmailCode 失败:", err);
+    throw new Error(err.message || "发送验证码失败");
   }
 }
 
 /**
  * 用邮箱 + 验证码完成登录/注册。
- * signInWithEmail 内部按 verificationInfo.is_user 自动分支：
- * 已注册用户直接登录，新用户自动注册（注册成功即登录）。
+ * verifyOtp 成功即建立会话；邮箱未注册时由 shouldCreateUser 自动注册。
  */
 export async function signInWithEmailCode(
   email: string,
   code: string,
   extra?: { name?: string; province?: string; city?: string }
 ): Promise<void> {
-  const a = getAuth();
-  if (!a) throw new Error("认证未初始化");
-  if (!emailVerifyCtx || emailVerifyCtx.email !== email) {
-    throw new Error("请先获取验证码");
-  }
+  const supabase = getSupabase();
+  if (!supabase) throw new Error("认证未初始化");
   try {
-    const res = await a.signInWithEmail({
-      verificationInfo: emailVerifyCtx.verificationInfo,
-      verificationCode: code,
+    const { data, error } = await supabase.auth.verifyOtp({
       email,
+      token: code.trim(),
+      type: "email",
     });
-    if (res?.error) throw res.error;
-    // 双保险：主动从 SDK 拉一次最新 loginState 并 emit，
-    // 保证即便 SDK 内部未及时触发 onLoginStateChanged，UI 也能立即更新到登录态。
-    try {
-      const state = await a.getLoginState();
-      emitUser(toAuthUser(state));
-      // 登录/注册成功后始终同步基础信息（至少邮箱）；注册页携带的称呼/省份/城市一并写入。
-      // 失败静默忽略（表可能未建）。merge-duplicates 仅更新提供的列，不会清空已有字段。
-      if (currentUser) {
+    if (error) throw error;
+
+    emitUser(toAuthUser(data.session));
+    emitReady();
+
+    // 登录/注册成功后同步基础信息（至少邮箱）；注册页携带的称呼/省份/城市一并写入。
+    // 失败静默忽略（表可能未建）。
+    const u = data.session?.user;
+    if (u?.email) {
+      try {
         const { ensureUserInfo } = await import("./user-info");
-        await ensureUserInfo(currentUser.uid, {
-          email: currentUser.email ?? email,
-          ...extra,
-        }).catch(() => {});
+        await ensureUserInfo(u.id, { email: u.email, ...extra });
+      } catch {
+        /* 忽略：user_info 写入失败不影响登录态 */
       }
-    } catch (refreshErr) {
-      console.warn("[auth] post-login getLoginState failed:", refreshErr);
     }
   } catch (e: unknown) {
-    const err = e as { message?: string; code?: string; requestId?: string; status?: number };
-    console.error("[auth] 邮箱验证码登录失败:", {
-      message: err.message,
-      code: err.code,
-      requestId: err.requestId,
-      status: err.status,
-      error: e,
-    });
-    throw new Error(
-      err.message || `验证失败${err.code ? ` (code=${err.code})` : ""}`,
-    );
-  } finally {
-    emailVerifyCtx = null;
+    const err = e as { message?: string; status?: number; code?: string };
+    console.error("[auth] 邮箱验证码登录失败:", err);
+    throw new Error(err.message || "验证码校验失败");
   }
 }
 
@@ -310,35 +211,28 @@ export function getCurrentUser(): AuthUser | null {
   return currentUser;
 }
 
-/** 登出（匿名态也会清除）。 */
+/** 登出。 */
 export async function signOut(): Promise<void> {
-  const a = getAuth();
-  if (!a) return;
+  const supabase = getSupabase();
+  if (!supabase) return;
   try {
-    await a.signOut();
+    await supabase.auth.signOut();
   } finally {
-    // 兜底：确保即使 SDK 未触发 onLoginStateChanged，UI 也立即回到未登录
+    // 兜底：确保即使 SDK 未触发 onAuthStateChange，UI 也立即回到未登录
     emitUser(null);
   }
 }
 
 /** 获取当前登录用户的 access token（JWT），用于 PostgREST 网关鉴权（RLS）。 */
 export async function getAccessToken(): Promise<string | null> {
-  const a = getAuth();
-  if (!a) return null;
+  const supabase = getSupabase();
+  if (!supabase) return null;
   try {
-    const info = await a.getAccessToken();
-    return info?.accessToken ?? null;
+    // getSession 会在 token 临近过期时自动续期
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token ?? null;
   } catch (e) {
     console.warn("[auth] 获取 access token 失败", e);
     return null;
   }
 }
-
-/**
- * 预留：后续升级为微信扫码登录时调用。
- * 开启微信登录方式后，将当前匿名/邮箱账号关联到微信：
- *   await auth.currentUser.linkWithWechat({ ... })
- * 关联后 uid 不变，云端数据保留。本期不实现。
- */
-// export async function linkWithWechat(): Promise<void> { /* TODO */ }

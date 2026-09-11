@@ -12,7 +12,7 @@ export interface FavoriteEntry {
   kind: FavoriteKind;
 }
 
-const LS_KEY = "wollyn:schools:favorites";
+const LS_KEY = "goalnz:schools:favorites";
 export const FAV_TOPIC = "favorites";
 
 const favSubs = new Set<(ids: FavoriteEntry[]) => void>();
@@ -70,7 +70,7 @@ export function setFavoritesUser(uid: string | null) {
   favUserUid = uid;
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem("wollyn:auth:uid", JSON.stringify(uid));
+    window.localStorage.setItem("goalnz:auth:uid", JSON.stringify(uid));
   } catch {
     /* ignore */
   }

@@ -150,7 +150,7 @@ export function studyPeriodToString(p?: StudyPeriod): string {
   return [s, e].filter(Boolean).join(" — ");
 }
 
-const LS_KEY = "wollyn:schools:applications";
+const LS_KEY = "goalnz:schools:applications";
 
 let items: ApplicationItem[] = loadLS();
 let uid: string | null = null;
@@ -339,7 +339,7 @@ export function addApplication(
     } else if (typeof window !== "undefined") {
       try {
         window.localStorage.setItem(
-          "wollyn:schools:profile",
+          "goalnz:schools:profile",
           JSON.stringify(profileCache)
         );
       } catch {
@@ -391,7 +391,7 @@ export function removeApplication(id: string) {
 
 // 每用户「是否已同步到云端」标记：用于区分「首次同步」与「云端被删除」。
 // 云端有数据 / 成功写云端 → 置位；云端为空且已置位 → 视为被有意清空，不再回传本地。
-const APP_SYNCED_PREFIX = "wollyn:schools:apps:synced:";
+const APP_SYNCED_PREFIX = "goalnz:schools:apps:synced:";
 function markSynced(u: string) {
   if (typeof window === "undefined") return;
   try {
@@ -453,7 +453,7 @@ export async function setApplicationsUser(next: string | null) {
     else {
       // 未登录时本地可能缓存了 profile
       try {
-        const raw = window.localStorage.getItem("wollyn:schools:profile");
+        const raw = window.localStorage.getItem("goalnz:schools:profile");
         if (raw) profileCache = JSON.parse(raw);
       } catch {
         /* 忽略 */

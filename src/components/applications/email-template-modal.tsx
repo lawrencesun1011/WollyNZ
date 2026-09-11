@@ -30,7 +30,7 @@ export function EmailTemplateModal({ item, onClose }: Props) {
     setLoading(true);
     setError("");
     try {
-      // 静态托管无服务端，改为浏览器直连 CloudBase AI 网关（用登录用户 token 鉴权）。
+      // 静态托管无服务端，改为经 Cloudflare Worker 代理调用第三方模型（带登录用户 token）。
       const data = await generateEmailWithAi(item, signal);
       setSubject(data.subject ?? "");
       setBody(data.body ?? "");

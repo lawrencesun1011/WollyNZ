@@ -5,27 +5,20 @@ import { getSchoolsSnapshot } from "./schools-store";
 /**
  * Auth 桥接：在客户端挂载一次，打通「登录态 ↔ 云端集合 ↔ 本地 pub/sub」。
  *
- * 注意：进站【不】自动匿名登录。未登录时 user 为 null，小人区显示「注册/登录」，
+ * 注意：进站【不】自动登录。未登录时 user 为 null，小人区显示「登录」，
  * 心愿单走本地 localStorage 兜底；用户用邮箱登录后才真正登录并合并上云。
- *
- * 为兼容历史：SDK 可能从 localStorage 恢复出匿名 token（之前进站自动匿名登录遗留），
- * 这种情况下首帧主动 signOut() 清掉，让 user 回到 null。
  *
  * 流程：
  * 1. 订阅 onUserChanged：
- *    - 匿名 user → signOut() 清掉（回到 null 走下面分支）
  *    - 正式 user → 设 favorites/compare 的 uid，首登合并 localStorage→云端，再以云端覆盖本地
- *    - 无 user → uid 置空，恢复 localStorage 兜底
+ *    - 无 user → uid 置空，恢复 localStorage 兜底，并清空本地镜像
+ *
+ * 迁移说明：原 CloudBase 版本需处理「历史自动匿名登录」遗留 token（进站主动 signOut），
+ * 换成 Supabase 后不存在匿名会话（未开启匿名登录），该分支已移除。
  */
 
 import { useEffect } from "react";
-import {
-  onUserChanged,
-  getLoginStateRaw,
-  signOut,
-  type AuthUser,
-  initCloudBase,
-} from "./auth";
+import { onUserChanged, initSupabase, type AuthUser } from "./auth";
 import {
   setFavoritesUser,
   setCompareUser,
@@ -45,18 +38,7 @@ export function useAuthBridge() {
     if (bridgeStarted) return;
     bridgeStarted = true;
 
-    initCloudBase();
-
-    // 进站清理历史匿名 token（之前自动匿名登录遗留）：匿名态不视为登录，
-    // 但残留 token 会占用云端匿名 uid，这里主动登出清掉。
-    getLoginStateRaw()
-      .then((raw) => {
-        const u = raw?.user;
-        if (u && (u.loginType === "ANONYMOUS" || !u.email)) {
-          return signOut();
-        }
-      })
-      .catch(() => {});
+    initSupabase();
 
     const unsub = onUserChanged(async (user: AuthUser | null) => {
       if (user) {

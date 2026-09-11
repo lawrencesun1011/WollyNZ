@@ -21,7 +21,7 @@ import {
 const EMPTY_FAVORITES: { id: string; kind: "school" | "ece" }[] = [];
 const EMPTY_COMPARE: string[] = [];
 
-const COMPARE_LS_KEY = "wollyn:schools:compare";
+const COMPARE_LS_KEY = "goalnz:schools:compare";
 const COMPARE_MAX = 4;
 
 type CompareKind = "school" | "ece";

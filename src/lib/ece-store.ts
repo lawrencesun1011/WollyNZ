@@ -7,7 +7,7 @@
 // 接口数据到达后通过订阅机制无缝替换，实现「优先接口、本地兜底」。
 import type { SchoolFrontend } from "./types";
 
-const LS_KEY = "wollyn:ece:all";
+const LS_KEY = "goalnz:ece:all";
 const LS_TTL = 5 * 60 * 1000; // 5min，避免一直用过期数据但减少接口压力
 
 type Listener = (list: SchoolFrontend[]) => void;

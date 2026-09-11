@@ -132,7 +132,7 @@ export function ApplicationForm({
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // 邮箱验证（注册/登录）
+  // 邮箱验证（登录）
   const [needAuth, setNeedAuth] = useState(false);
   const [code, setCode] = useState("");
   const [codeSending, setCodeSending] = useState(false);
@@ -480,7 +480,7 @@ export function ApplicationForm({
           )}
         </div>
         {!user?.email && (
-          <p className="mt-1 text-xs text-ink-soft">需先验证邮箱才能填写表单，验证即自动完成注册 / 登录。</p>
+          <p className="mt-1 text-xs text-ink-soft">需先验证邮箱才能填写表单，验证即完成登录（首次自动创建账号）。</p>
         )}
 
         {needAuth && !user?.email && (

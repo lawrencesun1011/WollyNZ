@@ -154,7 +154,7 @@ export function AccommodationForm({
     setCalOpen(true);
   }
 
-  // 邮箱验证（注册 / 登录）
+  // 邮箱验证（登录）
   const [email, setEmail] = useState("");
   const [needAuth, setNeedAuth] = useState(false);
   const [code, setCode] = useState("");
@@ -465,7 +465,7 @@ export function AccommodationForm({
           </div>
           {!user?.email && (
             <p className="text-xs text-ink-soft">
-              需先验证邮箱才能填写表单，验证即自动完成注册 / 登录。
+              需先验证邮箱才能填写表单，验证即完成登录（首次自动创建账号）。
             </p>
           )}
 

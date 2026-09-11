@@ -3,8 +3,8 @@
 /**
  * 云端用户数据（心愿单 / 对比）读写层（PostgreSQL）。
  *
- * 本环境为 CloudBase for Supabase 模式，仅含 PostgreSQL 实例（无 NoSQL），
- * 因此用户数据存于 public.user_collections 表，经 PostgREST 网关访问。
+ * 数据库为 Supabase PostgreSQL，用户数据存于 public.user_collections 表，
+ * 经 PostgREST 网关访问（请求需同时带 apikey 与用户 JWT）。
  *
  * 鉴权：写入需携带登录用户的 JWT（access token），由 RLS 限制
  *   owner = auth.uid()  —— 仅本人可读写自己的行。
@@ -12,7 +12,7 @@
  *
  * 表结构（user_collections）：
  *   owner             text PK   —— 等于 auth.uid()
- *   email             text      —— 注册/登录邮箱（与 user_info.email 同步）
+ *   email             text      —— 登录邮箱（与 user_info.email 同步）
  *   school_favorites  jsonb     —— [{id, name}] 中小学收藏
  *   school_compare    jsonb     —— [{id, name}] 中小学对比
  *   ece_favorites     jsonb     —— [{id, name}] 幼儿园收藏
@@ -24,8 +24,9 @@
  * - 失败降级：云端写入失败回退 localStorage，不影响浏览。
  */
 
-import { getAccessToken, getLoginStateRaw } from "./auth";
+import { getAccessToken, getCurrentUser } from "./auth";
 import { ensureUserInfo } from "./user-info";
+import { restAuthHeaders, restBase } from "./supabase";
 import { getEffectiveStatus, type ApplicationItem } from "./applications";
 
 /** 云端单条收藏/对比项（仅 id + name，kind 由列名体现）。 */
@@ -55,8 +56,8 @@ export interface MergedCollections {
 }
 
 const TABLE = "user_collections";
-const LS_FAV = "wollyn:schools:favorites";
-const LS_CMP = "wollyn:schools:compare";
+const LS_FAV = "goalnz:schools:favorites";
+const LS_CMP = "goalnz:schools:compare";
 
 /** 登录邮箱缓存，随登录态更新，供写 user_collections 时同步 email 列。 */
 let collectionsEmail: string | null = null;
@@ -64,9 +65,11 @@ export function setCollectionsEmail(email: string | null) {
   collectionsEmail = email;
 }
 
-function gatewayBase(): string {
-  const envId = process.env.NEXT_PUBLIC_CLOUDBASE_ENV_ID!;
-  return `https://${envId}.api.tcloudbasegateway.com/v1/rdb/rest`;
+/** PostgREST 根地址；未配置 Supabase 时抛错，避免请求打到相对路径而静默失败。 */
+function restApi(): string {
+  const base = restBase();
+  if (!base) throw new Error("[user-data] Supabase 未配置");
+  return base;
 }
 
 /** 从云端拉取当前用户集合（4 列）；owner 由 RLS 过滤。返回 null 表示无云端数据/未登录/失败。 */
@@ -75,8 +78,8 @@ export async function fetchCloudCollections(): Promise<CloudCollectionRow | null
   if (!token) return null;
   try {
     const res = await fetch(
-      `${gatewayBase()}/${TABLE}?select=school_favorites,school_compare,ece_favorites,ece_compare`,
-      { headers: { Authorization: `Bearer ${token}` } }
+      `${restApi()}/${TABLE}?select=school_favorites,school_compare,ece_favorites,ece_compare`,
+      { headers: restAuthHeaders(token) }
     );
     if (!res.ok) {
       console.warn("[user-data] 云端读取失败", res.status);
@@ -135,13 +138,12 @@ export async function saveCloudCollections(data: SaveCollectionsInput): Promise<
     };
     if (collectionsEmail) body.email = collectionsEmail;
 
-    const res = await fetch(`${gatewayBase()}/${TABLE}`, {
+    const res = await fetch(`${restApi()}/${TABLE}`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
+      headers: restAuthHeaders(token, {
         "Content-Type": "application/json",
         Prefer: "resolution=merge-duplicates",
-      },
+      }),
       body: JSON.stringify(body),
     });
     if (!res.ok) {
@@ -319,8 +321,8 @@ export async function fetchCloudApplications(): Promise<ApplicationItem[] | null
   if (!token) return null;
   try {
     const res = await fetch(
-      `${gatewayBase()}/applications?select=*`,
-      { headers: { Authorization: `Bearer ${token}` } }
+      `${restApi()}/applications?select=*`,
+      { headers: restAuthHeaders(token) }
     );
     if (!res.ok) {
       console.warn("[user-data] 申请云端读取失败", res.status);
@@ -354,13 +356,12 @@ export async function saveCloudApplication(
       status: item.status,
       data: item,
     };
-    const res = await fetch(`${gatewayBase()}/applications`, {
+    const res = await fetch(`${restApi()}/applications`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
+      headers: restAuthHeaders(token, {
         "Content-Type": "application/json",
         Prefer: "resolution=merge-duplicates",
-      },
+      }),
       body: JSON.stringify(row),
     });
     if (!res.ok) {
@@ -380,10 +381,10 @@ export async function deleteCloudApplication(id: string): Promise<boolean> {
   if (!token) return false;
   try {
     const res = await fetch(
-      `${gatewayBase()}/applications?id=eq.${encodeURIComponent(id)}`,
+      `${restApi()}/applications?id=eq.${encodeURIComponent(id)}`,
       {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: restAuthHeaders(token),
       }
     );
     return res.ok;
@@ -408,8 +409,8 @@ export async function fetchCloudProfile(): Promise<UserProfile | null> {
   if (!token) return null;
   try {
     const res = await fetch(
-      `${gatewayBase()}/user_info?select=province,city`,
-      { headers: { Authorization: `Bearer ${token}` } }
+      `${restApi()}/user_info?select=province,city`,
+      { headers: restAuthHeaders(token) }
     );
     if (!res.ok) return null;
     const rows = (await res.json()) as Array<{ province?: string; city?: string }>;
@@ -429,10 +430,9 @@ export async function saveCloudProfile(profile: UserProfile): Promise<boolean> {
   const token = await getAccessToken();
   if (!token) return false;
   try {
-    const state = await getLoginStateRaw();
-    const owner = state?.user?.uid ?? null;
-    if (!owner) return false;
-    return await ensureUserInfo(owner, {
+    const user = getCurrentUser();
+    if (!user) return false;
+    return await ensureUserInfo(user.uid, {
       province: profile.province,
       city: profile.city,
     });
@@ -473,8 +473,8 @@ export async function fetchCloudAccommodation(): Promise<AccommodationItem[] | n
   if (!token) return null;
   try {
     const res = await fetch(
-      `${gatewayBase()}/accommodation_applications?select=*`,
-      { headers: { Authorization: `Bearer ${token}` } }
+      `${restApi()}/accommodation_applications?select=*`,
+      { headers: restAuthHeaders(token) }
     );
     if (!res.ok) {
       console.error("[user-data] 住宿云端读取失败", res.status, await res.text());
@@ -495,13 +495,12 @@ export async function saveCloudAccommodation(item: AccommodationItem): Promise<b
   if (!token) return false;
   try {
     const row = { id: item.id, status: item.status, data: item };
-    const res = await fetch(`${gatewayBase()}/accommodation_applications`, {
+    const res = await fetch(`${restApi()}/accommodation_applications`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
+      headers: restAuthHeaders(token, {
         "Content-Type": "application/json",
         Prefer: "resolution=merge-duplicates",
-      },
+      }),
       body: JSON.stringify(row),
     });
     if (!res.ok) {
@@ -521,8 +520,8 @@ export async function deleteCloudAccommodation(id: string): Promise<boolean> {
   if (!token) return false;
   try {
     const res = await fetch(
-      `${gatewayBase()}/accommodation_applications?id=eq.${encodeURIComponent(id)}`,
-      { method: "DELETE", headers: { Authorization: `Bearer ${token}` } }
+      `${restApi()}/accommodation_applications?id=eq.${encodeURIComponent(id)}`,
+      { method: "DELETE", headers: restAuthHeaders(token) }
     );
     return res.ok || res.status === 404;
   } catch (e) {

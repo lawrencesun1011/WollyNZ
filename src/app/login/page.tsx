@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Mail, KeyRound, ShieldCheck, RotateCcw } from "lucide-react";
 import { sendEmailCode, signInWithEmailCode } from "@/lib/auth";
 
-/** 登录 / 注册独立页面：邮箱 + 验证码同屏，居中卡片布局。 */
+/** 登录独立页面：邮箱 + 验证码同屏，居中卡片布局。 */
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -95,9 +95,9 @@ export default function LoginPage() {
     <div className="accom-editorial flex min-h-screen flex-col items-center justify-start bg-bg px-4 pb-20 pt-24">
       <div className="w-full max-w-md rounded-[20px] border border-[#789491]/30 bg-white p-7 shadow-[--shadow-2] animate-fade-up">
         <div className="mb-5">
-          <h1 className="text-2xl font-bold text-ink">登录 / 注册</h1>
+          <h1 className="text-xl font-bold text-ink">登录</h1>
           <p className="mt-1 text-sm text-caption">
-            邮箱验证码登录，首次即自动注册
+            无需密码，输入邮箱验证码即可登录；首次登录自动创建账号
           </p>
         </div>
 
@@ -182,7 +182,7 @@ export default function LoginPage() {
             disabled={busy || !sent}
             className="h-11 w-full rounded-[--radius-sm] bg-primary font-medium text-white transition-colors hover:bg-primary-hover disabled:opacity-60"
           >
-            {verifying ? "登录中…" : "登录 / 注册"}
+            {verifying ? "登录中…" : "登录"}
           </button>
         </div>
 
