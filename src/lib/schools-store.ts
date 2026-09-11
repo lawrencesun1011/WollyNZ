@@ -1,7 +1,8 @@
 "use client";
 
 // 中小学数据的客户端全局缓存层。
-// 设计：进入网站（任意页面，根布局挂载）即触发预热拉取 /api/schools-all，
+// 设计：进入网站（任意页面，根布局挂载）即触发预热拉取 /api/schools-all.json，
+// 该 JSON 由构建期脚本 scripts/prepare-static-data.mjs 生成（静态托管下无 API Route）。
 // 结果存入内存 + localStorage（带 TTL），中小学页首屏用本地兜底秒开，
 // PG 数据到达后通过订阅机制无缝替换，实现「优先 PG、本地兜底、该缓存缓存」。
 import type { SchoolFrontend } from "./types";
@@ -67,7 +68,7 @@ export async function preloadSchools(): Promise<void> {
   }
   state.loading = true;
   try {
-    const res = await fetch("/api/schools-all");
+    const res = await fetch("/api/schools-all.json");
     if (!res.ok) return;
     const list = (await res.json()) as SchoolFrontend[];
     if (!list.length) return;

@@ -1,7 +1,8 @@
 "use client";
 
 // 幼儿园（ECE）数据的客户端全局缓存层，与 schools-store 同构。
-// 进入网站（根布局挂载 EcePreloader）即触发预热拉取 /api/ece-all，
+// 进入网站（根布局挂载 EcePreloader）即触发预热拉取 /api/ece-all.json，
+// 该 JSON 由构建期脚本 scripts/prepare-static-data.mjs 生成（静态托管下无 API Route）。
 // 结果存入内存 + localStorage（带 TTL），ECE 页首屏用本地兜底秒开，
 // 接口数据到达后通过订阅机制无缝替换，实现「优先接口、本地兜底」。
 import type { SchoolFrontend } from "./types";
@@ -66,7 +67,7 @@ async function doLoad(): Promise<void> {
   }
   state.loading = true;
   try {
-    const res = await fetch("/api/ece-all");
+    const res = await fetch("/api/ece-all.json");
     if (!res.ok) return;
     const json = (await res.json()) as { schools: SchoolFrontend[] };
     const list = json.schools ?? [];

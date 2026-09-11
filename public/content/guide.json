@@ -1,6 +1,5 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-10",
   "chapters": [
     {
       "id": "understand",
@@ -433,17 +432,11 @@
             ]
           }
         ]
-      },
-      "sources": [
-        {
-          "title": "GoalNZ 原攻略",
-          "url": "https://wollynz-301574-11-1305741203.sh.run.tcloudbase.com/guide"
-        }
-      ]
+      }
     },
     {
       "id": "schools",
-      "label": "选择学校",
+      "label": "确定学校",
       "title": "先选一种日常，再慢慢找到学校。",
       "doc": {
         "type": "doc",
@@ -880,21 +873,11 @@
             ]
           }
         ]
-      },
-      "sources": [
-        {
-          "title": "GoalNZ 原攻略",
-          "url": "https://wollynz-301574-11-1305741203.sh.run.tcloudbase.com/guide"
-        },
-        {
-          "title": "Education Counts — Find your nearest school",
-          "url": "https://www.educationcounts.govt.nz/find-school"
-        }
-      ]
+      }
     },
     {
       "id": "prepare",
-      "label": "申请准备",
+      "label": "递交申请",
       "title": "把时间对上，申请就从容许多。",
       "doc": {
         "type": "doc",
@@ -1324,37 +1307,11 @@
             ]
           }
         ]
-      },
-      "sources": [
-        {
-          "title": "GoalNZ 原攻略",
-          "url": "https://wollynz-301574-11-1305741203.sh.run.tcloudbase.com/guide"
-        },
-        {
-          "title": "Ministry of Education — School terms and holidays",
-          "url": "https://www.education.govt.nz/term-dates-and-holidays"
-        },
-        {
-          "title": "INZ V2.35 — Short-term study in schools",
-          "url": "https://www.immigration.govt.nz/opsmanual/44920.htm"
-        },
-        {
-          "title": "INZ V3.100 — Legal guardians",
-          "url": "https://www.immigration.govt.nz/opsmanual/34312.htm"
-        },
-        {
-          "title": "INZ — Guardian Visitor Visa",
-          "url": "https://www.immigration.govt.nz/visas/guardian-visitor-visa/"
-        },
-        {
-          "title": "NZQA — Guidelines for Code Signatory Schools",
-          "url": "https://www2.nzqa.govt.nz/assets/About-us/Publications/Code-news/2022/Guidelines-for-Code-Signatory-Schools.pdf"
-        }
-      ]
+      }
     },
     {
       "id": "stay",
-      "label": "安排住宿",
+      "label": "住宿贴士",
       "title": "先有学校，再找一家人住得舒服的地方。",
       "doc": {
         "type": "doc",
@@ -1462,17 +1419,11 @@
             ]
           }
         ]
-      },
-      "sources": [
-        {
-          "title": "GoalNZ 原攻略",
-          "url": "https://wollynz-301574-11-1305741203.sh.run.tcloudbase.com/guide"
-        }
-      ]
+      }
     },
     {
       "id": "packing",
-      "label": "行前清单",
+      "label": "其它准备",
       "title": "行李慢慢收，重要的事先放稳。",
       "doc": {
         "type": "doc",
@@ -1782,25 +1733,11 @@
             ]
           }
         ]
-      },
-      "sources": [
-        {
-          "title": "GoalNZ 原攻略",
-          "url": "https://wollynz-301574-11-1305741203.sh.run.tcloudbase.com/guide"
-        },
-        {
-          "title": "NZQA — Insurance for international learners",
-          "url": "https://www2.nzqa.govt.nz/tertiary/the-code/the-code-for-education-providers/code-resources-for-school-signatories/insurance-for-international-learners/"
-        },
-        {
-          "title": "MPI — How to declare items when arriving in NZ",
-          "url": "https://www.mpi.govt.nz/bring-send-to-nz/bringing-and-posting-items-to-nz/how-to-declare-items-when-arriving-in-nz"
-        }
-      ]
+      }
     },
     {
       "id": "life",
-      "label": "在地生活",
+      "label": "入学事项",
       "title": "从第一只午餐盒开始，慢慢熟悉这里。",
       "doc": {
         "type": "doc",
@@ -1908,14 +1845,7 @@
             ]
           }
         ]
-      },
-      "sources": [
-        {
-          "title": "GoalNZ 原攻略",
-          "url": "https://wollynz-301574-11-1305741203.sh.run.tcloudbase.com/guide"
-        }
-      ]
+      }
     }
   ]
 }
-

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
-import Image from "next/image";
+import { SmartImage } from "@/components/smart-image";
 import { ArrowRight } from "./icons";
 import { GuideDocument } from "./guide-document";
 import { chapterIds, parseGuideContent, type GuideContent } from "@/lib/guide-content";
@@ -45,7 +45,7 @@ export function GuidePage({ initialContent }: { initialContent: GuideContent }) 
   return (
     <main id="main-content" className={`${styles.main} guide-page`}>
       <section className={styles.hero} aria-labelledby="guide-heading">
-        <Image className={styles.mapImage} src="/images/guide/guide-map.png" alt="山川、学校与小屋串联的新西兰游学准备地图" fill priority sizes="100vw" unoptimized />
+        <SmartImage className={styles.mapImage} src="/images/guide/guide-map" alt="山川、学校与小屋串联的新西兰游学准备地图" sizes="100vw" priority />
         <div className={styles.heroCopy}>
           <h1 id="guide-heading">游学攻略</h1>
           <p className={styles.heroSubtitle}>一张地图，走好游学的每一步。</p>
@@ -96,11 +96,6 @@ export function GuidePage({ initialContent }: { initialContent: GuideContent }) 
             <p className={styles.noteIntro}>GoalNZ 游学手记 <span>慢慢了解，认真准备。</span></p>
           </header>
           <GuideDocument doc={chapter.doc} />
-          <details className={styles.references}>
-            <summary>参考来源与更新记录</summary>
-            <p>内容更新：{data.updatedAt.slice(0, 10)}。学期、入学与签证安排请以官方及学校最新信息为准。</p>
-            <ul>{chapter.sources.map((source, index) => <li key={index}><a href={source.url} target="_blank" rel="noopener noreferrer">{source.title} ↗</a></li>)}</ul>
-          </details>
           <div className={styles.pageNumber}>— {number(active)} —</div>
         </article>
       </section>

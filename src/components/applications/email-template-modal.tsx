@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, Copy, Loader2, Mail, RefreshCw, X } from "lucide-react";
 import type { ApplicationItem } from "@/lib/applications";
+import { generateEmailWithAi } from "@/lib/ai-email";
 
 function buildRecipients(item: ApplicationItem): { text: string; hasEmail: boolean } {
   const emails = item.intendedSchools
@@ -29,14 +30,8 @@ export function EmailTemplateModal({ item, onClose }: Props) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/generate-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ item }),
-        signal,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "生成失败，请稍后重试");
+      // 静态托管无服务端，改为浏览器直连 CloudBase AI 网关（用登录用户 token 鉴权）。
+      const data = await generateEmailWithAi(item, signal);
       setSubject(data.subject ?? "");
       setBody(data.body ?? "");
     } catch (e: unknown) {

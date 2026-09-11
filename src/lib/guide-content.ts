@@ -2,8 +2,8 @@ export const chapterIds = ["understand", "schools", "prepare", "stay", "packing"
 export type ChapterId = (typeof chapterIds)[number];
 export type GuideMark = { type: string; attrs?: Record<string, unknown> };
 export type GuideNode = { type: string; text?: string; attrs?: Record<string, unknown>; marks?: GuideMark[]; content?: GuideNode[] };
-export type GuideChapter = { id: ChapterId; label: string; title: string; doc: GuideNode; sources: { title: string; url: string }[] };
-export type GuideContent = { version: 1; updatedAt: string; chapters: GuideChapter[] };
+export type GuideChapter = { id: ChapterId; label: string; title: string; doc: GuideNode };
+export type GuideContent = { version: 1; chapters: GuideChapter[] };
 
 export function safeLink(value: unknown): value is string {
   if (typeof value !== "string" || !value || value.length > 2048 || /[\s\\\u0000-\u001f]/.test(value)) return false;
@@ -109,14 +109,7 @@ export function parseGuideContent(input: unknown): GuideContent {
     if (chapter.id !== chapterIds[index]) throw new Error("章节顺序不正确。");
     const doc = node(chapter.doc);
     if (doc.type !== "doc") throw new Error("正文缺少文档节点。");
-    if (!Array.isArray(chapter.sources) || chapter.sources.length > 30) throw new Error("来源列表不正确。");
-    return { id: chapterIds[index], label: string(chapter.label, 20), title: string(chapter.title, 120), doc, sources: chapter.sources.map((s: unknown) => {
-      const source = record(s);
-      if (!safeLink(source.url) || !/^https?:/.test(source.url)) throw new Error("来源链接不正确。");
-      return { title: string(source.title, 160), url: source.url };
-    }) };
+    return { id: chapterIds[index], label: string(chapter.label, 20), title: string(chapter.title, 120), doc };
   });
-  const updatedAt = string(data.updatedAt, 40);
-  if (Number.isNaN(Date.parse(updatedAt))) throw new Error("更新日期不正确。");
-  return { version: 1, updatedAt, chapters };
+  return { version: 1, chapters };
 }

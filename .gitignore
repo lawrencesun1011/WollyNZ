@@ -18,6 +18,15 @@
 /.next-verify/
 /out/
 
+# 构建期生成的静态数据（由 scripts/prepare-static-data.mjs 从 data/ 生成）
+/public/api/
+
+# 构建期生成的 WebP 图片（源文件在 assets-src/images/，原图不部署）
+/public/images/**/*.png
+/public/images/**/*.jpg
+/public/images/**/*.jpeg
+/public/images/**/*.webp
+
 # production
 /build
 

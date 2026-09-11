@@ -63,6 +63,8 @@ interface CloudBaseAccessTokenInfo {
 
 const ENV_ID = process.env.NEXT_PUBLIC_CLOUDBASE_ENV_ID!;
 const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLOUDBASE_PUBLISHABLE_KEY!;
+// 地域：新加坡环境用 ap-singapore，国内环境用 ap-shanghai。默认 ap-shanghai 保持原有行为。
+const REGION = process.env.NEXT_PUBLIC_CLOUDBASE_REGION || "ap-shanghai";
 
 export interface AuthUser {
   uid: string;
@@ -154,7 +156,7 @@ export function initCloudBase(): CloudBaseAuth | null {
   app = cloudbase.init({
     env: ENV_ID,
     accessKey: PUBLISHABLE_KEY,
-    region: "ap-shanghai",
+    region: REGION,
   }) as unknown as CloudBaseApp;
   auth = app.auth();
   initialized = true;

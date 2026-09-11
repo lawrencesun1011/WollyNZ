@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from "react";
+import { SmartImage } from "@/components/smart-image";
 import { safeImage, safeLink, type GuideNode } from "@/lib/guide-content";
 import styles from "./guide.module.css";
 
@@ -32,7 +33,7 @@ function renderNode(node: GuideNode, key: number): ReactNode {
     case "tableRow": return <tr key={key}>{content}</tr>;
     case "tableHeader": return <th key={key} colSpan={Number(node.attrs?.colspan) || 1} rowSpan={Number(node.attrs?.rowspan) || 1}>{content}</th>;
     case "tableCell": return <td key={key} colSpan={Number(node.attrs?.colspan) || 1} rowSpan={Number(node.attrs?.rowspan) || 1}>{content}</td>;
-    case "image": return safeImage(node.attrs?.src) ? <figure key={key}><img src={node.attrs.src} alt={String(node.attrs?.alt || "")} loading="lazy" />{(node.attrs.caption || node.attrs.title) ? <figcaption>{String(node.attrs.caption || node.attrs.title)}</figcaption> : null}</figure> : null;
+    case "image": return safeImage(node.attrs?.src) ? <figure key={key}><SmartImage src={String(node.attrs.src)} alt={String(node.attrs?.alt || "")} />{(node.attrs.caption || node.attrs.title) ? <figcaption>{String(node.attrs.caption || node.attrs.title)}</figcaption> : null}</figure> : null;
     default: return <Fragment key={key}>{content}</Fragment>;
   }
 }

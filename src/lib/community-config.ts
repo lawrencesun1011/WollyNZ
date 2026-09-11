@@ -5,6 +5,6 @@ type CommunityConfig = {
 };
 
 export const communityConfig: CommunityConfig = {
-  qrCodeSrc: "/images/community/wechat-qrcode.png",
-  qrCodeDownloadName: "GoalNZ-家长社群二维码.png",
+  qrCodeSrc: "/images/community/wechat-qrcode",
+  qrCodeDownloadName: "GoalNZ-家长社群二维码.webp",
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { SmartImage } from "@/components/smart-image";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "@/components/editorial/icons";
 import { Artwork } from "@/components/editorial/artwork";
@@ -46,12 +46,13 @@ export default function HomePage() {
           </button>
         </div>
         <div className="hero-art relative mx-auto">
-          <Image
-            src="/images/storybook.webp"
+          <SmartImage
+            src="/images/storybook"
             alt="背着书包的小女孩与小羊并肩坐在立体书中的草坡上，望向新西兰雪山、湖泊和学校。"
             width={2087}
             height={754}
             priority
+            sizes="(max-width: 768px) 100vw, 1100px"
             className="h-auto w-full"
           />
         </div>

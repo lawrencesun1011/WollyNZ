@@ -1,6 +1,7 @@
 "use client";
 
 import { ReferenceArtwork } from "@/components/reference-artwork";
+import { SmartImage } from "@/components/smart-image";
 import { communityConfig } from "@/lib/community-config";
 import styles from "./community.module.css";
 
@@ -43,10 +44,10 @@ export function CommunityContent() {
 
         <div className={styles.qrArea}>
           <div className={styles.qrCard}>
-            {qrCodeSrc ? <img className={styles.qrImage} src={qrCodeSrc} alt="GoalNZ 家长社群二维码，请使用微信扫描" /> : <><InvitationMark /><p id="qr-unavailable">社群二维码待更新</p></>}
+            {qrCodeSrc ? <SmartImage className={styles.qrImage} src={qrCodeSrc} alt="GoalNZ 家长社群二维码，请使用微信扫描" /> : <><InvitationMark /><p id="qr-unavailable">社群二维码待更新</p></>}
           </div>
           <div className={styles.qrActions}>
-            {qrCodeSrc ? <a className={`${styles.qrButton} ${styles.saveQr}`} href={qrCodeSrc} download={communityConfig.qrCodeDownloadName}>保存二维码 <DownloadIcon /></a> : <button type="button" className={`${styles.qrButton} ${styles.saveQr}`} disabled aria-describedby="qr-unavailable">保存二维码 <DownloadIcon /></button>}
+            {qrCodeSrc ? <a className={`${styles.qrButton} ${styles.saveQr}`} href={`${qrCodeSrc}.webp`} download={communityConfig.qrCodeDownloadName}>保存二维码 <DownloadIcon /></a> : <button type="button" className={`${styles.qrButton} ${styles.saveQr}`} disabled aria-describedby="qr-unavailable">保存二维码 <DownloadIcon /></button>}
           </div>
         </div>
 
