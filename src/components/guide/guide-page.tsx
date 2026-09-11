@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } f
 import { SmartImage } from "@/components/smart-image";
 import { ArrowRight } from "./icons";
 import { GuideDocument } from "./guide-document";
-import { chapterIds, parseGuideContent, type GuideContent } from "@/lib/guide-content";
+import { chapterIds, type GuideContent } from "@/lib/guide-content";
 import { registerGuideReading } from "@/lib/guide-webmcp";
 import styles from "./guide.module.css";
 
@@ -12,19 +12,16 @@ const stops = [{ x: 17, y: 77 }, { x: 30, y: 60 }, { x: 47, y: 79 }, { x: 61, y:
 const number = (index: number) => String(index + 1).padStart(2, "0");
 
 export function GuidePage({ initialContent }: { initialContent: GuideContent }) {
-  const [data, setData] = useState(initialContent);
-  const currentContent = useRef(data);
-  useEffect(() => { currentContent.current = data; }, [data]);
-  useEffect(() => registerGuideReading(() => currentContent.current), []);
+  // 内容在构建时由 content/guide/*.md 解析得到，静态导出后不再需要运行时拉取
+  const data = initialContent;
+  useEffect(() => registerGuideReading(() => data), [data]);
   const [active, setActive] = useState(0);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const panel = useRef<HTMLElement>(null);
   useEffect(() => {
     const sync = () => { const index = chapterIds.indexOf(window.location.hash.slice(1) as typeof chapterIds[number]); setActive(index < 0 ? 0 : index); };
     sync(); window.addEventListener("hashchange", sync);
-    const controller = new AbortController();
-    fetch("/content/guide.json", { cache: "no-store", signal: controller.signal }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(value => setData(parseGuideContent(value))).catch(() => {});
-    return () => { window.removeEventListener("hashchange", sync); controller.abort(); };
+    return () => window.removeEventListener("hashchange", sync);
   }, []);
   function select(index: number, scroll = false, focus = false) {
     setActive(index);
@@ -68,7 +65,7 @@ export function GuidePage({ initialContent }: { initialContent: GuideContent }) 
           ))}
         </div>
       </section>
-      <div className={styles.mapMeta}><p>你的游学准备地图</p><p>当前章节 <b>{number(active)}</b> / 06</p></div>
+      <div className={styles.mapMeta}><p>您的游学准备地图</p><p>当前章节 <b>{number(active)}</b> / 06</p></div>
       <div className={styles.tabs} role="tablist" aria-label="游学攻略章节">
         {data.chapters.map((item, index) => (
           <button
