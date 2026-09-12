@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, KeyRound, ShieldCheck, RotateCcw } from "lucide-react";
 import { sendEmailCode, signInWithEmailCode } from "@/lib/auth";
+import { buttonCls } from "@/components/form-ui";
 
 /** 登录独立页面：邮箱 + 验证码同屏，居中卡片布局。 */
 export default function LoginPage() {
@@ -93,7 +94,7 @@ export default function LoginPage() {
 
   return (
     <div className="accom-editorial flex min-h-screen flex-col items-center justify-start bg-bg px-4 pb-20 pt-24">
-      <div className="w-full max-w-md rounded-[20px] border border-[#789491]/30 bg-white p-7 shadow-[--shadow-2] animate-fade-up">
+      <div className="w-full max-w-md rounded-3xl border border-(--color-rule)/30 bg-white p-7 shadow-lg animate-fade-up">
         <div className="mb-5">
           <h1 className="text-xl font-bold text-ink">登录</h1>
           <p className="mt-1 text-sm text-caption">
@@ -102,7 +103,7 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded-[--radius-sm] bg-error/10 px-3 py-2 text-sm text-error">
+          <div className="mb-4 rounded-(--radius-sm) bg-error/10 px-3 py-2 text-sm text-error">
             {error}
           </div>
         )}
@@ -114,7 +115,7 @@ export default function LoginPage() {
               邮箱
             </span>
             <div className="flex items-center gap-2">
-              <div className="flex h-11 flex-1 items-center gap-2 rounded-[--radius-sm] border border-stroke bg-white px-3">
+              <div className="flex h-11 flex-1 items-center gap-2 rounded-(--radius-sm) border border-stroke bg-white px-3">
                 <Mail className="h-4 w-4 shrink-0 text-caption" />
                 <input
                   ref={emailRef}
@@ -131,7 +132,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={handleSend}
                 disabled={busy || !validEmail || cooldown > 0}
-                className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-[--radius-sm] border border-[#789491]/50 px-3 text-sm font-medium text-ink transition-colors hover:bg-[#f5f1e8] disabled:cursor-not-allowed disabled:opacity-50"
+                className={buttonCls("secondary", "sm", "h-11 shrink-0 gap-1.5 border-(--color-rule)/50 px-3 hover:bg-(--color-paper-hover)")}
               >
                 {sending ? (
                   "发送中…"
@@ -153,7 +154,7 @@ export default function LoginPage() {
               验证码
             </span>
             <div
-              className={`flex h-11 items-center gap-2 rounded-[--radius-sm] border bg-white px-3 transition-colors ${
+              className={`flex h-11 items-center gap-2 rounded-(--radius-sm) border bg-white px-3 transition-colors ${
                 sent ? "border-stroke" : "border-stroke/50 opacity-60"
               }`}
             >
@@ -180,13 +181,13 @@ export default function LoginPage() {
             type="button"
             onClick={handleVerify}
             disabled={busy || !sent}
-            className="h-11 w-full rounded-[--radius-sm] bg-primary font-medium text-white transition-colors hover:bg-primary-hover disabled:opacity-60"
+            className={buttonCls("primary", "md", "h-11 w-full")}
           >
             {verifying ? "登录中…" : "登录"}
           </button>
         </div>
 
-        <div className="mt-5 flex items-start gap-2 rounded-[--radius-sm] bg-bg-soft/60 px-3 py-2.5 text-xs text-caption">
+        <div className="mt-5 flex items-start gap-2 rounded-(--radius-sm) bg-bg-soft/60 px-3 py-2.5 text-xs text-caption">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <span>
             登录后数据将同步至云端，支持跨设备查看。

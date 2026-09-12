@@ -26,7 +26,7 @@ export function SchoolCardList({
 }: Props) {
   if (schools.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-primary/20 bg-white/50 py-20 text-center">
+      <div className="flex flex-col items-center justify-center rounded-surface border border-dashed border-primary/20 bg-white/50 py-20 text-center">
         <SearchX className="h-8 w-8 text-ink-soft" />
         <p className="mt-4 text-base font-medium text-ink">没有符合条件的学校</p>
         <p className="mt-1 text-sm text-ink-soft">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { buttonCls } from "@/components/form-ui";
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -43,7 +44,7 @@ export function ConfirmDialog({
 
   return (
     <div
-      className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/40 p-4 animate-fade-up"
+      className="fixed inset-0 z-(--z-confirm) flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm animate-overlay"
       onClick={() => {
         if (!pending) onCancel();
       }}
@@ -52,7 +53,7 @@ export function ConfirmDialog({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="bg-paper w-full max-w-sm rounded-2xl border border-stroke p-5 shadow-xl"
+        className="bg-paper w-full max-w-sm rounded-surface border border-stroke p-5 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-base font-semibold text-ink">{title}</h2>
@@ -65,7 +66,7 @@ export function ConfirmDialog({
             type="button"
             disabled={pending}
             onClick={onCancel}
-            className="rounded-lg px-3 py-2 text-sm text-ink-soft transition-colors hover:bg-primary/5 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+            className={buttonCls("ghost", "sm")}
           >
             {cancelText}
           </button>
@@ -73,7 +74,7 @@ export function ConfirmDialog({
             type="button"
             disabled={pending}
             onClick={onConfirm}
-            className="rounded-lg bg-error/10 px-3 py-2 text-sm font-semibold text-error transition-colors hover:bg-error/15 disabled:cursor-not-allowed disabled:opacity-50"
+            className={buttonCls("ghost", "sm", "bg-error/10 font-semibold text-error hover:bg-error/15")}
           >
             {confirmText}
           </button>

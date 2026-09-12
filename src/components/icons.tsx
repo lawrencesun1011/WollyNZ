@@ -2,10 +2,10 @@ import type { SVGProps } from "react";
 
 type Props = SVGProps<SVGSVGElement>;
 export function ArrowUpRight(props: Props) {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}><path d="M6 18 18 6M6 6h12v12" /></svg>;
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}><path d="M6 18 18 6M6 6h12v12" /></svg>;
 }
 export function ArrowRight(props: Props) {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}><path d="M4 12h16m-7-7 7 7-7 7" /></svg>;
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}><path d="M4 12h16m-7-7 7 7-7 7" /></svg>;
 }
 export function Heart(props: Props) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}><path d="M20.6 4.9a5.5 5.5 0 0 0-7.8 0l-.8.8-.8-.8a5.5 5.5 0 0 0-7.8 7.8L12 21l8.6-8.3a5.5 5.5 0 0 0 0-7.8Z" /></svg>;
@@ -17,7 +17,7 @@ export function Close(props: Props) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true" {...props}><path d="m6 6 12 12M6 18 18 6" /></svg>;
 }
 export function LambMark(props: Props) {
-  return <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+  return <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
     <circle cx="26" cy="26" r="24" />
     <path d="M17 24c-5-4-9 0-5 4 1 1 3 1 5 0m18-4c5-4 9 0 5 4-1 1-3 1-5 0" />
     <path d="M17 24c-3-3-1-7 3-7 0-4 5-5 7-2 3-3 7-1 7 2 4 0 6 5 2 8l-2 9c-1 5-14 5-16 0Z" />

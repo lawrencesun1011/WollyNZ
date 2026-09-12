@@ -1,10 +1,9 @@
-import { Loader2 } from "lucide-react";
+import { LoadingState } from "@/components/ui/states";
 
 export default function SchoolsLoading() {
   return (
-    <div className="flex min-h-[100svh] flex-col items-center justify-center gap-3 text-ink-soft">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      <p className="text-sm">加载中…</p>
+    <div className="flex min-h-[100svh] items-center justify-center">
+      <LoadingState />
     </div>
   );
 }

@@ -396,7 +396,7 @@ export function AccommodationForm({
 
   if (saved) {
     return (
-      <div className="space-y-6 rounded-2xl border border-stroke bg-bg p-6 text-center">
+      <div className="space-y-6 rounded-surface border border-stroke bg-bg p-6 text-center">
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
           <Check className="h-8 w-8 text-success" />
         </div>
@@ -470,7 +470,7 @@ export function AccommodationForm({
           )}
 
           {needAuth && !user?.email && (
-            <div className="mt-3 rounded-lg border border-stroke/40 bg-white p-4">
+            <div className="mt-3 rounded-surface border border-stroke/40 bg-white p-4">
               <p className="mb-2 flex items-center gap-2 text-sm text-ink">
                 <Mail className="h-4 w-4 text-primary" />
                 验证码已发送至 <span className="font-medium">{email}</span>
@@ -547,7 +547,7 @@ export function AccommodationForm({
                     className="fixed inset-0 z-20"
                     onClick={() => setCalOpen(false)}
                   />
-                  <div className="relative z-30 rounded-2xl border border-stroke bg-white p-4 shadow-xl">
+                  <div className="relative z-30 rounded-surface border border-stroke bg-white p-4 shadow-lg">
                     <DateRangeCalendar
                       start={calRange.start}
                       end={calRange.end}
@@ -641,7 +641,7 @@ export function AccommodationForm({
 
           {/* 儿童年龄 */}
           {form.children > 0 && (
-            <div className="space-y-2.5 rounded-2xl border border-stroke bg-white p-4">
+            <div className="space-y-2.5 rounded-surface border border-stroke bg-white p-4">
               <SectionTitle title="儿童年龄" required />
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {Array.from({ length: form.children }, (_, i) => (

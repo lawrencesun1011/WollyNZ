@@ -45,7 +45,7 @@ export function GuidePage({ initialContent }: { initialContent: GuideContent }) 
         <SmartImage className={styles.mapImage} src="/images/guide/guide-map" alt="山川、学校与小屋串联的新西兰游学准备地图" sizes="100vw" priority />
         <div className={styles.heroCopy}>
           <h1 id="guide-heading">游学攻略</h1>
-          <p className={styles.heroSubtitle}>一张地图，走好游学的每一步。</p>
+          <h2 className={styles.heroSubtitle}>一张地图，走好游学的每一步。</h2>
           <p className={styles.heroDescription}>从初步了解，到安心出发，跟着六个章节逐步准备。</p>
         </div>
         <div className={styles.stops} aria-label="游学准备路线">
@@ -101,11 +101,11 @@ export function GuidePage({ initialContent }: { initialContent: GuideContent }) 
         <div>
           {active > 0 && <button type="button" className={styles.previous} onClick={() => select(active - 1, true)}>← 上一章</button>}
           {active < 5 ? (
-            <button type="button" className="primary-button inline-flex items-center justify-center gap-3" onClick={() => select(active + 1, true)}>
+            <button type="button" className="primary-button" onClick={() => select(active + 1, true)}>
               下一章：{data.chapters[active + 1].label} <ArrowRight />
             </button>
           ) : (
-            <button type="button" className="primary-button inline-flex items-center justify-center gap-3" onClick={() => select(0, true)}>
+            <button type="button" className="primary-button" onClick={() => select(0, true)}>
               回到第一章 <ArrowRight />
             </button>
           )}

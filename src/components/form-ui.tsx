@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 
 /** 输入框 / 下拉框统一基类：圆角 7px 风、描边、聚焦变主色、禁用态。 */
 const controlBase =
-  "w-full rounded-xl border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors hover:border-primary/40 focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft disabled:opacity-70";
+  "w-full rounded-control border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors hover:border-primary/40 focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft disabled:opacity-70";
 
 /** 文本 / 日期等输入框。error 时加红色描边。 */
 export function inputCls(error?: string) {
@@ -74,23 +74,74 @@ export function SectionTitle({
   );
 }
 
-/* 按钮：编辑风深湖绿，统一 20px（与全局 .accom-editorial .bg-primary 一致）；
-   调用处如需 shrink-0 / flex-1 等布局类，自行追加即可。 */
-export const primaryBtnCls =
-  "inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-[20px] font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60";
+/* ============================================================
+   按钮：唯一来源（3 变体 × 2 尺寸）
+   · md：主操作 —— 16px，min-height 44px
+   · sm：行内操作 —— 15px（text-sm），min-height 36px
+   统一圆角（rounded-control = 12px）、统一焦点环与禁用态。
+   调用处如需 shrink-0 / flex-1 / w-full 等布局类，自行追加。
+   新代码请直接用 buttonCls()；下方常量仅为兼容既有调用点。
+   ============================================================ */
+export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonSize = "md" | "sm" | "xs";
 
-export const secondaryBtnCls =
-  "inline-flex items-center justify-center gap-1.5 rounded-xl border border-stroke px-4 py-2.5 text-[20px] font-medium text-ink transition-colors hover:bg-primary/5 disabled:opacity-60";
+const buttonBase =
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-control transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-60";
 
-export const ghostBtnCls =
-  "inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-[20px] font-medium text-ink-soft transition-colors hover:bg-primary/5 disabled:opacity-60";
+const buttonSizes: Record<ButtonSize, string> = {
+  md: "min-h-11 px-5 py-2.5 text-base",
+  sm: "min-h-9 px-4 py-2 text-sm",
+  xs: "min-h-8 px-3 py-1.5 text-xs",
+};
 
-/* 小号按钮（14px）：内联语境操作，如「验证 / 确认 / 日历确定 / 导入心愿单」。 */
-export const primaryBtnSmCls =
-  "inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60";
+const buttonVariants: Record<ButtonVariant, string> = {
+  primary: "bg-primary font-semibold text-white hover:bg-primary/90",
+  secondary: "border border-stroke font-medium text-ink hover:bg-primary/5",
+  ghost: "font-medium text-ink-soft hover:bg-primary/5",
+};
 
-export const secondaryBtnSmCls =
-  "inline-flex items-center justify-center gap-1.5 rounded-xl border border-stroke px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-primary/5 disabled:opacity-60";
+/** 组合按钮类名，例：buttonCls("primary", "sm")。 */
+export function buttonCls(
+  variant: ButtonVariant = "primary",
+  size: ButtonSize = "md",
+  extra?: string,
+) {
+  return cn(buttonBase, buttonSizes[size], buttonVariants[variant], extra);
+}
 
-export const ghostBtnSmCls =
-  "inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-primary/5 disabled:opacity-60";
+/* 兼容既有调用点的常量别名。 */
+export const primaryBtnCls = buttonCls("primary", "md");
+export const secondaryBtnCls = buttonCls("secondary", "md");
+export const ghostBtnCls = buttonCls("ghost", "md");
+export const primaryBtnSmCls = buttonCls("primary", "sm");
+export const secondaryBtnSmCls = buttonCls("secondary", "sm");
+export const ghostBtnSmCls = buttonCls("ghost", "sm");
+
+/* 图标按钮（仅图标，无文字）：圆形，用于关闭 / 前后翻页 / 移除等。
+   尺寸由调用处指定，默认 h-9 w-9。 */
+export function iconBtnCls(size = "h-9 w-9", extra?: string) {
+  return cn(
+    "inline-flex items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+    size,
+    extra,
+  );
+}
+
+/* 药丸标签 / 筛选 chip（可带激活态）。 */
+export function chipCls(active = false, extra?: string) {
+  return cn(
+    "inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+    active
+      ? "border-primary bg-primary/10 text-primary"
+      : "border-stroke bg-white text-ink hover:border-primary/40 hover:text-primary",
+    extra,
+  );
+}
+
+/* 下拉 / 菜单项（整行可点，用于用户菜单、页眉下拉等）。 */
+export function menuItemCls(extra?: string) {
+  return cn(
+    "flex w-full items-center gap-2 rounded-control px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-(--color-paper-hover)",
+    extra,
+  );
+}

@@ -20,23 +20,23 @@ function ApplyAccommodationInner() {
 
   return (
     <div className="accom-editorial min-h-screen bg-bg">
-      <div className="mx-auto w-full max-w-5xl px-6 py-8 md:px-10 md:py-12">
+      <div className="mx-auto w-full max-w-(--width-form) py-8 md:py-12 px-(--page-gutter)">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-[clamp(26px,3.4vw,40px)] font-bold leading-tight tracking-tight text-ink">
+          <h1 className="text-h1 font-bold leading-tight tracking-tight text-ink">
             {title}
           </h1>
           <button
             type="button"
             onClick={back}
-            className="flex items-center gap-1 text-sm font-medium text-primary underline underline-offset-4 transition-colors hover:text-[#b44427]"
+            className="flex items-center gap-1 text-sm font-medium text-primary underline underline-offset-4 transition-colors hover:text-(--color-accent)"
           >
             <ChevronLeft className="h-4 w-4" />
             返回住宿意向
           </button>
         </div>
 
-        <div className="rounded-lg border border-[#789491]/50 bg-white p-6 shadow-sm md:p-10">
-          <p className="mb-6 rounded-lg border border-[#789491]/40 bg-white px-4 py-3 text-sm text-ink-soft">
+        <div className="rounded-surface border border-(--color-rule)/50 bg-white p-6 shadow-sm md:p-10">
+          <p className="mb-6 rounded-surface border border-(--color-rule)/40 bg-white px-4 py-3 text-sm text-ink-soft">
             提交您的需求后，我们会匹配合作的物业公司资源；如有合适房源，将主动与您联系。
           </p>
           <AccommodationForm

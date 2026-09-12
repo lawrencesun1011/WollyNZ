@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { CalendarDays, Mail, Pencil, School, Trash2, Users } from "lucide-react";
 import {
+  APPLICATION_STATUS_META,
   getEffectiveStatus,
   studyPeriodToString,
   updateApplication,
   type ApplicationItem,
 } from "@/lib/applications";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { EmailTemplateModal } from "./email-template-modal";
 
 interface Props {
@@ -19,25 +21,16 @@ interface Props {
 export function ApplicationCard({ item, onRemove, onEdit }: Props) {
   const [showEmail, setShowEmail] = useState(false);
   const status = getEffectiveStatus(item);
-  const statusBadge =
-    status === "draft"
-      ? { label: "草稿", cls: "border border-[#789491]/40 bg-[#eef0ea] text-ink-soft" }
-      : status === "closed"
-        ? { label: "已结束", cls: "border border-ink/20 bg-ink/5 text-ink-soft" }
-        : { label: "已提交", cls: "border border-[#b44427]/30 bg-[#f0ddd0] text-[#b44427]" };
+  const statusMeta = APPLICATION_STATUS_META[status];
 
   return (
     <>
-      <div className="animate-fade-up flex flex-col rounded-lg border border-[#789491]/50 bg-white p-4 shadow-sm">
+      <div className="animate-fade-up flex flex-col rounded-surface border border-(--color-rule)/50 bg-white p-4 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <h3 className="truncate text-base font-semibold text-ink">
             {item.parentTitle || "未填写称呼"}
           </h3>
-          <span
-            className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadge.cls}`}
-          >
-            {statusBadge.label}
-          </span>
+          <StatusBadge tone={statusMeta.tone}>{statusMeta.label}</StatusBadge>
         </div>
 
         <div className="mt-3 flex items-center gap-2 text-sm text-ink-soft">
@@ -65,7 +58,7 @@ export function ApplicationCard({ item, onRemove, onEdit }: Props) {
             <button
               type="button"
               onClick={() => setShowEmail(true)}
-              className="flex-1 rounded-lg border border-[#789491]/50 py-2 text-sm text-ink transition-colors hover:bg-[#f5f1e8]"
+              className="flex-1 rounded-control border border-(--color-rule)/50 py-2 text-sm text-ink transition-colors hover:bg-(--color-paper-hover)"
             >
               查看详情
             </button>
@@ -73,7 +66,7 @@ export function ApplicationCard({ item, onRemove, onEdit }: Props) {
             <button
               type="button"
               onClick={() => onEdit(item.id)}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-control bg-primary py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
             >
               <Pencil className="h-3.5 w-3.5" />
               继续编辑
@@ -83,7 +76,7 @@ export function ApplicationCard({ item, onRemove, onEdit }: Props) {
               <button
                 type="button"
                 onClick={() => setShowEmail(true)}
-                className="flex-1 rounded-lg border border-[#789491]/50 py-2 text-sm text-ink transition-colors hover:bg-[#f5f1e8]"
+                className="flex-1 rounded-control border border-(--color-rule)/50 py-2 text-sm text-ink transition-colors hover:bg-(--color-paper-hover)"
               >
                 查看详情
               </button>
@@ -92,7 +85,7 @@ export function ApplicationCard({ item, onRemove, onEdit }: Props) {
                   type="button"
                   onClick={() => onEdit(item.id)}
                   aria-label="编辑"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#789491]/50 text-ink-soft transition-colors hover:bg-[#f5f1e8] hover:text-ink"
+                  className="flex h-9 w-9 items-center justify-center rounded-control border border-(--color-rule)/50 text-ink-soft transition-colors hover:bg-(--color-paper-hover) hover:text-ink"
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
@@ -104,7 +97,7 @@ export function ApplicationCard({ item, onRemove, onEdit }: Props) {
               type="button"
               onClick={() => onRemove(item.id)}
               aria-label="移除申请"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#789491]/50 text-ink-soft transition-colors hover:bg-[#f5f1e8] hover:text-[#b44427]"
+              className="flex h-9 w-9 items-center justify-center rounded-control border border-(--color-rule)/50 text-ink-soft transition-colors hover:bg-(--color-paper-hover) hover:text-(--color-accent)"
             >
               <Trash2 className="h-4 w-4" />
             </button>

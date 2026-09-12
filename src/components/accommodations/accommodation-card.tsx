@@ -1,5 +1,7 @@
 "use client";
 
+import { useEscapeKey } from "@/components/ui/use-escape";
+
 import { useState } from "react";
 import { Baby, Bath, Bed, CalendarDays, CircleDollarSign, Home, Mail, Pencil, Trash2, Users, X } from "lucide-react";
 import {
@@ -7,6 +9,7 @@ import {
   getEffectiveStatus,
   type AccommodationItem,
 } from "@/lib/accommodation";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 function formatDate(d: string) {
   if (!d) return "";
@@ -22,18 +25,17 @@ interface Props {
 
 export function AccommodationCard({ item, onRemove, onEdit }: Props) {
   const [detail, setDetail] = useState(false);
+  useEscapeKey(() => setDetail(false));
   const status = ACCOMMODATION_STATUS_META[getEffectiveStatus(item)];
 
   return (
     <>
-      <div className="animate-fade-up flex flex-col rounded-lg border border-[#789491]/50 bg-white p-4 shadow-sm">
+      <div className="animate-fade-up flex flex-col rounded-surface border border-(--color-rule)/50 bg-white p-4 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <h3 className="truncate text-base font-semibold text-ink">
             {item.name || "未填写称呼"}
           </h3>
-          <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${status.className}`}>
-            {status.label}
-          </span>
+          <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
         </div>
 
         <div className="mt-3 flex items-center gap-2 text-sm text-ink-soft">
@@ -80,7 +82,7 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
             <button
               type="button"
               onClick={() => setDetail(true)}
-              className="flex-1 rounded-lg border border-[#789491]/50 py-2 text-sm text-ink transition-colors hover:bg-[#f5f1e8]"
+              className="flex-1 rounded-control border border-(--color-rule)/50 py-2 text-sm text-ink transition-colors hover:bg-(--color-paper-hover)"
             >
               查看详情
             </button>
@@ -88,7 +90,7 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
             <button
               type="button"
               onClick={() => onEdit(item.id)}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-control bg-primary py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
             >
               <Pencil className="h-3.5 w-3.5" />
               继续编辑
@@ -97,7 +99,7 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
             <button
               type="button"
               onClick={() => setDetail(true)}
-              className="flex-1 rounded-lg border border-[#789491]/50 py-2 text-sm text-ink transition-colors hover:bg-[#f5f1e8]"
+              className="flex-1 rounded-control border border-(--color-rule)/50 py-2 text-sm text-ink transition-colors hover:bg-(--color-paper-hover)"
             >
               查看详情
             </button>
@@ -107,7 +109,7 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
               type="button"
               onClick={() => onRemove(item.id)}
               aria-label="移除意向"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#789491]/50 text-ink-soft transition-colors hover:bg-[#f5f1e8] hover:text-[#b44427]"
+              className="flex h-9 w-9 items-center justify-center rounded-control border border-(--color-rule)/50 text-ink-soft transition-colors hover:bg-(--color-paper-hover) hover:text-(--color-accent)"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -117,14 +119,14 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
 
       {detail && (
         <div
-          className="animate-overlay fixed inset-0 z-[1200] flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm"
+          className="animate-overlay fixed inset-0 z-(--z-modal) flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm"
           onClick={() => setDetail(false)}
         >
           <div
-            className="animate-fade-up relative max-h-[90vh] w-[460px] max-w-full overflow-y-auto rounded-lg border border-[#789491]/50 bg-white shadow-2xl scroll-thin"
+            className="animate-fade-up relative max-h-[90vh] w-[460px] max-w-full overflow-y-auto rounded-surface border border-(--color-rule)/50 bg-white shadow-lg scroll-thin"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-[#789491]/50 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-(--color-rule)/50 px-5 py-4">
               <h3 className="flex items-center gap-2 text-lg font-bold text-ink">
                 <Home className="h-5 w-5 text-ink" />
                 住宿意向详情
@@ -133,16 +135,14 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
                 type="button"
                 onClick={() => setDetail(false)}
                 aria-label="关闭"
-                className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-[#f5f1e8] hover:text-ink"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-(--color-paper-hover) hover:text-ink"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="space-y-4 px-5 py-5 text-sm">
               <Row label="系统状态">
-                <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${status.className}`}>
-                  {status.label}
-                </span>
+                <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
               </Row>
               <Row label="联系邮箱">
                 <span className="flex items-center gap-1.5 text-ink">
@@ -193,7 +193,7 @@ export function AccommodationCard({ item, onRemove, onEdit }: Props) {
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-[#789491]/40 pb-3 last:border-0">
+    <div className="flex items-start justify-between gap-4 border-b border-(--color-rule)/40 pb-3 last:border-0">
       <span className="shrink-0 text-ink-soft">{label}</span>
       <span className="text-right text-ink">{children}</span>
     </div>

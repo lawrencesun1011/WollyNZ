@@ -31,7 +31,7 @@
   --color-error: #d97e72;
   --color-info: #5ba3c4;
 
-  --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", -apple-system, "Segoe UI", system-ui, sans-serif;
 
   /* 全站正文基准：保留紧凑感，但避免 12–14px 文字显得吃力 */
   --text-xs: 0.8125rem;            /* 13px */
@@ -40,16 +40,37 @@
   --text-sm--line-height: 1.45rem;
   --text-base: 1rem;               /* 16px */
   --text-base--line-height: 1.7rem;
+  --text-2xs: 0.75rem;
+  --text-2xs--line-height: 1rem;
+  --text-hero: clamp(48px, 5vw, 68px);
+  --text-hero--line-height: 1.2;
+  --text-h1: clamp(28px, 3.6vw, 42px);
+  --text-h1--line-height: 1.25;
+  --text-h2: clamp(22px, 2.8vw, 32px);
+  --text-h2--line-height: 1.35;
+  /* Hero 导语 / 说明（标题下的第三行）：16 → 20px */
+  --text-lead: clamp(1rem, 1.6vw, 1.25rem);
+  --text-lead--line-height: 1.75;
 
-  /* 圆角 */
-  --radius-sm: 0.75rem;   /* 12px */
-  --radius-md: 1.25rem;   /* 20px */
-  --radius-lg: 1.75rem;   /* 28px */
-  --radius-card: 1.25rem;
+  /* 圆角：两级语义刻度（组件按角色选用，不要再直接写尺码类）
+       control → 交互控件：按钮 / 输入框 / 下拉触发器 / 菜单项 / 图标底座
+       surface → 承载容器：卡片 / 面板 / 弹窗 / 浮层 / 空态 / 提示条
+     通用尺码保持单调：sm 8 → md 10 → lg/xl 12 → 2xl 16 → 3xl 20 */
+  --radius-sm: 0.5rem;    /* 8px  */
+  --radius-md: 0.625rem;  /* 10px */
+  --radius-lg: 0.75rem;   /* 12px */
+  --radius-3xl: 1.25rem;  /* 20px */
 
-  /* 阴影（柔和绿色投影） */
-  --shadow-1: 0 4px 16px rgba(40, 126, 110, 0.1);
-  --shadow-2: 0 12px 30px rgba(40, 126, 110, 0.18);
+  --radius-control: 0.75rem; /* 12px —— 控件 */
+  --radius-surface: 1rem;    /* 16px —— 容器 */
+
+  /* 阴影阶梯（品牌绿 tint，3 档）—— 覆盖 Tailwind 默认的中性黑阴影，避免两套并存
+       sm → 卡片 / 面板静止态
+       md → 浮层 / 下拉 / tooltip / 卡片 hover 抬升
+       lg → 弹窗 / 模态 */
+  --shadow-sm: 0 1px 2px rgba(40, 126, 110, 0.06), 0 2px 8px rgba(40, 126, 110, 0.06);
+  --shadow-md: 0 4px 16px rgba(40, 126, 110, 0.1);
+  --shadow-lg: 0 12px 30px rgba(40, 126, 110, 0.18);
 }
 
 /* 编辑风（Editorial / Storybook）专用 token。
@@ -59,6 +80,10 @@
   --color-paper: #f9f6f0;
   --color-rule: #789491;
   --color-accent: #b44427;
+  --color-accent-soft: #f0ddd0;
+  --color-paper-hover: #eeeede;
+  --color-neutral-soft: #eef0ea;
+  --color-stroke-strong: #537770;
   --font-editorial: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
 }
 
@@ -68,6 +93,13 @@
 
 html {
   scroll-behavior: smooth;
+}
+
+/* 全站焦点环基线：任何可聚焦交互元素默认都有可见焦点反馈。
+   用 :where() 保持 0 特异性，已有的更具体焦点样式（.editorial、按钮基元等）仍可覆盖。 */
+:where(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 body {
@@ -130,7 +162,7 @@ body {
   font-size: 0.9375rem;
   line-height: 1.5;
   color: var(--color-ink);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
 }
 .input::placeholder {
   color: var(--color-caption);
@@ -191,7 +223,7 @@ textarea.input {
   justify-content: center;
   width: 26px;
   height: 26px;
-  transition: transform 0.12s ease, filter 0.12s ease;
+  transition: transform var(--dur-fast) ease, filter var(--dur-fast) ease;
 }
 
 .map-pin svg {
@@ -220,17 +252,17 @@ textarea.input {
   bottom: calc(100% + 8px);
   left: 50%;
   padding: 4px 10px;
-  border-radius: 8px;
-  background: #2e9e8c;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
   color: #fff;
-  font-size: 12px;
+  font-size: var(--text-2xs);
   font-weight: 600;
   line-height: 1.2;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(46, 158, 140, 0.28);
+  box-shadow: 0 4px 12px rgba(40, 126, 110, 0.28);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.12s ease;
+  transition: opacity var(--dur-fast) ease;
   transform: translateX(-50%);
 }
 .map-pin-wrap:hover .map-pin-tip,
@@ -245,7 +277,7 @@ textarea.input {
   width: 0;
   height: 0;
   border: 4px solid transparent;
-  border-top-color: #2e9e8c;
+  border-top-color: var(--color-primary);
   content: "";
   transform: translateX(-50%);
 }
@@ -268,23 +300,23 @@ textarea.input {
 .map-cluster--sm {
   width: 34px;
   height: 34px;
-  font-size: 12px;
-  background: rgba(46, 158, 140, 0.6);
-  box-shadow: 0 0 0 6px rgba(46, 158, 140, 0.2);
+  font-size: var(--text-2xs);
+  background: rgba(40, 126, 110, 0.6);
+  box-shadow: 0 0 0 6px rgba(40, 126, 110, 0.2);
 }
 .map-cluster--md {
   width: 44px;
   height: 44px;
-  font-size: 13px;
-  background: rgba(46, 158, 140, 0.7);
-  box-shadow: 0 0 0 8px rgba(46, 158, 140, 0.2);
+  font-size: var(--text-xs);
+  background: rgba(40, 126, 110, 0.7);
+  box-shadow: 0 0 0 8px rgba(40, 126, 110, 0.2);
 }
 .map-cluster--lg {
   width: 54px;
   height: 54px;
-  font-size: 14px;
-  background: rgba(46, 158, 140, 0.8);
-  box-shadow: 0 0 0 10px rgba(46, 158, 140, 0.2);
+  font-size: var(--text-sm);
+  background: rgba(40, 126, 110, 0.8);
+  box-shadow: 0 0 0 10px rgba(40, 126, 110, 0.2);
 }
 
 /* ── popup 卡片 ── */
@@ -297,13 +329,13 @@ textarea.input {
   top: 2px;
   right: 6px;
   padding: 0 4px;
-  font-size: 18px;
+  font-size: var(--text-lg);
   line-height: 1;
   color: #94a3b8;
   background: transparent;
 }
 .school-popup .maplibregl-popup-close-button:hover {
-  color: #2e9e8c;
+  color: var(--color-primary);
   background: transparent;
 }
 
@@ -318,7 +350,7 @@ textarea.input {
 }
 .popup-card__title {
   flex: 1;
-  font-size: 15px;
+  font-size: var(--text-sm);
   font-weight: 600;
   line-height: 1.4;
   color: #000;
@@ -328,7 +360,7 @@ textarea.input {
   align-items: center;
   gap: 4px;
   margin-top: 4px;
-  font-size: 12px;
+  font-size: var(--text-2xs);
   color: #888;
 }
 .popup-ic {
@@ -336,7 +368,7 @@ textarea.input {
   width: 14px;
   height: 14px;
   flex-shrink: 0;
-  color: #2e9e8c;
+  color: var(--color-primary);
 }
 .popup-ic svg {
   display: block;
@@ -354,7 +386,7 @@ textarea.input {
   color: #94a3b8;
 }
 .popup-ic--r {
-  margin-left: 3px;
+  margin-left: 4px;
 }
 .popup-card__tags {
   display: flex;
@@ -363,11 +395,11 @@ textarea.input {
   margin-top: 10px;
 }
 .popup-chip {
-  padding: 3px 10px;
+  padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(46, 158, 140, 0.08);
-  color: #2e9e8c;
-  font-size: 12px;
+  background: rgba(40, 126, 110, 0.08);
+  color: var(--color-primary);
+  font-size: var(--text-2xs);
   font-weight: 500;
   line-height: 1.5;
 }
@@ -381,39 +413,43 @@ textarea.input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   padding: 6px 8px;
-  font-size: 12px;
+  font-size: var(--text-2xs);
   font-weight: 500;
   line-height: 1.2;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   text-decoration: none;
-  transition: background-color 0.15s ease, color 0.15s ease,
-    border-color 0.15s ease;
+  transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease;
+}
+.popup-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 .popup-btn--solid {
-  background: #2e9e8c;
+  background: var(--color-primary);
   color: #fff;
-  border: 1px solid #2e9e8c;
-  box-shadow: 0 1px 2px rgba(46, 158, 140, 0.15);
+  border: 1px solid var(--color-primary);
+  box-shadow: 0 1px 2px rgba(40, 126, 110, 0.15);
 }
 .popup-btn--solid:hover {
-  background: #258a7a;
+  background: var(--color-primary-hover);
 }
 .popup-btn--compare {
   background: #fff;
   color: #6b7280;
-  border: 1px solid rgba(46, 158, 140, 0.2);
+  border: 1px solid rgba(40, 126, 110, 0.2);
 }
 .popup-btn--compare:hover {
-  background: rgba(46, 158, 140, 0.05);
-  color: #2e9e8c;
+  background: rgba(40, 126, 110, 0.05);
+  color: var(--color-primary);
 }
 .popup-btn--compare.is-on {
-  background: rgba(46, 158, 140, 0.05);
-  color: #2e9e8c;
-  border-color: #2e9e8c;
+  background: rgba(40, 126, 110, 0.05);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 .popup-btn--favorite {
   border: 1px solid #d1d5db;
@@ -428,19 +464,19 @@ textarea.input {
   stroke: #6b7280;
 }
 .popup-btn--favorite.is-on {
-  background: #fef2f2;
-  color: #ef4444;
-  border-color: #ef4444;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 .popup-btn--favorite.is-on .popup-ic--fav {
-  fill: #ef4444;
-  color: #ef4444;
+  fill: var(--color-accent);
+  color: var(--color-accent);
 }
 .popup-btn--favorite.is-on .popup-ic--fav svg {
-  fill: #ef4444 !important;
+  fill: var(--color-accent) !important;
 }
 .popup-btn--favorite.is-on .popup-ic--fav svg path {
-  stroke: #ef4444;
+  stroke: var(--color-accent);
 }
 .popup-check {
   display: inline-flex;
@@ -459,8 +495,8 @@ textarea.input {
   color: transparent;
 }
 .popup-btn--compare.is-on .popup-check {
-  background: #2e9e8c;
-  border-color: #2e9e8c;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 .popup-btn--compare.is-on .popup-check .popup-ic {
   color: #fff;
@@ -488,11 +524,29 @@ textarea.input {
 }
 
 .animate-fade-up {
-  animation: 0.4s ease-out both fadeUp;
+  animation: var(--dur-slow) ease-out both fadeUp;
 }
 
 .animate-overlay {
-  animation: 0.25s ease-out both overlayIn;
+  animation: var(--dur-base) ease-out both overlayIn;
+}
+
+/* 浮层（下拉 / 菜单 / 小面板）入场：自触发点方向轻微下滑淡入。
+   修复：user-menu / favorites-popover 此前引用了未定义的 animate-popover（死类），
+   导致这两个浮层实际没有任何入场动画。 */
+@keyframes popoverIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-popover {
+  animation: var(--dur-fast) ease-out both popoverIn;
 }
 
 /* 轻量服务页模板：住宿、社群等转化型页面共用同一版式语言 */
@@ -534,18 +588,18 @@ textarea.input {
 .service-panel {
   border: 1px solid rgba(255, 255, 255, 0.72);
   background: rgba(255, 255, 255, 0.7);
-  box-shadow: var(--shadow-1);
+  box-shadow: var(--shadow-md);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
 
 .service-panel-hover {
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  transition: transform var(--dur-base) ease, box-shadow var(--dur-base) ease, border-color var(--dur-base) ease;
 }
 
 .service-panel-hover:hover {
   border-color: rgba(40, 126, 110, 0.26);
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-lg);
   transform: translateY(-3px);
 }
 
@@ -560,11 +614,10 @@ textarea.input {
   --color-primary: #16433a;
   --color-stroke: #c7d1c8;
   --color-border: #c7d1c8;
-  --color-warning: #b44427;
+  --color-warning: var(--color-accent);
   --color-bg: #f9f6f0;
   background: var(--color-paper);
   color: var(--color-ink);
-  font-family: var(--font-editorial);
   -webkit-font-smoothing: antialiased;
 }
 .guide-article {
@@ -578,7 +631,7 @@ textarea.input {
 .guide-article h1 {
   font-family: var(--font-editorial);
   color: #06262b;
-  font-size: clamp(32px, 4.4vw, 46px);
+  font-size: var(--text-h1);
   line-height: 1.18;
   letter-spacing: -0.02em;
   font-weight: 700;
@@ -586,7 +639,7 @@ textarea.input {
 .guide-article h2 {
   font-family: var(--font-editorial);
   color: #102e2c;
-  font-size: clamp(23px, 2.8vw, 30px);
+  font-size: var(--text-h2);
   font-weight: 700;
   letter-spacing: 0.01em;
   border-bottom: 1px solid var(--color-rule);
@@ -596,7 +649,7 @@ textarea.input {
 .guide-article h3 {
   font-family: var(--font-editorial);
   color: #102e2c;
-  font-size: 21px;
+  font-size: var(--text-xl);
   font-weight: 700;
 }
 .guide-article li::marker {
@@ -610,16 +663,12 @@ textarea.input {
 .guide-page .service-eyebrow {
   border: 1px solid var(--color-rule);
   background: transparent;
-  color: #b44427;
+  color: var(--color-accent);
   letter-spacing: 0.14em;
 }
 /* 图片框改用规则线描边 */
 .guide-article .my-6.overflow-hidden {
   border-color: var(--color-rule) !important;
-}
-/* 提示框圆角统一 */
-.guide-article .rounded-xl.border {
-  border-radius: 10px;
 }
 /* 目录对齐编辑风 */
 .guide-toc {
@@ -649,7 +698,6 @@ textarea.input {
   min-height: 100vh;
   background: var(--color-paper);
   color: #102e2c;
-  font-family: var(--font-editorial);
   -webkit-font-smoothing: antialiased;
   /* —— token 重映射 —— */
   --color-ink: #102e2c;
@@ -663,42 +711,27 @@ textarea.input {
   --color-bg: #f9f6f0;
   --color-bg-soft: #eef0ea;
   --color-rule: #789491;
-  --color-warning: #b44427;
-  --color-error: #b44427;
+  --color-warning: var(--color-accent);
+  --color-error: var(--color-accent);
   --color-success: #5bab8e;
 }
 
 /* 表单 / 账户页（登录 · 申请 · 我的）与编辑风主站统一字号刻度：
    标题收口到 T2 / T3，正文收口到 T4（16px），主按钮对齐 20px。
    用 .accom-editorial 后代选择器（特异性高于页面内 Tailwind text-* 工具类）一次性收口。 */
-.accom-editorial h1 { font-size: clamp(30px, 3.5vw, 40px); line-height: 1.3; font-weight: 700; }
-.accom-editorial h2 { font-size: 21px; line-height: 1.45; font-weight: 700; }
+.accom-editorial h1 { font-size: var(--text-h1); line-height: 1.3; font-weight: 700; }
+.accom-editorial h2 { font-size: var(--text-xl); line-height: 1.45; font-weight: 700; }
 @layer base {
   /* 表单/账户页默认正文 16px（T4）、h3 区块标题 21px（T3）；
      放入 base 层，使页面内的 Tailwind text-* 工具类能正常覆盖字号
      （此前未分层会强制压住 h3/正文上的 text-* 类）。 */
-  .accom-editorial p { font-size: 16px; line-height: 1.7; }
-  .accom-editorial h3 { font-size: 21px; line-height: 1.5; font-weight: 700; }
+  .accom-editorial p { font-size: var(--text-base); line-height: 1.7; }
+  .accom-editorial h3 { font-size: var(--text-xl); line-height: 1.5; font-weight: 700; }
 }
-.accom-editorial .bg-primary { font-size: 20px; }
-
-/* 主按钮：编辑风深湖绿渐变 + 7px 圆角。
-   .bg-primary 在两页中仅用于真实按钮（提交 / 新建 / 继续编辑），
-   不影响输入框或图标底纹。 */
-.accom-editorial .bg-primary {
-  background-color: transparent;
-  background-image: linear-gradient(115deg, #16433a, #123d34);
-  border: 1px solid #16433a;
-  border-radius: 7px;
-  box-shadow: inset 0 1px 1px #ffffff15;
-  transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
-}
-.accom-editorial .bg-primary:hover {
-  background-color: transparent;
-  background-image: linear-gradient(115deg, #245044, #1c4a3e);
-  box-shadow: 0 5px 15px #123d341b;
-  transform: translateY(-1px);
-}
+/* 按钮统一由 form-ui 的按钮基元（buttonCls，3 变体 × 2 尺寸）决定。
+   此处原先用后代选择器把 .bg-primary 重写成「渐变 + 7px 圆角」按钮，
+   属于分散实现，已移除；按钮颜色随 .accom-editorial 重映射后的
+   --color-primary（深湖绿）自动适配。 */
 
 /* ============================================================
    编辑风首页体系 (Editorial / Storybook)
@@ -710,14 +743,65 @@ textarea.input {
 /* Header 保持 fixed，高度随断点变化，由 main 的 padding-top 让位 */
 :root {
   --header-height: 80px;
+
+  /* ── 布局栅格：容器宽度档位（唯一来源）── */
+  --width-page: 1440px;    /* 页眉 / 页脚 / 首页 / 攻略（满宽版面） */
+  --width-work: 1400px;    /* 工作台：找学校 / 找幼儿园（地图 + 列表并置） */
+  --width-content: 1280px; /* 常规内容区：住宿 / 社群 / 我的申请 / 我的住宿 */
+  --width-form: 1024px;    /* 表单页：申请 / 住宿申请 */
+  --width-narrow: 720px;   /* 窄内容：登录 / 单列内容 */
+
+  /* 内容区左右留白。全站（内容 + 页眉页脚 + CSS 模块页）统一引用它，
+     这样任何视口下三者的文字左边界都在同一条竖线上。
+     此前攻略用 padding 38/24/16px、住宿社群用 width 44/32/22/16px，
+     两套断点不同，导致 1368px 以下各页 Hero 文字错位最多 22px。 */
+  --page-gutter: 44px;
+
+  /* ── 全局层级表（浮层）──
+     局部层叠（同一容器内的 z-10/20/30/50）不在表内，按需就地使用。 */
+  --z-sticky: 100;   /* 吸顶小控件（地图工具栏） */
+  --z-map: 500;      /* 地图图例 / 底图切换 */
+  --z-header: 900;   /* 页眉 / 对比条 */
+  --z-modal: 1000;   /* 弹窗 / 模态 */
+  --z-popover: 1100; /* 下拉 / 浮层 */
+  --z-confirm: 2000; /* 二次确认（最高） */
+
+  /* ── 动效时长（三段）──
+     fast → 微反馈：popover 入场 / hover
+     base → 常规：遮罩淡入 / 面板切换
+     slow → 版面级：页面区块入场 */
+  --dur-fast: 160ms;
+  --dur-base: 250ms;
+  --dur-slow: 400ms;
+}
+
+@media (max-width: 1100px) {
+  :root { --page-gutter: 32px; }
+}
+@media (max-width: 767px) {
+  :root { --page-gutter: 22px; }
+}
+@media (max-width: 359px) {
+  :root { --page-gutter: 16px; }
 }
 
 .editorial {
   background: var(--color-paper);
   color: #102e2c;
-  font-family: var(--font-editorial);
   -webkit-font-smoothing: antialiased;
 }
+
+/* 叙事字体（衬线）只走「页面级大标题」：h1 / h2。
+   h3 及以下（表单区块标题、卡片小标题）随正文用无衬线——它们与字段标签是同级视觉，
+   若用衬线会出现「同一张表单里标签是黑体、小标题却是宋体」的割裂。
+   正文、控件、元信息与数字同样继承 body 的无衬线栈。
+   例外：攻略长文正文内的 .guide-article h3 有独立声明，保留衬线以维持文章调性。 */
+.editorial h1, .editorial h2,
+.guide-page h1, .guide-page h2,
+.accom-editorial h1, .accom-editorial h2 {
+  font-family: var(--font-editorial);
+}
+
 .editorial button,
 .editorial a {
   -webkit-tap-highlight-color: transparent;
@@ -735,7 +819,7 @@ textarea.input {
 /* 找学校功能区的字体：沿用游学计划模板（微软雅黑 / 苹方无衬线栈），
    仅作用于功能区，footer 仍保留 .editorial 衬线。 */
 .schools-func {
-  font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+  font-family: var(--font-sans);
   line-height: 1.55;
 }
 
@@ -748,15 +832,15 @@ textarea.input {
   overflow: clip;
 }
 .page-width {
-  width: calc(100% - 44px);
+  width: calc(100% - var(--page-gutter) * 2);
   margin-inline: auto;
 }
 
 /* 内容区统一宽度：与找住宿 / 加入社群的 .page 同一套体系。
    用于首页内容区块与游学攻略，页眉页脚仍用 .page-width（1440 体系）。 */
 .content-width {
-  width: calc(100% - 88px);
-  max-width: 1280px;
+  width: calc(100% - var(--page-gutter) * 2);
+  max-width: var(--width-content);
   margin-inline: auto;
 }
 
@@ -772,19 +856,19 @@ textarea.input {
   margin-right: 40px;
 }
 .nav-link {
-  font-size: 19px;
+  font-size: var(--text-lg);
   font-weight: 600;
   text-decoration-color: transparent;
   text-underline-offset: 6px;
-  transition: color 0.2s, text-decoration-color 0.2s;
+  transition: color var(--dur-base), text-decoration-color var(--dur-base);
   white-space: nowrap;
 }
 .nav-link:hover {
-  color: #b44427;
+  color: var(--color-accent);
   text-decoration: underline;
 }
 .nav-link[data-active="true"] {
-  color: #b44427;
+  color: var(--color-accent);
   text-decoration: underline;
 }
 .icon-button {
@@ -793,16 +877,20 @@ textarea.input {
   height: 45px;
   align-items: center;
   justify-content: center;
-  border: 1px solid #537770;
+  border: 1px solid var(--color-stroke-strong);
   border-radius: 50%;
   background: var(--color-paper);
-  color: #113d34;
+  color: var(--color-ink);
   box-shadow: inset 0 1px 2px #fff8;
-  transition: background 0.2s, transform 0.2s;
+  transition: background var(--dur-base), transform var(--dur-base);
 }
 .icon-button:hover {
-  background: #eeeede;
+  background: var(--color-paper-hover);
   transform: translateY(-1px);
+}
+.icon-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
 }
 .icon-button svg {
   width: 24px;
@@ -820,52 +908,77 @@ textarea.input {
   justify-content: center;
   padding: 0 5px;
   border-radius: 999px;
-  background: #b44427;
+  background: var(--color-accent);
   color: #faf8ee;
-  font: 600 11px/1 system-ui, sans-serif;
+  font: 600 var(--text-2xs)/1 var(--font-sans);
 }
 
 /* ── Hero ── */
 .hero-copy {
-  padding-top: 39px;
+  padding-top: 40px;
 }
 .hero-eyebrow {
-  font-size: 23px;
+  font-family: var(--font-editorial);
+  font-size: var(--text-2xl);
   line-height: 1.5;
   font-weight: 600;
   letter-spacing: 0.14em;
 }
 .hero h1 {
-  margin: 9px 0 14px;
-  font-size: clamp(48px, 5vw, 68px);
+  margin: 8px 0 14px;
+  font-size: var(--text-hero);
   line-height: 1.25;
   letter-spacing: -0.035em;
   font-weight: 700;
   color: #102e2c;
 }
 .hero-description {
-  font-size: 20px;
+  font-size: var(--text-lead);
   line-height: 1.65;
   letter-spacing: 0.05em;
 }
+/* 编辑风主按钮：沿用墨绿渐变（本主题配色），
+   尺寸 / 圆角与 form-ui 按钮基元对齐（16px / 12px / 44px）。 */
 .primary-button {
+  /* 编辑风主按钮：全站唯一定义点。
+     尺寸 / 圆角 / 字号对齐 form-ui 的 buttonCls("primary","md")：44px / 12px / 16px。
+     此前 accommodation.module.css 与 community.module.css 各手写了一份几乎相同的副本，
+     且每个调用点还要重复补 inline-flex/items-center/justify-center/gap —— 现全部内聚到这里。 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   min-width: 162px;
-  min-height: 46px;
+  min-height: 44px;
   padding: 10px 24px;
   border: 1px solid #16433a;
-  border-radius: 7px;
+  border-radius: var(--radius-control);
   background: linear-gradient(115deg, #16433a, #123d34);
   color: #faf8ee;
-  font-size: 20px;
+  font-size: var(--text-base);
+  font-weight: 600;
   line-height: 1.2;
-  letter-spacing: 0.035em;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  white-space: nowrap;
   box-shadow: inset 0 1px 1px #ffffff15;
-  transition: background 0.25s, box-shadow 0.25s, transform 0.25s;
+  transition: background var(--dur-base), box-shadow var(--dur-base), transform var(--dur-base);
+}
+.primary-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 .primary-button:hover {
   background: #245044;
   box-shadow: 0 5px 15px #123d341b;
   transform: translateY(-1px);
+}
+.primary-button:disabled {
+  cursor: not-allowed;
+  border-color: transparent;
+  background: #b4c2be;
+  box-shadow: none;
+  transform: none;
 }
 .primary-button svg {
   width: 22px;
@@ -873,7 +986,7 @@ textarea.input {
   flex-shrink: 0;
 }
 .hero .primary-button {
-  margin-top: 13px;
+  margin-top: 12px;
 }
 .hero-art {
   width: 100%;
@@ -893,7 +1006,7 @@ textarea.input {
   gap: 20px;
 }
 .section-heading h2 {
-  font-size: clamp(25px, 3.2vw, 38px);
+  font-size: var(--text-h2);
   font-weight: 700;
   line-height: 1.45;
   letter-spacing: 0.02em;
@@ -913,7 +1026,7 @@ textarea.input {
 }
 .entry-art {
   height: clamp(110px, 11.6vw, 165px);
-  margin-bottom: 7px;
+  margin-bottom: 8px;
 }
 .artwork {
   display: block;
@@ -944,23 +1057,23 @@ textarea.input {
   width: min(220px, 85%);
 }
 .entry-number {
-  font: 500 20px/1.5 Georgia, serif;
+  font: 500 var(--text-xl)/1.5 var(--font-editorial);
 }
 .entry h3 {
-  font-size: 30px;
+  font-size: var(--text-h2);
   font-weight: 700;
   line-height: 1.5;
 }
 .entry p {
   margin-top: 1px;
-  font-size: 18px;
+  font-size: var(--text-lg);
   line-height: 1.65;
   letter-spacing: 0.025em;
 }
 .entry-arrow {
   width: 27px;
   height: 27px;
-  margin-top: 9px;
+  margin-top: 8px;
   margin-bottom: 2px;
 }
 
@@ -970,7 +1083,7 @@ textarea.input {
   grid-template-columns: 27% 1fr auto;
   align-items: center;
   min-height: 135px;
-  padding: 13px 47px 13px 0;
+  padding: 12px 48px 12px 0;
 }
 .community-art {
   height: 100%;
@@ -1001,27 +1114,22 @@ textarea.input {
   padding: 0 24px 0 44px;
 }
 .community h2 {
-  font-size: clamp(23px, 2.6vw, 31px);
+  font-size: var(--text-h2);
   font-weight: 700;
   line-height: 1.45;
   letter-spacing: -0.035em;
 }
 .community p {
-  font-size: 20px;
+  font-size: var(--text-xl);
   margin-top: 5px;
   line-height: 1.4;
-}
-.community-button {
-  min-width: 143px;
-  font-size: 18px;
-  padding-inline: 18px;
 }
 
 /* ── 页脚 ── */
 .site-footer {
   background: var(--color-paper);
   color: #102e2c;
-  border-top: 1px solid #789491;
+  border-top: 1px solid var(--color-rule);
 }
 .footer-main {
   display: grid;
@@ -1035,18 +1143,18 @@ textarea.input {
 .footer-brand {
   display: inline-block;
   color: #102e2c;
-  font: 600 27px/1.25 Georgia, "Times New Roman", serif;
+  font: 600 27px/1.25 var(--font-editorial);
   letter-spacing: -0.7px;
 }
 .footer-about p {
   margin-top: 12px;
-  font-size: 15px;
+  font-size: var(--text-sm);
   line-height: 1.85;
 }
 .footer-nav h2 {
   margin-bottom: 5px;
   color: #102e2c;
-  font-size: 16px;
+  font-size: var(--text-base);
   line-height: 1.7;
   font-weight: 700;
 }
@@ -1055,7 +1163,7 @@ textarea.input {
   display: inline-flex;
   align-items: center;
   min-height: 34px;
-  font-size: 15px;
+  font-size: var(--text-sm);
   line-height: 1.6;
   text-align: left;
 }
@@ -1063,11 +1171,11 @@ textarea.input {
 .footer-nav button {
   text-decoration-color: transparent;
   text-underline-offset: 4px;
-  transition: color 0.2s, text-decoration-color 0.2s;
+  transition: color var(--dur-base), text-decoration-color var(--dur-base);
 }
 .site-footer a:hover,
 .footer-nav button:hover {
-  color: #b44427;
+  color: var(--color-accent);
   text-decoration: underline;
 }
 .footer-bottom {
@@ -1079,7 +1187,7 @@ textarea.input {
   justify-content: space-between;
   gap: 12px 30px;
   padding: 16px 26px;
-  font-size: 13px;
+  font-size: var(--text-xs);
   line-height: 1.8;
 }
 .footer-bottom-inner > p:first-child {
@@ -1099,7 +1207,7 @@ textarea.input {
   background: #16433a;
   color: #fff;
   padding: 12px 18px;
-  border-radius: 5px;
+  border-radius: var(--radius-control);
 }
 .skip-link:focus {
   transform: translateY(0);
@@ -1121,9 +1229,6 @@ textarea.input {
   }
 }
 @media (max-width: 1100px) {
-  .content-width {
-    width: calc(100% - 64px);
-  }
 }
 @media (max-width: 1000px) {
   .site-header {
@@ -1135,7 +1240,7 @@ textarea.input {
     gap: 24px;
   }
   .hero-description {
-    font-size: 18px;
+    font-size: var(--text-lg);
   }
   .hero-art {
     margin-top: -38px;
@@ -1144,40 +1249,29 @@ textarea.input {
     padding-inline: 16px;
   }
   .entry h3 {
-    font-size: 26px;
+    font-size: var(--text-2xl);
   }
   .entry p {
-    font-size: 16px;
+    font-size: var(--text-base);
   }
   .community {
     padding-right: 16px;
     grid-template-columns: 26% 1fr auto;
   }
   .community-copy {
-    padding-left: 25px;
+    padding-left: 24px;
     padding-right: 16px;
   }
   .community h2 {
-    font-size: 24px;
+    font-size: var(--text-2xl);
   }
   .community p {
-    font-size: 16px;
+    font-size: var(--text-base);
   }
-  .community-button {
-    min-width: auto;
-    font-size: 16px;
-    padding-inline: 12px;
   }
-}
 @media (max-width: 767px) {
   :root {
     --header-height: 104px;
-  }
-  .page-width {
-    width: calc(100% - 36px);
-  }
-  .content-width {
-    width: calc(100% - 44px);
   }
   .site-header {
     min-height: 104px;
@@ -1187,7 +1281,7 @@ textarea.input {
     padding: 10px 0 8px;
   }
   .account-actions {
-    gap: 9px;
+    gap: 8px;
     margin-left: auto;
   }
   .icon-button {
@@ -1207,41 +1301,42 @@ textarea.input {
     gap: 16px;
   }
   .nav-link {
-    font-size: 15px;
+    font-size: var(--text-sm);
   }
   .hero-copy {
     padding-top: 32px;
   }
   .hero-eyebrow {
-    font-size: 16px;
+    font-size: var(--text-base);
     letter-spacing: 0.13em;
   }
   .hero h1 {
     font-size: clamp(38px, 9vw, 54px);
-    margin-top: 13px;
-    margin-bottom: 13px;
+    margin-top: 12px;
+    margin-bottom: 12px;
     line-height: 1.25;
     letter-spacing: -0.035em;
   }
   .hero-description {
-    font-size: 14px;
+    font-size: var(--text-sm);
     letter-spacing: 0.005em;
   }
   .hero .primary-button {
-    min-height: 43px;
+    /* 仅收窄宽度；高度与字号保持全站主按钮同一规格（44px / 16px）。
+       此前把小屏字号放大到 var(--text-lg)=18px，导致手机端首页按钮
+       反而比其它页面的主按钮大一圈。 */
     min-width: 139px;
-    font-size: 17px;
     margin-top: 18px;
   }
   .hero-art {
     width: 128%;
     max-width: none;
     margin-left: -14%;
-    margin-top: 7px;
+    margin-top: 8px;
     margin-bottom: 15px;
   }
   .section-heading {
-    padding: 17px 0;
+    padding: 16px 0;
     gap: 8px;
   }
   .section-heading h2 {
@@ -1261,7 +1356,7 @@ textarea.input {
     grid-template-rows: auto auto auto;
     text-align: left;
     padding: 22px 2px;
-    column-gap: 19px;
+    column-gap: 20px;
     align-content: center;
   }
   .entry-art {
@@ -1282,16 +1377,16 @@ textarea.input {
   .entry-number {
     grid-column: 2;
     align-self: end;
-    font-size: 16px;
+    font-size: var(--text-base);
   }
   .entry h3 {
     grid-column: 2;
-    font-size: 24px;
+    font-size: var(--text-2xl);
     line-height: 1.5;
   }
   .entry p {
     grid-column: 2;
-    font-size: 13px;
+    font-size: var(--text-xs);
     margin: 0;
     letter-spacing: -0.03em;
     line-height: 1.7;
@@ -1320,76 +1415,57 @@ textarea.input {
   }
   .community-copy {
     grid-column: 2;
-    padding-left: 19px;
+    padding-left: 20px;
     padding-right: 0;
     border-left: 0;
     z-index: 1;
   }
   .community h2 {
     max-width: 235px;
-    font-size: 22px;
+    font-size: var(--text-xl);
     line-height: 1.5;
     text-wrap: balance;
   }
   .community p {
-    font-size: 14px;
-    margin-top: 9px;
+    font-size: var(--text-sm);
+    margin-top: 8px;
   }
-  .community-button {
-    grid-column: 2;
-    justify-self: start;
-    margin: 17px 0 0 19px;
-    font-size: 14px;
-    min-height: 39px;
-    padding: 9px 13px;
-    z-index: 1;
-  }
-  .community-button svg {
-    width: 18px;
-    height: 18px;
-  }
-  .footer-main {
+      .footer-main {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 25px 24px;
-    padding: 32px 0 27px;
+    gap: 24px 24px;
+    padding: 32px 0 28px;
   }
   .footer-about {
     grid-column: 1 / -1;
     max-width: 460px;
   }
   .footer-brand {
-    font-size: 26px;
+    font-size: var(--text-2xl);
   }
   .footer-about p {
     margin-top: 10px;
-    font-size: 14px;
+    font-size: var(--text-sm);
   }
   .footer-nav h2 {
-    font-size: 15px;
+    font-size: var(--text-sm);
   }
   .footer-nav a,
   .footer-nav button {
     min-height: 44px;
-    font-size: 14px;
+    font-size: var(--text-sm);
   }
   .footer-bottom-inner {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
-    padding: 17px 0 21px;
-    font-size: 12px;
+    padding: 16px 0 20px;
+    font-size: var(--text-2xs);
   }
   .footer-sources {
     text-align: left;
   }
 }
 @media (max-width: 359px) {
-  .page-width {
-    width: calc(100% - 28px);
-  }
-  .content-width {
-    width: calc(100% - 32px);
-  }
   .main-nav {
     gap: 12px;
   }
@@ -1404,7 +1480,7 @@ textarea.input {
     width: 108px;
   }
   .entry p {
-    font-size: 12px;
+    font-size: var(--text-2xs);
   }
   .hero h1 {
     font-size: 41px;

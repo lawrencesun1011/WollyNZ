@@ -26,7 +26,7 @@ const ENGLISH_LEVELS = [
   "初级（能听懂简单指令，会说日常短句）",
   "中级（能进行基础对话，读懂简单故事）",
   "中高级（表达较流利，能讨论复杂话题）",
-  "高级（听说读写熟练，接近母语国家同龄孩子）",
+  "高级（听说读写熟练，接近母语国家同龄学生）",
   "流利/接近母语。（表达自如，无语言障碍）",
 ];
 
@@ -247,8 +247,9 @@ export function ApplicationForm({
     // schoolsData 为异步加载（ECE 库），缺此依赖会导致数据到达后建议不刷新
   }, [schoolInput, schools, schoolsData]);
 
-  const childWord = ece ? "孩子" : "学生";
-  const studentTitle = (n: number) => `${childWord}${n}信息`;
+  // 幼儿园与中小学统一使用「学生」称呼（此前幼儿园为「孩子」）。
+  const studentWord = "学生";
+  const studentTitle = (n: number) => `${studentWord}${n}信息`;
 
   function validate(): boolean {
     const e: Record<string, string> = {};
@@ -484,7 +485,7 @@ export function ApplicationForm({
         )}
 
         {needAuth && !user?.email && (
-          <div className="mt-3 rounded-lg border border-stroke/40 bg-white p-4">
+          <div className="mt-3 rounded-surface border border-stroke/40 bg-white p-4">
             <p className="mb-2 flex items-center gap-2 text-sm text-ink">
               <Mail className="h-4 w-4 text-ink" />
               验证码已发送至 <span className="font-medium">{email}</span>
@@ -614,7 +615,7 @@ export function ApplicationForm({
                   disabled={locked}
                   className="text-xs text-ink-soft hover:text-error disabled:opacity-50"
                 >
-                  删除该{childWord}
+                  删除该{studentWord}
                 </button>
               </div>
             )}
@@ -673,14 +674,14 @@ export function ApplicationForm({
 
       {/* ⑤ 游学时间 */}
       <Section title="计划游学时间" required>
-        <div className="mb-2 inline-flex rounded-xl border border-stroke p-1 text-sm">
+        <div className="mb-2 inline-flex rounded-control border border-stroke p-1 text-sm">
           {(["exact", "fuzzy"] as StudyTimeMode[]).map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => setTimeMode(m)}
               disabled={locked}
-              className={`rounded-lg px-3 py-1.5 transition-colors ${
+              className={`rounded-control px-3 py-1.5 transition-colors ${
                 timeMode === m ? "bg-primary text-white" : "text-ink-soft hover:text-primary"
               }`}
             >
@@ -697,7 +698,7 @@ export function ApplicationForm({
               type="button"
               onClick={() => !locked && setCalendarOpen((v) => !v)}
               disabled={locked}
-              className={`flex w-full items-center justify-between gap-2 rounded-xl border bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors hover:border-primary/40 focus:border-primary ${
+              className={`flex w-full items-center justify-between gap-2 rounded-control border bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors hover:border-primary/40 focus:border-primary ${
                 errors.time ? "border-error" : "border-stroke"
               }`}
             >
@@ -714,7 +715,7 @@ export function ApplicationForm({
             {calendarOpen && (
               <div className="absolute left-0 right-0 z-30 mt-2">
                 <div className="fixed inset-0 z-20" onClick={() => setCalendarOpen(false)} />
-                <div className="relative z-30 rounded-lg border border-stroke/50 bg-white p-4 shadow-xl">
+                <div className="relative z-30 rounded-surface border border-stroke/50 bg-white p-4 shadow-lg">
                   <DateRangeCalendar
                     start={exStart}
                     end={exEnd}
@@ -814,7 +815,7 @@ export function ApplicationForm({
               className={inputCls(errors.schools)}
             />
             {schoolSuggestOpen && suggest.length > 0 && (
-              <div className="absolute left-0 right-0 top-[48px] z-20 max-h-52 overflow-y-auto rounded-xl border border-stroke bg-white shadow-lg scroll-thin">
+              <div className="absolute left-0 right-0 top-[48px] z-20 max-h-52 overflow-y-auto rounded-surface border border-stroke bg-white shadow-md scroll-thin">
                 {suggest.map((s) => (
                   <button
                     key={s.id}

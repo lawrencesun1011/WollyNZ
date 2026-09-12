@@ -4,6 +4,7 @@ import { useMemo, useState, useRef, useEffect } from "react";
 import type { SchoolFrontend, Filters } from "@/lib/types";
 import { uniqueSorted } from "@/lib/filters";
 import { Search, X, ChevronDown } from "lucide-react";
+import { buttonCls, chipCls } from "@/components/form-ui";
 import { NorthIslandIcon } from "./north-island-icon";
 import { SouthIslandIcon } from "./south-island-icon";
 
@@ -184,16 +185,16 @@ const AUTHORITY_TREE: TreeNode[] = [
 
 /* 统一筛选按钮样式（参考图的 pill 样式） */
 const filterBtn =
-  "inline-flex items-center gap-2 rounded-lg border border-stroke bg-white px-4 py-2 text-sm text-ink-soft transition-all hover:border-stroke hover:text-ink outline-none cursor-pointer select-none whitespace-nowrap";
+  buttonCls("secondary", "sm", "cursor-pointer select-none");
 
 /* ── 字段说明小问号（hover 弹出 tooltip） ── */
 function FilterHelpTip({ text }: { text: string }) {
   return (
     <span className="group relative inline-flex">
-      <span className="flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-stroke text-[10px] font-semibold text-caption transition-colors group-hover:border-primary group-hover:text-primary">
+      <span className="flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-stroke text-2xs font-semibold text-caption transition-colors group-hover:border-primary group-hover:text-primary">
         ?
       </span>
-      <span className="pointer-events-none absolute bottom-full right-0 z-30 mb-2 hidden w-80 max-w-[80vw] whitespace-pre-line break-words rounded-lg bg-primary px-3.5 py-2.5 text-left text-[13px] leading-relaxed text-white shadow-lg group-hover:block">
+      <span className="pointer-events-none absolute bottom-full right-0 z-30 mb-2 hidden w-80 max-w-[80vw] whitespace-pre-line break-words rounded-surface bg-primary px-3.5 py-2.5 text-left text-xs leading-relaxed text-white shadow-md group-hover:block">
         {text}
       </span>
     </span>
@@ -209,7 +210,7 @@ function FilterSearch({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className={`flex items-center gap-2 rounded-lg border border-stroke bg-white px-4 py-2 ${value ? "border-primary/40 ring-1 ring-primary/10" : ""}`}>
+    <div className={`flex items-center gap-2 rounded-control border border-stroke bg-white px-4 py-2 ${value ? "border-primary/40 ring-1 ring-primary/10" : ""}`}>
       <Search className="h-4 w-4 shrink-0 text-caption" />
       <input
         type="text"
@@ -268,7 +269,7 @@ function FilterSelect({
         )}
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 min-w-[180px] max-h-[260px] overflow-y-auto rounded-xl border border-stroke bg-white py-1 shadow-lg">
+        <div className="absolute left-0 top-full z-50 mt-1 min-w-[180px] max-h-[260px] overflow-y-auto rounded-surface border border-stroke bg-white py-1 shadow-md">
           {options.map((o) => (
             <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false); }}
               className={`block w-full px-4 py-2 text-left text-sm ${o.value === value ? "bg-primary/8 font-medium text-primary" : "text-ink-soft hover:bg-bg-soft"}`}
@@ -318,7 +319,7 @@ function FilterCity({
         )}
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 w-[240px] overflow-hidden rounded-xl border border-stroke bg-white shadow-lg">
+        <div className="absolute left-0 top-full z-50 mt-1 w-[240px] overflow-hidden rounded-surface border border-stroke bg-white shadow-md">
           <div className="flex items-center gap-2 border-b border-stroke px-3 py-2">
             <Search className="h-3.5 w-3.5 shrink-0 text-caption" />
             <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="搜索城市..." autoFocus
@@ -327,7 +328,7 @@ function FilterCity({
           <div className="max-h-[220px] overflow-y-auto p-1.5">
             {filteredCities.map((c) => (
               <button key={c} type="button" onClick={() => { onChange([c]); setQuery(""); setOpen(false); }}
-                className={`block w-full rounded-lg px-3 py-2 text-left text-sm ${cities.includes(c) ? "bg-primary/8 font-medium text-primary" : "text-ink-soft hover:bg-bg-soft"}`}
+                className={`block w-full rounded-control px-3 py-2 text-left text-sm ${cities.includes(c) ? "bg-primary/8 font-medium text-primary" : "text-ink-soft hover:bg-bg-soft"}`}
               >
                 {c}
               </button>
@@ -405,7 +406,7 @@ function TreeFilter({
         )}
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 max-h-[320px] min-w-[260px] overflow-y-auto rounded-xl border border-stroke bg-white p-4 shadow-lg">
+        <div className="absolute left-0 top-full z-50 mt-1 max-h-[320px] min-w-[260px] overflow-y-auto rounded-surface border border-stroke bg-white p-4 shadow-md">
           {tree.map((parent) => (
             <div key={parent.value} className="mb-4 last:mb-0">
               <label className="flex cursor-pointer items-center gap-2.5 py-1 font-semibold text-sm text-primary">
@@ -503,7 +504,7 @@ function FilterDistrict({
         )}
       </button>
       {open && !disabled && (
-        <div className="absolute left-0 top-full z-50 mt-1 max-h-64 w-[240px] overflow-auto rounded-xl border border-stroke bg-white p-2 shadow-lg">
+        <div className="absolute left-0 top-full z-50 mt-1 max-h-64 w-[240px] overflow-auto rounded-surface border border-stroke bg-white p-2 shadow-md">
           {groups ? (
             groups.map((g) => {
               const allOn = g.suburbs.length > 0 && g.suburbs.every((s) => suburbs.includes(s));
@@ -519,7 +520,7 @@ function FilterDistrict({
                       className="h-4 w-4 rounded border-stroke accent-primary"
                     />
                     <span className="text-xs font-semibold text-primary">{g.label}</span>
-                    <span className="text-[11px] text-caption">{g.suburbs.length}</span>
+                    <span className="text-2xs text-caption">{g.suburbs.length}</span>
                   </label>
                   <div className="pl-3">
                     {g.suburbs.map((sub) => (
@@ -642,13 +643,13 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
   }, []);
 
   return (
-    <div className="rounded-2xl border border-stroke bg-white p-5 shadow-sm">
+    <div className="rounded-surface border border-stroke bg-white p-5 shadow-sm">
       <div className="space-y-4">
         {/* ── 热门地区（北岛一行、南岛一行） ── */}
         <div className="flex flex-col gap-4">
           {/* 北岛 */}
           <div className="flex gap-3 sm:items-center">
-            <span className="hidden shrink-0 rounded-xl bg-primary/5 p-1.5 ring-1 ring-primary/10 sm:block">
+            <span className="hidden shrink-0 rounded-control bg-primary/5 p-1.5 ring-1 ring-primary/10 sm:block">
               <NorthIslandIcon size={40} />
             </span>
             <div className="min-w-0">
@@ -666,20 +667,16 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
                       <div key="auckland-group" className="relative" ref={aucklandRef}>
                         <button type="button"
                           onClick={() => setExpandedAuckland((v) => !v)}
-                          className={`inline-flex items-center gap-1 rounded-full border px-4 py-1.5 text-sm font-medium transition-all ${
-                            on
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-stroke bg-white text-black hover:border-primary/40 hover:text-primary"
-                          }`}
+                          className={chipCls(on, "gap-1")}
                         >
                           {label}
                           <ChevronDown className={`h-3.5 w-3.5 transition-transform ${expandedAuckland ? "rotate-180" : ""}`} />
                         </button>
                         {expandedAuckland && (
-                          <div className="absolute left-0 top-full z-50 mt-1 w-[170px] rounded-xl border border-stroke bg-white p-2 shadow-lg">
+                          <div className="absolute left-0 top-full z-50 mt-1 w-[170px] rounded-surface border border-stroke bg-white p-2 shadow-md">
                             <button type="button"
                               onClick={() => { handleHotCity("奥克兰"); setExpandedAuckland(false); }}
-                              className={`mb-1 block w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-all ${
+                              className={`mb-1 block w-full rounded-control px-3 py-1.5 text-left text-sm font-medium transition-all ${
                                 activeHot === "奥克兰" ? "bg-primary/10 text-primary" : "text-black hover:bg-primary/5 hover:text-primary"
                               }`}
                             >
@@ -691,13 +688,13 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
                               return (
                                 <button key={child} type="button"
                                   onClick={() => { handleHotCity(child); setExpandedAuckland(false); }}
-                                  className={`block w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-all ${
+                                  className={`block w-full rounded-control px-3 py-1.5 text-left text-sm font-medium transition-all ${
                                     cOn ? "bg-primary/10 text-primary" : "text-black hover:bg-primary/5 hover:text-primary"
                                   }`}
                                 >
                                   {child.replace("奥克兰-", "")}
                                   {HOT_AUCKLAND_CHILDREN.has(child) && (
-                                    <span className="ml-1 inline-block rounded bg-red-500 px-1 py-0.5 text-[10px] font-bold leading-none text-white">
+                                    <span className="ml-1 inline-block rounded bg-error px-1 py-0.5 text-2xs font-bold leading-none text-white">
                                       HOT
                                     </span>
                                   )}
@@ -712,11 +709,7 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
                   const on = activeHot === city;
                   return (
                     <button key={city} type="button" onClick={() => handleHotCity(city)}
-                      className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all ${
-                        on
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-stroke bg-white text-black hover:border-primary/40 hover:text-primary"
-                      }`}
+                      className={chipCls(on)}
                     >
                       {city}
                     </button>
@@ -728,7 +721,7 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
 
           {/* 南岛 */}
           <div className="flex gap-3 sm:items-center">
-            <span className="hidden shrink-0 rounded-xl bg-primary/5 p-1.5 ring-1 ring-primary/10 sm:block">
+            <span className="hidden shrink-0 rounded-control bg-primary/5 p-1.5 ring-1 ring-primary/10 sm:block">
               <SouthIslandIcon size={40} />
             </span>
             <div className="min-w-0">
@@ -741,11 +734,7 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
                   const isOn = activeHot === city;
                   return (
                     <button key={city} type="button" onClick={() => handleHotCity(city)}
-                      className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all ${
-                        isOn
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-stroke bg-white text-black hover:border-primary/40 hover:text-primary"
-                      }`}
+                      className={chipCls(isOn)}
                     >
                       {city}
                     </button>
@@ -767,11 +756,11 @@ export function FilterBar({ schools, filters, onChange, onClear, active }: Props
               type="button"
               onClick={onClear}
               disabled={!active}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                active
-                  ? "border border-stroke text-ink-soft hover:border-error hover:text-error"
-                  : "cursor-not-allowed border border-transparent text-caption"
-              }`}
+              className={buttonCls(
+                "ghost",
+                "sm",
+                `gap-1.5 ${active ? "border border-stroke hover:bg-error/5 hover:text-error" : "cursor-not-allowed text-caption"}`,
+              )}
             >
               <X className="h-3.5 w-3.5" />
               清空筛选

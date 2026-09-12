@@ -1,5 +1,7 @@
 "use client";
 
+import { useEscapeKey } from "@/components/ui/use-escape";
+
 import type { SchoolFrontend } from "@/lib/types";
 import { SchoolDetailCard } from "./school-modal";
 import { X, GitCompare, Trash2 } from "lucide-react";
@@ -12,10 +14,11 @@ interface Props {
 
 /** 对比视图：多个学校详情页横向平铺，方便逐项对比 */
 export function CompareModal({ schools, onClose }: Props) {
+  useEscapeKey(onClose);
   const { removeCompare } = useCompare();
   return (
     <div
-      className="animate-overlay fixed inset-0 z-[1000] flex flex-col bg-ink/40 backdrop-blur-sm"
+      className="animate-overlay fixed inset-0 z-(--z-modal) flex flex-col bg-ink/40 backdrop-blur-sm"
       onClick={onClose}
     >
       {/* 顶部标题栏 */}
@@ -48,7 +51,7 @@ export function CompareModal({ schools, onClose }: Props) {
           {schools.map((s) => (
             <div
               key={s.id}
-              className="flex w-[400px] shrink-0 flex-col overflow-hidden rounded-3xl bg-white shadow-xl"
+              className="flex w-[400px] shrink-0 flex-col overflow-hidden rounded-3xl bg-white shadow-lg"
             >
               <SchoolDetailCard
                 school={s}

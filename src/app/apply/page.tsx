@@ -20,22 +20,22 @@ function ApplyInner() {
 
   return (
     <div className="accom-editorial min-h-screen bg-bg">
-      <div className="mx-auto w-full max-w-5xl px-6 py-8 md:px-10 md:py-12">
+      <div className="mx-auto w-full max-w-(--width-form) py-8 md:py-12 px-(--page-gutter)">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-[clamp(26px,3.4vw,40px)] font-bold leading-tight tracking-tight text-ink">
+          <h1 className="text-h1 font-bold leading-tight tracking-tight text-ink">
             {title}
           </h1>
           <button
             type="button"
             onClick={back}
-            className="flex items-center gap-1 text-sm font-medium text-primary underline underline-offset-4 transition-colors hover:text-[#b44427]"
+            className="flex items-center gap-1 text-sm font-medium text-primary underline underline-offset-4 transition-colors hover:text-(--color-accent)"
           >
             <ChevronLeft className="h-4 w-4" />
             返回学校申请
           </button>
         </div>
 
-        <div className="rounded-lg border border-[#789491]/50 bg-white p-6 shadow-sm md:p-10">
+        <div className="rounded-surface border border-(--color-rule)/50 bg-white p-6 shadow-sm md:p-10">
           <ApplicationForm
             category={category}
             editId={editId}

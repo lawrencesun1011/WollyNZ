@@ -19,7 +19,7 @@ function InvitationMark() {
 }
 
 function DownloadIcon() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v13m-5-5 5 5 5-5M5 21h14" /></svg>;
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v13m-5-5 5 5 5-5M5 21h14" /></svg>;
 }
 
 export function CommunityContent() {
@@ -30,7 +30,7 @@ export function CommunityContent() {
       <section className={styles.intro} aria-labelledby="community-title">
         <div className={styles.introCopy}>
           <h1 id="community-title">加入家长社群</h1>
-          <p className={styles.tagline}>成长这一页，我们一起翻开。</p>
+          <h2 className={styles.tagline}>成长这一页，我们一起翻开。</h2>
           <p className={styles.description}><span className={styles.desktopOnly}>和同行的家长，</span>交流游学准备与生活经验。</p>
         </div>
         <ReferenceArtwork name="conversation" className={styles.conversationArt} />
@@ -47,7 +47,7 @@ export function CommunityContent() {
             {qrCodeSrc ? <SmartImage className={styles.qrImage} src={qrCodeSrc} alt="GoalNZ 家长社群二维码，请使用微信扫描" /> : <><InvitationMark /><p id="qr-unavailable">社群二维码待更新</p></>}
           </div>
           <div className={styles.qrActions}>
-            {qrCodeSrc ? <a className={`${styles.qrButton} ${styles.saveQr}`} href={`${qrCodeSrc}.webp`} download={communityConfig.qrCodeDownloadName}>保存二维码 <DownloadIcon /></a> : <button type="button" className={`${styles.qrButton} ${styles.saveQr}`} disabled aria-describedby="qr-unavailable">保存二维码 <DownloadIcon /></button>}
+            {qrCodeSrc ? <a className={`primary-button w-full ${styles.saveQr}`} href={`${qrCodeSrc}.webp`} download={communityConfig.qrCodeDownloadName}>保存二维码 <DownloadIcon /></a> : <button type="button" className={`primary-button w-full ${styles.saveQr}`} disabled aria-describedby="qr-unavailable">保存二维码 <DownloadIcon /></button>}
           </div>
         </div>
 
@@ -62,7 +62,7 @@ export function CommunityContent() {
       </section>
 
       <aside className={styles.privacy} aria-label="社群交流约定">
-        <svg className={styles.privacyIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg className={styles.privacyIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M3 6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H8l-3 3z" />
           <path d="M13 8a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2l-3 3v-3h-2" />
         </svg>

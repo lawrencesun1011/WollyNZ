@@ -23,7 +23,7 @@ const EceMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full items-center justify-center rounded-2xl bg-primary/5 text-sm text-ink-soft">
+      <div className="flex h-full items-center justify-center rounded-surface bg-primary/5 text-sm text-ink-soft">
         地图加载中…
       </div>
     ),
@@ -130,7 +130,7 @@ export function EceExplorer({ initialSchools }: { initialSchools: SchoolFrontend
     <div className="min-h-screen editorial">
       <div className="schools-func">
       <div className="px-6 py-5 lg:px-10">
-        <div className="mx-auto max-w-[1400px]">
+        <div className="mx-auto max-w-(--width-work)">
           <EceFilterBar
             schools={schools}
             filters={filters}
@@ -142,8 +142,8 @@ export function EceExplorer({ initialSchools }: { initialSchools: SchoolFrontend
       </div>
 
       <div className="px-6 pb-8 lg:px-10">
-        <main className="mx-auto flex h-[720px] max-w-[1400px] gap-5 overflow-hidden">
-          <section className="flex w-full flex-col overflow-hidden rounded-2xl border border-stroke bg-white shadow-sm lg:w-[420px] xl:w-[480px]">
+        <main className="mx-auto flex h-[720px] max-w-(--width-work) gap-5 overflow-hidden">
+          <section className="flex w-full flex-col overflow-hidden rounded-surface border border-stroke bg-white shadow-sm lg:w-[420px] xl:w-[480px]">
             <div className="shrink-0 border-b border-stroke px-5 py-3">
               <Toolbar
                 total={inBounds.length}
@@ -182,7 +182,7 @@ export function EceExplorer({ initialSchools }: { initialSchools: SchoolFrontend
             </div>
           </section>
 
-          <section className="hidden min-h-0 flex-1 overflow-hidden rounded-2xl border border-stroke shadow-sm lg:block">
+          <section className="hidden min-h-0 flex-1 overflow-hidden rounded-surface border border-stroke shadow-sm lg:block">
             <EceMap
               schools={base}
               hoveredId={hoveredId}

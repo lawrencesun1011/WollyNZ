@@ -1,11 +1,14 @@
 "use client";
 
+import { useEscapeKey } from "@/components/ui/use-escape";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toPng } from "html-to-image";
 import type { SchoolFrontend } from "@/lib/types";
 import { cnGender, cnLanguage } from "@/lib/labels";
 import { eqiLabel, isolationLabel } from "@/lib/filters";
 import { X, MapPin, Check, ExternalLink } from "lucide-react";
+import { buttonCls } from "@/components/form-ui";
 
 interface Props {
   school: SchoolFrontend;
@@ -53,7 +56,7 @@ function Field({
   value: string | number;
 }) {
   return (
-    <div className="rounded-2xl bg-primary/5 p-2.5">
+    <div className="rounded-surface bg-primary/5 p-2.5">
       <p className="text-xs text-ink-soft">{label}</p>
       <p className="mt-0.5 text-sm font-semibold text-ink">{value || "—"}</p>
     </div>
@@ -138,7 +141,7 @@ export function SchoolDetailCard({
   return (
     <div ref={cardRef} className="relative flex h-full flex-col">
       {toast && (
-        <div className="absolute left-1/2 top-4 z-30 flex -translate-x-1/2 items-center gap-2 rounded-xl bg-ink/95 px-4 py-2 text-sm text-white shadow-lg">
+        <div className="absolute left-1/2 top-4 z-30 flex -translate-x-1/2 items-center gap-2 rounded-surface bg-ink/95 px-4 py-2 text-sm text-white shadow-md">
           <Check className="h-4 w-4 text-tertiary" />
           {toast}
         </div>
@@ -195,16 +198,16 @@ export function SchoolDetailCard({
       </div>
 
       {/* ── 族裔分布卡片 ── */}
-      <div className="mx-6 mt-3 shrink-0 rounded-2xl border border-primary/10 bg-white p-4">
+      <div className="mx-6 mt-3 shrink-0 rounded-surface border border-primary/10 bg-white p-4">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-primary">族裔分布</h3>
           <div className="flex items-center gap-1.5 text-xs text-ink-soft">
             <span>统计样本：{ethnicTotal} 人次</span>
             <span className="group relative">
-              <span className="flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-ink-soft/40 text-[10px] font-semibold text-ink-soft transition-colors group-hover:border-primary group-hover:text-primary">
+              <span className="flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-ink-soft/40 text-2xs font-semibold text-ink-soft transition-colors group-hover:border-primary group-hover:text-primary">
                 ?
               </span>
-              <span className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 hidden w-80 max-w-[80vw] whitespace-pre-line break-words rounded-lg bg-primary px-3.5 py-2.5 text-left text-[13px] leading-relaxed text-white shadow-lg group-hover:block">
+              <span className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 hidden w-80 max-w-[80vw] whitespace-pre-line break-words rounded-surface bg-primary px-3.5 py-2.5 text-left text-xs leading-relaxed text-white shadow-md group-hover:block">
                 新西兰教育部允许申报多重族裔，故统计人次高于在校总人数。
               </span>
             </span>
@@ -225,7 +228,7 @@ export function SchoolDetailCard({
                   style={{
                     width: `${r.pct}%`,
                     backgroundImage:
-                      "linear-gradient(to right, #3e9c8c, #5ba3c4)",
+                      "linear-gradient(to right, var(--color-primary), var(--color-primary-light))",
                   }}
                 />
               </div>
@@ -242,13 +245,13 @@ export function SchoolDetailCard({
               href={school.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 rounded-xl border border-primary/20 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+              className={buttonCls("secondary", "sm", "gap-1.5 border-primary/20 px-2 py-3 text-primary")}
             >
               访问官网
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
           ) : (
-            <span className="flex cursor-not-allowed items-center justify-center gap-1.5 rounded-xl border border-primary/10 bg-bg-soft py-3 text-sm font-medium text-ink-soft">
+            <span className={buttonCls("secondary", "sm", "gap-1.5 cursor-not-allowed border-primary/10 bg-bg-soft px-2 py-3 text-ink-soft hover:bg-bg-soft")}>
               访问官网
               <ExternalLink className="h-3.5 w-3.5" />
             </span>
@@ -257,7 +260,7 @@ export function SchoolDetailCard({
             href={eroUrl(school)}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-primary/20 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+            className={buttonCls("secondary", "sm", "gap-1.5 border-primary/20 px-2 py-3 text-primary")}
           >
             ERO 报告
             <ExternalLink className="h-3.5 w-3.5" />
@@ -265,7 +268,7 @@ export function SchoolDetailCard({
           <button
             type="button"
             onClick={handleShare}
-            className="flex items-center justify-center rounded-xl border border-primary/20 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+            className={buttonCls("secondary", "sm", "border-primary/20 px-2 py-3 text-primary")}
           >
             分享卡片
           </button>
@@ -282,6 +285,7 @@ export function SchoolDetailCard({
 }
 
 export function SchoolModal({ school, onClose }: Props) {
+  useEscapeKey(onClose);
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -291,11 +295,11 @@ export function SchoolModal({ school, onClose }: Props) {
 
   return (
     <div
-      className="animate-overlay fixed inset-0 z-[1000] flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm"
+      className="animate-overlay fixed inset-0 z-(--z-modal) flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="animate-fade-up relative max-h-[90vh] w-[420px] max-w-full overflow-y-auto rounded-3xl bg-white shadow-2xl scroll-thin"
+        className="animate-fade-up relative max-h-[90vh] w-[420px] max-w-full overflow-y-auto rounded-3xl bg-white shadow-lg scroll-thin"
         onClick={(e) => e.stopPropagation()}
       >
         <SchoolDetailCard

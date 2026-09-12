@@ -38,7 +38,7 @@ export default function HomePage() {
           <p className="hero-description">免费找学校，开启新的成长体验。</p>
           <button
             type="button"
-            className="primary-button group inline-flex items-center justify-center gap-3"
+            className="primary-button group"
             onClick={startExploring}
           >
             出发吧
@@ -60,10 +60,10 @@ export default function HomePage() {
 
       <section
         id="explore"
-        className="directory content-width border-t border-[#789491]"
+        className="directory content-width border-t border-(--color-rule)"
         aria-labelledby="explore-title"
       >
-        <div className="section-heading flex items-center justify-between border-b border-[#789491]">
+        <div className="section-heading flex items-center justify-between border-b border-(--color-rule)">
           <h2 id="explore-title">在出发之前，找到答案。</h2>
         </div>
         <div className="entry-grid grid grid-cols-1 md:grid-cols-3">
@@ -80,7 +80,7 @@ export default function HomePage() {
                     className="transition-transform duration-500 group-hover:-translate-y-1"
                   />
                 </div>
-                <span className="entry-number text-[#b44427]">{number}</span>
+                <span className="entry-number text-(--color-accent)">{number}</span>
                 <h3>{title}</h3>
                 <p>{description}</p>
                 <ArrowRight className="entry-arrow transition-transform duration-300 group-hover:translate-x-1.5" />
@@ -92,7 +92,7 @@ export default function HomePage() {
 
       <section
         id="community"
-        className="community content-width relative border-t border-[#789491]"
+        className="community content-width relative border-t border-(--color-rule)"
         aria-labelledby="community-title"
       >
         <div className="community-art">
@@ -104,7 +104,7 @@ export default function HomePage() {
         </div>
         <Link
           href="/community"
-          className="primary-button community-button group inline-flex items-center justify-center gap-3"
+          className="primary-button group"
         >
           加入社群
           <ArrowUpRight className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />

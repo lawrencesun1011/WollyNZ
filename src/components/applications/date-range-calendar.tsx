@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { iconBtnCls } from "@/components/form-ui";
 import type { ExactDate } from "@/lib/applications";
 
 const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
@@ -142,20 +143,20 @@ export function DateRangeCalendar({ start, end, onChange, maxYear }: Props) {
   }
 
   return (
-    <div className="rounded-2xl">
+    <div className="rounded-surface">
       <div className="mb-3 flex justify-end">
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={prev}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-soft hover:bg-primary/10 hover:text-primary"
+            className={iconBtnCls("h-8 w-8")}
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
             type="button"
             onClick={next}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-soft hover:bg-primary/10 hover:text-primary"
+            className={iconBtnCls("h-8 w-8")}
           >
             <ChevronRight className="h-4 w-4" />
           </button>

@@ -1,17 +1,19 @@
 "use client";
 
 import { saveCloudAccommodation, fetchCloudAccommodation } from "./user-data";
+import type { StatusTone } from "./status";
 
 export type AccommodationStatus = "draft" | "submitted" | "closed" | "deleted";
 
+/** 状态文案 + 语气（tone）；具体配色由 `components/ui/status-badge.tsx` 统一决定。 */
 export const ACCOMMODATION_STATUS_META: Record<
   AccommodationStatus,
-  { label: string; className: string }
+  { label: string; tone: StatusTone }
 > = {
-  draft: { label: "草稿", className: "bg-[#eef0ea] text-ink-soft" },
-  submitted: { label: "已提交", className: "bg-[#f0ddd0] text-[#b44427]" },
-  closed: { label: "已结束", className: "bg-ink/10 text-ink-soft" },
-  deleted: { label: "已删除", className: "bg-ink/10 text-ink-soft" },
+  draft: { label: "草稿", tone: "draft" },
+  submitted: { label: "已提交", tone: "active" },
+  closed: { label: "已结束", tone: "muted" },
+  deleted: { label: "已删除", tone: "muted" },
 };
 
 /** 已提交后超过入住开始时间 30 天视为已结束。 */

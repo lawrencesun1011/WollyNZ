@@ -9,6 +9,7 @@ import { ApplicationCard } from "@/components/applications/application-card";
 import { useAuthUser, useAuthReady } from "@/lib/auth";
 import { useAuthBridge } from "@/lib/auth-init";
 import { primaryBtnSmCls, secondaryBtnSmCls } from "@/components/form-ui";
+import { EmptyState as UiEmptyState, LoadingState as UiLoadingState } from "@/components/ui/states";
 
 type Tab = ApplicationCategory;
 
@@ -50,11 +51,11 @@ function MyApplicationsInner() {
 
   return (
     <div className="accom-editorial min-h-screen bg-bg">
-      <div className="mx-auto max-w-7xl px-6 py-8 pb-16 md:px-10">
+      <div className="mx-auto max-w-(--width-content) py-8 pb-16 px-(--page-gutter)">
       {/* 标题 */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-[clamp(26px,3.4vw,40px)] font-bold leading-tight tracking-tight text-ink">
+          <h1 className="text-h1 font-bold leading-tight tracking-tight text-ink">
             我的学校申请
           </h1>
           <p className="mt-2 text-lg text-ink-soft">
@@ -65,7 +66,7 @@ function MyApplicationsInner() {
           <button
             type="button"
             onClick={handleAdd}
-            className={`${primaryBtnSmCls} shadow-[--shadow-1]`}
+            className={`${primaryBtnSmCls} shadow-md`}
           >
             <Plus className="h-4 w-4" />
             新增申请
@@ -74,13 +75,13 @@ function MyApplicationsInner() {
       </div>
 
       {/* 分类 Tab：幼儿园在前 */}
-      <div className="mt-5 inline-flex rounded-[12px] border border-[#789491]/50 bg-white p-1 text-sm shadow-sm">
+      <div className="mt-5 inline-flex rounded-control border border-(--color-rule)/50 bg-white p-1 text-sm shadow-sm">
         {TABS.map((t) => (
           <button
             key={t.key}
             type="button"
             onClick={() => setTab(t.key)}
-            className={`rounded-[8px] px-4 py-2 transition-colors ${
+            className={`rounded-sm px-4 py-2 transition-colors ${
               tab === t.key ? "bg-primary text-white" : "text-ink-soft hover:text-primary"
             }`}
           >
@@ -119,7 +120,7 @@ function MyApplicationsInner() {
               {/* 已提交 */}
               <Section title={`已提交（${generated.length}）`} icon={<Mail className="h-4 w-4" />}>
                 {generated.length === 0 ? (
-                  <p className="text-sm text-ink-soft">暂无已生成的申请</p>
+                  <UiEmptyState className="py-4">暂无已生成的申请</UiEmptyState>
                 ) : (
                   <Grid>
                     {generated.map((a) => (
@@ -174,11 +175,7 @@ function Section({
 
 /** 登录态恢复中：避免已登录用户闪一下空态 */
 function LoadingState() {
-  return (
-    <div className="mt-6 flex items-center justify-center py-16 text-sm text-ink-soft">
-      正在确认登录状态…
-    </div>
-  );
+  return <UiLoadingState label="正在确认登录状态…" className="mt-6 py-16" />;
 }
 
 /** 未登录时的墙：与空态同款卡片，保留“新增申请”按钮（走邮箱验证），不展示申请列表 */

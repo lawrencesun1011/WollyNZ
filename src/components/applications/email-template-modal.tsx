@@ -1,7 +1,10 @@
 "use client";
 
+import { useEscapeKey } from "@/components/ui/use-escape";
+
 import { useEffect, useState } from "react";
 import { Check, Copy, Loader2, Mail, RefreshCw, X } from "lucide-react";
+import { buttonCls, iconBtnCls } from "@/components/form-ui";
 import type { ApplicationItem } from "@/lib/applications";
 import { generateEmailWithAi } from "@/lib/ai-email";
 
@@ -25,6 +28,8 @@ export function EmailTemplateModal({ item, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
+
+  useEscapeKey(() => onClose(subject, body));
 
   async function generateEmail(signal?: AbortSignal) {
     setLoading(true);
@@ -71,11 +76,11 @@ export function EmailTemplateModal({ item, onClose }: Props) {
 
   return (
     <div
-      className="animate-overlay fixed inset-0 z-[1200] flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm"
+      className="animate-overlay fixed inset-0 z-(--z-modal) flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm"
       onClick={() => onClose(subject, body)}
     >
       <div
-        className="animate-fade-up relative max-h-[90vh] w-[560px] max-w-full overflow-y-auto rounded-3xl bg-white shadow-2xl scroll-thin"
+        className="animate-fade-up relative max-h-[90vh] w-[560px] max-w-full overflow-y-auto rounded-3xl bg-white shadow-lg scroll-thin"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-stroke/70 px-5 py-4">
@@ -87,7 +92,7 @@ export function EmailTemplateModal({ item, onClose }: Props) {
             type="button"
             onClick={() => onClose(subject, body)}
             aria-label="关闭"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-primary/10 hover:text-primary"
+            className={iconBtnCls()}
           >
             <X className="h-5 w-5" />
           </button>
@@ -96,13 +101,13 @@ export function EmailTemplateModal({ item, onClose }: Props) {
         <div className="space-y-5 px-5 py-5">
           {/* 生成状态提示 */}
           {loading && (
-            <p className="flex items-center gap-2 rounded-xl bg-primary/5 px-3 py-2 text-xs text-primary">
+            <p className="flex items-center gap-2 rounded-surface bg-primary/5 px-3 py-2 text-xs text-primary">
               <Loader2 className="h-4 w-4 animate-spin" />
               正在生成邮件模板…
             </p>
           )}
           {error && (
-            <p className="rounded-xl bg-error/5 px-3 py-2 text-xs text-error">{error}</p>
+            <p className="rounded-surface bg-error/5 px-3 py-2 text-xs text-error">{error}</p>
           )}
 
           {/* 邮件主题 */}
@@ -131,7 +136,7 @@ export function EmailTemplateModal({ item, onClose }: Props) {
                 未获取到意向学校邮箱，请手动补充收件人后再发送。
               </p>
             )}
-            <p className="mt-1 text-xs text-red-500">
+            <p className="mt-1 text-xs text-error">
               重要！请不要直接群发邮件，QQ邮箱请开启右上角“<strong className="font-bold">分别发送</strong>”， 163邮箱请开启右上角“<strong className="font-bold">群发单显</strong>”，其它邮箱请使用类似功能
             </p>
           </div>
@@ -151,7 +156,7 @@ export function EmailTemplateModal({ item, onClose }: Props) {
             />
           </div>
 
-          <p className="rounded-xl bg-primary/5 px-3 py-2 text-xs font-bold text-black">
+          <p className="rounded-surface bg-primary/5 px-3 py-2 text-xs font-bold text-black">
             主题与正文由 AI 生成，请仔细检查是否符合预期，可直接编辑修改；确认后复制粘贴到您的邮箱发送即可。
           </p>
         </div>
@@ -161,7 +166,7 @@ export function EmailTemplateModal({ item, onClose }: Props) {
             type="button"
             onClick={() => void generateEmail()}
             disabled={loading}
-            className="flex items-center gap-1.5 rounded-xl border border-primary/20 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-60"
+            className={buttonCls("secondary", "sm", "gap-1.5 border-primary/20 px-5 py-2.5 font-semibold text-primary hover:bg-primary/10")}
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -173,7 +178,7 @@ export function EmailTemplateModal({ item, onClose }: Props) {
           <button
             type="button"
             onClick={() => onClose(subject, body)}
-            className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+            className={buttonCls("primary", "sm", "px-6 py-2.5")}
           >
             完成
           </button>
@@ -189,11 +194,15 @@ function CopyButton({ onClick, active }: { onClick: () => void; active: boolean 
       type="button"
       onClick={onClick}
       aria-label="复制"
-      className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-xs transition-colors ${
-        active
-          ? "border-success/30 bg-success/10 text-success"
-          : "border-stroke/70 text-ink-soft hover:border-primary/40 hover:text-primary"
-      }`}
+      className={buttonCls(
+        "secondary",
+        "xs",
+        `gap-1 border px-2 py-1 ${
+          active
+            ? "border-success/30 bg-success/10 text-success"
+            : "border-stroke/70 text-ink-soft hover:border-primary/40 hover:text-primary"
+        }`,
+      )}
     >
       {active ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
       {active ? "已复制" : "复制"}

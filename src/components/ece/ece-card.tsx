@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { SchoolFrontend } from "@/lib/types";
 import { eceTypeCN, eceEqiShort } from "@/lib/filters";
+import { buttonCls } from "@/components/form-ui";
 import { MapPin, Home, Check, Heart } from "lucide-react";
 import { useFavorites, useCompare } from "@/lib/user-collections";
 
@@ -69,7 +70,7 @@ export function EceCard({
       onClick={() => onOpen(school.id)}
       onMouseEnter={() => onHover(school.id)}
       onMouseLeave={() => onHover(null)}
-      className={`group flex cursor-pointer rounded-2xl border bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+      className={`group flex cursor-pointer rounded-surface border bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
         hovered || selected ? "border-primary ring-1 ring-primary/30" : "border-primary/10"
       } ${view === "list" ? "flex-row items-center gap-4" : "flex-col gap-4"}`}
     >
@@ -85,22 +86,25 @@ export function EceCard({
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); toggleFavorite(school.id, "ece"); }}
-          className={`inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition-colors ${
-            inFavorite
-              ? "border-[#EF4444] bg-[#fef2f2] text-[#EF4444]"
-              : "border-primary/20 bg-white text-ink-soft hover:bg-primary/5 hover:text-primary"
-          } ${view === "list" ? "h-9 w-full" : "flex-1 px-3 py-2"}`}
+          aria-pressed={inFavorite}
+          className={buttonCls(
+            "secondary",
+            "xs",
+            `gap-1 px-2 ${view === "list" ? "h-9 w-full" : "flex-1"} ${
+              inFavorite
+                ? "border-(--color-accent) bg-(--color-accent-soft) text-(--color-accent)"
+                : "border-primary/20 bg-white text-ink-soft hover:bg-primary/5 hover:text-primary"
+            }`,
+          )}
         >
-          <Heart className={`h-3.5 w-3.5 ${inFavorite ? "fill-[#EF4444] text-[#EF4444]" : ""}`} />
-          <span>{inFavorite ? "心愿单" : "心愿"}</span>
+          <Heart className={`h-3.5 w-3.5 ${inFavorite ? "fill-(--color-accent) text-(--color-accent)" : ""}`} />
+          <span>心愿</span>
         </button>
 
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onDetail(school.id); }}
-          className={`inline-flex items-center justify-center rounded-lg bg-primary text-xs font-medium text-white shadow-sm transition-all hover:bg-primary/90 hover:shadow-md ${
-            view === "list" ? "h-9 w-full" : "flex-1 px-3 py-2"
-          }`}
+          className={buttonCls("primary", "xs", view === "list" ? "h-9 w-full" : "flex-1")}
         >
           详情
         </button>
@@ -108,11 +112,15 @@ export function EceCard({
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); toggleCompare(school.id, "ece"); }}
-          className={`inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs font-medium transition-colors ${
-            inCompare
-              ? "border-primary bg-primary/5 text-primary"
-              : "border-primary/20 bg-white text-ink-soft hover:bg-primary/5 hover:text-primary"
-          } ${view === "list" ? "h-9 w-full" : "flex-initial"}`}
+          className={buttonCls(
+            "secondary",
+            "xs",
+            `gap-1 px-2 ${view === "list" ? "h-9 w-full" : "flex-initial"} ${
+              inCompare
+                ? "border-primary bg-primary/5 text-primary"
+                : "border-primary/20 bg-white text-ink-soft hover:bg-primary/5 hover:text-primary"
+            }`,
+          )}
         >
           <span
             className={`flex h-3.5 w-3.5 items-center justify-center rounded border ${

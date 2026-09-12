@@ -49,10 +49,10 @@ interface Props {
 // ECE marker：按办学性质区分形状与颜色（私立蓝圆 / 公立紫方）
 // 几何与中小学 pinSvg 完全一致（viewBox 18×18、26px、白描边 1.6），保证尺寸统一
 function circleSvg(color: string): string {
-  return `<svg width="26" height="26" viewBox="0 0 18 18" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"><circle class="shape" cx="9" cy="9" r="6.2" fill="${color}"/></svg>`;
+  return `<svg width="26" height="26" viewBox="0 0 18 18" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"><circle class="shape" cx="9" cy="9" r="6.2" fill="${color}"/></svg>`;
 }
 function squareSvg(color: string): string {
-  return `<svg width="26" height="26" viewBox="0 0 18 18" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"><rect class="shape" x="2" y="2" width="14" height="14" rx="3.2" fill="${color}"/></svg>`;
+  return `<svg width="26" height="26" viewBox="0 0 18 18" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"><rect class="shape" x="2" y="2" width="14" height="14" rx="3.2" fill="${color}"/></svg>`;
 }
 function authMarkSvg(authorityCN: string | undefined): string {
   const { color, shape } = eceAuthStyle(authorityCN);
@@ -67,9 +67,9 @@ function legendMarkSvg(color: string, shape: "circle" | "square"): string {
 }
 
 /** 加入心愿单后地图上的标记改为爱心（红色，与卡片 / 心愿单统一） */
-function heartSvg(color = "#EF4444"): string {
+function heartSvg(color = "#b44427"): string {
   const inner = `<path class="shape" d="M12 20.5l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 20.5z" fill="${color}"/>`;
-  return `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.4" stroke-linejoin="round">${inner}</svg>`;
+  return `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round">${inner}</svg>`;
 }
 
 /** popup 内容（MapLibre popup 是纯 DOM，与迁移前一样注入 HTML 字符串） */
@@ -744,7 +744,7 @@ export function EceMap({
     <div className="relative h-full w-full overflow-hidden">
       <div ref={containerRef} className="h-full w-full" />
 
-      <div className="absolute right-3 top-3 z-[100] flex overflow-hidden rounded-full border border-stroke bg-white shadow-sm">
+      <div className="absolute right-3 top-3 z-(--z-sticky) flex overflow-hidden rounded-full border border-stroke bg-white shadow-sm">
         <button
           type="button"
           onClick={() => switchBase("街道")}
@@ -765,7 +765,7 @@ export function EceMap({
         </button>
       </div>
 
-      <div className="absolute bottom-4 left-4 z-[500] rounded-2xl bg-white/90 px-4 py-2.5 shadow-sm backdrop-blur">
+      <div className="absolute bottom-4 left-4 z-(--z-map) rounded-surface bg-white/90 px-4 py-2.5 shadow-sm backdrop-blur">
         <p className="mb-1.5 text-xs font-semibold text-ink">办学性质图例</p>
         <div className="flex flex-col gap-1">
           {([

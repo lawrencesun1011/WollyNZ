@@ -8,6 +8,7 @@ import { getEceSnapshot, loadEceSnapshot } from "@/lib/ece-store";
 import { useFavorites } from "@/lib/user-collections";
 import { removeFavoritesByKind } from "@/lib/favorites";
 import { Heart, X, MapPin, GraduationCap } from "lucide-react";
+import { buttonCls, iconBtnCls } from "@/components/form-ui";
 
 function useSchoolsList(): SchoolFrontend[] {
   // 浮层打开时若学校数据尚未加载（如停留在 /ece、/my-applications 等页面），
@@ -84,20 +85,20 @@ export function FavoritesPopover({ onClose }: Props) {
   return (
     <div
       data-fav-popover
-      className="animate-popover absolute right-0 top-[calc(100%+10px)] z-[1100] w-[340px] origin-top-right"
+      className="animate-popover absolute right-0 top-[calc(100%+10px)] z-(--z-popover) w-[340px] origin-top-right"
     >
-      <div className="bg-paper overflow-hidden rounded-2xl border border-stroke shadow-xl">
+      <div className="bg-paper overflow-hidden rounded-surface border border-stroke shadow-lg">
         {/* 标题栏 */}
         <div className="flex items-center justify-between border-b border-stroke/70 px-4 py-3">
-          <div className="flex items-center gap-2 text-[#EF4444]">
-            <Heart className="h-4 w-4 fill-[#EF4444] text-[#EF4444]" />
+          <div className="flex items-center gap-2 text-(--color-accent)">
+            <Heart className="h-4 w-4 fill-(--color-accent) text-(--color-accent)" />
             <span className="text-sm font-semibold text-ink">我的心愿单（{total}）</span>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="关闭"
-            className="flex h-7 w-7 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-primary/10 hover:text-primary"
+            className={iconBtnCls("h-7 w-7")}
           >
             <X className="h-4 w-4" />
           </button>
@@ -106,7 +107,7 @@ export function FavoritesPopover({ onClose }: Props) {
         {/* 列表（按来源分两个子模块） */}
         {total === 0 ? (
           <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
-            <Heart className="h-8 w-8 text-[#EF4444]/30" />
+            <Heart className="h-8 w-8 text-(--color-accent)/30" />
             <p className="text-sm text-ink-soft">还没有心愿的学校</p>
             <p className="text-xs text-ink-soft/80">
               在学校卡片或地图弹窗中点击「心愿」即可加入这里
@@ -127,7 +128,7 @@ export function FavoritesPopover({ onClose }: Props) {
                     <button
                       type="button"
                       onClick={() => removeFavoritesByKind(kind)}
-                      className="rounded-md px-2 py-0.5 text-xs text-ink-soft transition-colors hover:bg-error/5 hover:text-error"
+                      className={buttonCls("ghost", "xs", "min-h-0 px-2 py-0.5 hover:bg-error/5 hover:text-error")}
                     >
                       清空
                     </button>
@@ -136,7 +137,7 @@ export function FavoritesPopover({ onClose }: Props) {
                     {items.map((s) => (
                       <div
                         key={s.id}
-                        className="group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-primary/5"
+                        className="group flex items-center gap-3 rounded-control px-2 py-2 transition-colors hover:bg-primary/5"
                       >
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium text-ink">{s.name}</p>
@@ -152,7 +153,7 @@ export function FavoritesPopover({ onClose }: Props) {
                             type="button"
                             onClick={() => removeFavorite(s.id, kind)}
                             aria-label="移除心愿"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/20 text-ink-soft transition-colors hover:bg-error/5 hover:text-error"
+                            className={iconBtnCls("h-7 w-7", "rounded-control border border-primary/20 hover:bg-error/5 hover:text-error")}
                           >
                             <X className="h-3.5 w-3.5" />
                           </button>
@@ -163,7 +164,7 @@ export function FavoritesPopover({ onClose }: Props) {
                   <button
                     type="button"
                     onClick={() => goApply(kind)}
-                    className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary/10 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/15"
+                    className={buttonCls("ghost", "xs", "mt-1 min-h-0 w-full gap-1.5 bg-primary/10 py-1.5 font-semibold text-primary hover:bg-primary/15")}
                   >
                     <GraduationCap className="h-3.5 w-3.5" />
                     去申请（{entries.length}）

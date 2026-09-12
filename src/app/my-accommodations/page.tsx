@@ -14,6 +14,7 @@ import {
 } from "@/lib/accommodation";
 import { AccommodationCard } from "@/components/accommodations/accommodation-card";
 import { primaryBtnSmCls } from "@/components/form-ui";
+import { EmptyState as UiEmptyState, LoadingState as UiLoadingState } from "@/components/ui/states";
 
 function MyAccommodationsInner() {
   const router = useRouter();
@@ -42,11 +43,11 @@ function MyAccommodationsInner() {
 
   return (
     <div className="accom-editorial min-h-screen bg-bg">
-      <div className="mx-auto max-w-7xl px-6 py-8 pb-16 md:px-10">
+      <div className="mx-auto max-w-(--width-content) py-8 pb-16 px-(--page-gutter)">
       {/* 标题 */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-[clamp(26px,3.4vw,40px)] font-bold leading-tight tracking-tight text-ink">
+          <h1 className="text-h1 font-bold leading-tight tracking-tight text-ink">
             我的住宿意向
           </h1>
           <p className="mt-2 text-lg text-ink-soft">
@@ -57,7 +58,7 @@ function MyAccommodationsInner() {
           <button
             type="button"
             onClick={handleAdd}
-            className={`${primaryBtnSmCls} shadow-[--shadow-1]`}
+            className={`${primaryBtnSmCls} shadow-md`}
           >
             <Plus className="h-4 w-4" />
             新建意向
@@ -92,7 +93,7 @@ function MyAccommodationsInner() {
           {/* 已提交 */}
           <Section title={`已提交（${active.length}）`} icon={<Mail className="h-4 w-4" />}>
             {active.length === 0 ? (
-              <p className="text-sm text-ink-soft">暂无已提交的意向</p>
+              <UiEmptyState className="py-4">暂无已提交的意向</UiEmptyState>
             ) : (
               <Grid>
                 {active.map((it) => (
@@ -144,17 +145,13 @@ function Section({
 
 /** 登录态恢复中：避免已登录用户闪一下空态 */
 function LoadingState() {
-  return (
-    <div className="mt-6 flex items-center justify-center py-16 text-sm text-ink-soft">
-      正在确认登录状态…
-    </div>
-  );
+  return <UiLoadingState label="正在确认登录状态…" className="mt-6 py-16" />;
 }
 
 /** 未登录时的墙：与空态同款卡片，保留“新建意向”按钮（走邮箱验证），不展示意向列表 */
 function LoginWall({ onAdd }: { onAdd: () => void }) {
   return (
-    <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[#789491]/50 bg-white/60 px-6 py-16 text-center">
+    <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-surface border border-dashed border-(--color-rule)/50 bg-white/60 px-6 py-16 text-center">
       <svg
         className="h-16 w-16 text-ink"
         viewBox="0 0 64 64"
@@ -188,7 +185,7 @@ function LoginWall({ onAdd }: { onAdd: () => void }) {
 
 function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
-    <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[#789491]/50 bg-white/60 px-6 py-16 text-center">
+    <div className="animate-fade-up mt-6 flex flex-col items-center gap-3 rounded-surface border border-dashed border-(--color-rule)/50 bg-white/60 px-6 py-16 text-center">
       <svg
         className="h-16 w-16 text-ink"
         viewBox="0 0 64 64"

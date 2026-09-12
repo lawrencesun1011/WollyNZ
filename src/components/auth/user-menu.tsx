@@ -6,6 +6,7 @@ import { LogOut, Mail, FileText, BedDouble } from "lucide-react";
 import { signOut, useAuthUser } from "@/lib/auth";
 import { User } from "@/components/editorial/icons";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { menuItemCls } from "@/components/form-ui";
 
 /** 顶栏右侧用户区：点击小人弹出下拉菜单（登录、我的申请、退出登录）。 */
 export function UserMenu() {
@@ -44,7 +45,7 @@ export function UserMenu() {
       </button>
 
       {open && (
-        <div className="bg-paper absolute right-0 top-[calc(100%+10px)] z-[1100] w-64 origin-top-right overflow-hidden rounded-2xl border border-stroke p-2 shadow-xl animate-popover">
+        <div className="bg-paper absolute right-0 top-[calc(100%+10px)] z-(--z-popover) w-64 origin-top-right overflow-hidden rounded-surface border border-stroke p-2 shadow-lg animate-popover">
           {!user && (
             <>
               <div className="px-2 pb-1 pt-1 text-xs text-caption">
@@ -53,7 +54,7 @@ export function UserMenu() {
               <Link
                 href="/login"
                 onClick={() => setOpen(false)}
-                className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-[#eeeede]"
+                className={menuItemCls()}
               >
                 <Mail className="h-4 w-4" />
                 注册 / 登录
@@ -70,7 +71,7 @@ export function UserMenu() {
           <Link
             href="/my-applications"
             onClick={() => setOpen(false)}
-            className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-[#eeeede]"
+            className={menuItemCls()}
           >
             <FileText className="h-4 w-4" />
             学校申请
@@ -78,7 +79,7 @@ export function UserMenu() {
           <Link
             href="/my-accommodations"
             onClick={() => setOpen(false)}
-            className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-[#eeeede]"
+            className={menuItemCls()}
           >
             <BedDouble className="h-4 w-4" />
             住宿意向
@@ -91,7 +92,7 @@ export function UserMenu() {
                 setOpen(false);
                 setConfirmOpen(true);
               }}
-              className="flex w-full items-center gap-2 rounded-[--radius-sm] px-3 py-2.5 text-sm text-ink-soft transition-colors hover:bg-[#eeeede] hover:text-error"
+              className={menuItemCls("hover:text-error")}
             >
               <LogOut className="h-4 w-4" />
               退出登录

@@ -32,10 +32,10 @@ export function AccommodationContent() {
       <section className={styles.hero} aria-labelledby="accommodation-title">
         <div className={styles.heroCopy}>
           <div className={styles.titleRow}><h1 id="accommodation-title">找住宿</h1><span className={styles.beta}>内测中</span></div>
-          <p className={styles.intro}>提交住宿意向，寻找适合一家人的落脚点。</p>
+          <h2 className={styles.intro}>提交住宿意向，寻找适合一家人的落脚点。</h2>
           <p className={styles.description}>我们从合作物业中匹配房源，若有合适房源时会通过邮件联系您。</p>
           <div className={styles.actions}>
-            <Link className={styles.primaryButton} href="/apply/accommodation">填写住宿意向 <ArrowUpRight /></Link>
+            <Link className="primary-button" href="/apply/accommodation">填写住宿意向 <ArrowUpRight /></Link>
             <Link className={styles.textButton} href="/my-accommodations">管理我的意向 <ArrowRight /></Link>
           </div>
         </div>

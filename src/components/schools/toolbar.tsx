@@ -2,6 +2,7 @@
 
 import type { SortKey } from "@/lib/types";
 import { ArrowUpDown, Heart } from "lucide-react";
+import { buttonCls } from "@/components/form-ui";
 
 interface Props {
   total: number;
@@ -44,22 +45,26 @@ export default function Toolbar({
         <button
           type="button"
           onClick={() => onToggleFavoritesOnly(!favoritesOnly)}
-          className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
-            favoritesOnly
-              ? "border-[#EF4444] bg-[#fef2f2] text-[#EF4444]"
-              : "border-primary/20 bg-white text-ink-soft hover:border-primary hover:text-primary"
-          }`}
+          className={buttonCls(
+            "secondary",
+            "sm",
+            `gap-1.5 ${
+              favoritesOnly
+                ? "border-(--color-accent) bg-(--color-accent-soft) text-(--color-accent)"
+                : "border-primary/20 bg-white text-ink-soft hover:border-primary hover:text-primary"
+            }`,
+          )}
         >
-          <Heart className={`h-4 w-4 ${favoritesOnly ? "fill-[#EF4444]" : ""}`} />
+          <Heart className={`h-4 w-4 ${favoritesOnly ? "fill-(--color-accent)" : ""}`} />
           心愿单
           {favoriteCount > 0 && (
-            <span className={favoritesOnly ? "text-[#EF4444]" : "text-ink-soft"}>
+            <span className={favoritesOnly ? "text-(--color-accent)" : "text-ink-soft"}>
               ({favoriteCount})
             </span>
           )}
         </button>
 
-        <div className="relative flex items-center gap-2 rounded-xl border border-primary/20 bg-white px-3 py-2">
+        <div className="relative flex items-center gap-2 rounded-control border border-stroke bg-white px-3 py-2">
           <ArrowUpDown className="h-4 w-4 text-ink-soft" />
           <select
             value={sort}

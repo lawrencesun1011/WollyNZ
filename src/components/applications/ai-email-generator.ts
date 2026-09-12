@@ -48,7 +48,7 @@ function studyPeriodToText(p?: ApplicationItem["studyPeriod"]): string {
   return [s, e].filter(Boolean).join(" — ");
 }
 
-/** 孩子出生日期 → 可读文本（多个孩子用分号分隔）。 */
+/** 学生出生日期 → 可读文本（多个学生用分号分隔）。 */
 
 
 /**
@@ -69,7 +69,7 @@ export function buildAiEmailPrompt(item: ApplicationItem): {
     lines.push(`- 我们来自：${[item.province, item.city].filter(Boolean).join(" / ")}`);
   }
   const students = studentsToText(item.students);
-  if (students) lines.push(`- 孩子信息（出生日期 / 性别 / 英语水平）：${students}`);
+  if (students) lines.push(`- 学生信息（出生日期 / 性别 / 英语水平）：${students}`);
   const period = studyPeriodToText(item.studyPeriod);
   if (period) lines.push(`- 计划游学时间：${period}`);
   if (item.extraRequests?.trim()) {

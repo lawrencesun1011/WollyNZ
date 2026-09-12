@@ -9,6 +9,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { useFavorites } from "@/lib/user-collections";
 import { FavoritesPopover } from "./favorites-popover";
 import { UserMenu } from "./auth/user-menu";
+import { menuItemCls } from "@/components/form-ui";
 
 /** 顶部导航：编辑刊物风（纸色实底 + 衬线品牌字 + 细分隔线）。
  *
@@ -26,8 +27,8 @@ export function SiteHeader() {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <header className="editorial fixed inset-x-0 top-0 z-[900] mx-auto w-full max-w-[1440px]">
-      <div className="site-header page-width flex items-center justify-between border-b border-[#789491]">
+    <header className="editorial fixed inset-x-0 top-0 z-(--z-header) mx-auto w-full max-w-(--width-page)">
+      <div className="site-header page-width flex items-center justify-between border-b border-(--color-rule)">
         {/* 左侧：GoalNZ 品牌 logo */}
         <Link
           href="/"
@@ -67,16 +68,16 @@ export function SiteHeader() {
               <ChevronDown className="h-4 w-4 transition-transform group-hover:rotate-180" />
             </button>
             <div className="absolute left-1/2 top-full hidden -translate-x-1/2 pt-2 group-hover:block group-focus-within:block">
-              <div className="flex w-36 flex-col overflow-hidden rounded-[7px] border border-[#789491] bg-[#f9f6f0] p-1 shadow-lg">
+              <div className="flex w-36 flex-col overflow-hidden rounded-sm border border-(--color-rule) bg-[#f9f6f0] p-1 shadow-md">
                 <Link
                   href="/ece"
-                  className="rounded-[5px] px-3 py-2 text-sm font-medium transition-colors hover:bg-[#eeeede]"
+                  className={menuItemCls()}
                 >
                   幼儿园
                 </Link>
                 <Link
                   href="/schools"
-                  className="rounded-[5px] px-3 py-2 text-sm font-medium transition-colors hover:bg-[#eeeede]"
+                  className={menuItemCls()}
                 >
                   中小学
                 </Link>
@@ -114,7 +115,7 @@ export function SiteHeader() {
               className="icon-button"
             >
               <Heart
-                className={favoriteIds.length ? "fill-[#b44427] text-[#b44427]" : ""}
+                className={favoriteIds.length ? "fill-(--color-accent) text-(--color-accent)" : ""}
               />
               {favoriteIds.length > 0 && (
                 <span className="icon-button-badge">

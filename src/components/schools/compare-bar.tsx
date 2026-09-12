@@ -3,6 +3,7 @@
 import type { SchoolFrontend } from "@/lib/types";
 import { X, GitCompare } from "lucide-react";
 import { useCompare } from "@/lib/user-collections";
+import { buttonCls } from "@/components/form-ui";
 
 interface Props {
   schools: SchoolFrontend[];
@@ -12,8 +13,8 @@ interface Props {
 export function CompareBar({ schools, onCompare }: Props) {
   const { removeCompare, clearCompare } = useCompare();
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[900] px-4 pb-4">
-      <div className="glass mx-auto flex max-w-5xl items-center gap-3 rounded-2xl px-4 py-3 shadow-lg">
+    <div className="fixed inset-x-0 bottom-0 z-(--z-header) px-4 pb-4">
+      <div className="glass mx-auto flex max-w-5xl items-center gap-3 rounded-surface px-4 py-3 shadow-md">
         <div className="flex items-center gap-2 text-primary">
           <GitCompare className="h-5 w-5" />
           <span className="hidden text-sm font-semibold sm:inline">
@@ -47,7 +48,7 @@ export function CompareBar({ schools, onCompare }: Props) {
           <button
             type="button"
             onClick={() => clearCompare("school")}
-            className="rounded-lg px-3 py-1.5 text-sm text-ink-soft transition-colors hover:text-ink"
+            className={buttonCls("ghost", "sm")}
           >
             清空
           </button>
@@ -55,7 +56,7 @@ export function CompareBar({ schools, onCompare }: Props) {
             type="button"
             disabled={schools.length < 2}
             onClick={onCompare}
-            className="rounded-xl bg-gradient-to-r from-primary to-primary-light px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+            className={buttonCls("primary", "sm")}
           >
             查看对比
           </button>

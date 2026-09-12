@@ -18,6 +18,7 @@ import {
 } from "./user-data";
 import { getSchoolsSnapshot, preloadSchools } from "./schools-store";
 import { getEceSnapshot, loadEceSnapshot } from "./ece-store";
+import type { StatusTone } from "./status";
 
 export type ApplicationCategory = "school" | "ece";
 
@@ -114,6 +115,18 @@ export interface ApplicationItem extends ApplicationForm {
 export const CATEGORY_META: Record<ApplicationCategory, { label: string }> = {
   school: { label: "中小学" },
   ece: { label: "幼儿园" },
+};
+
+/** 状态文案 + 语气（tone）；具体配色由 `components/ui/status-badge.tsx` 统一决定。
+    注：generated（已生成邮件模板）对用户呈现为「已提交」，与住宿侧的 submitted 语义一致。 */
+export const APPLICATION_STATUS_META: Record<
+  ApplicationStatus,
+  { label: string; tone: StatusTone }
+> = {
+  draft: { label: "草稿", tone: "draft" },
+  generated: { label: "已提交", tone: "active" },
+  closed: { label: "已结束", tone: "muted" },
+  deleted: { label: "已删除", tone: "muted" },
 };
 
 export const TENSE_LABEL: Record<Tense, string> = {

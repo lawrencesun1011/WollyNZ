@@ -10,7 +10,7 @@ import { BrandLogo } from "@/components/brand-logo";
  *  且与首页社群条 / 目录区的左右端点完全对齐。 */
 export function SiteFooter() {
   return (
-    <footer className="editorial mx-auto w-full max-w-[1440px]">
+    <footer className="editorial mx-auto w-full max-w-(--width-page)">
       <div className="site-footer page-width">
         <div className="footer-main">
           <div className="footer-about">

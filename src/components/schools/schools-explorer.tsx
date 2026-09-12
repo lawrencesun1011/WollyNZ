@@ -24,7 +24,7 @@ const SchoolMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full items-center justify-center rounded-2xl bg-primary/5 text-sm text-ink-soft">
+      <div className="flex h-full items-center justify-center rounded-surface bg-primary/5 text-sm text-ink-soft">
         地图加载中…
       </div>
     ),
@@ -150,7 +150,7 @@ export function SchoolsExplorer({
       <div className="schools-func">
       {/* ── 热门地区 + 筛选栏 ── */}
       <div className="px-6 py-5 lg:px-10">
-        <div className="mx-auto max-w-[1400px]">
+        <div className="mx-auto max-w-(--width-work)">
           <FilterBar
             schools={schools}
             filters={filters}
@@ -163,9 +163,9 @@ export function SchoolsExplorer({
 
       {/* ── 下方：左列表 + 右地图（宽度与上面对齐） ── */}
       <div className="px-6 pb-8 lg:px-10">
-        <main className="mx-auto flex h-[720px] max-w-[1400px] gap-5 overflow-hidden">
+        <main className="mx-auto flex h-[720px] max-w-(--width-work) gap-5 overflow-hidden">
           {/* 左侧列表 */}
-          <section className="flex w-full flex-col overflow-hidden rounded-2xl border border-stroke bg-white shadow-sm lg:w-[420px] xl:w-[480px]">
+          <section className="flex w-full flex-col overflow-hidden rounded-surface border border-stroke bg-white shadow-sm lg:w-[420px] xl:w-[480px]">
             <div className="shrink-0 border-b border-stroke px-5 py-3">
               <Toolbar
                 total={inBounds.length}
@@ -204,7 +204,7 @@ export function SchoolsExplorer({
           </section>
 
           {/* 右侧地图 */}
-          <section className="hidden min-h-0 flex-1 overflow-hidden rounded-2xl border border-stroke shadow-sm lg:block">
+          <section className="hidden min-h-0 flex-1 overflow-hidden rounded-surface border border-stroke shadow-sm lg:block">
             <SchoolMap
               schools={base}
               hoveredId={hoveredId}
