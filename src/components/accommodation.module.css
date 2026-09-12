@@ -18,7 +18,7 @@
 .hero .villa { position: absolute; right: -18px; top: 8px; width: 46.5%; z-index: -1; pointer-events: none; }
 .process { border-top: 1px solid var(--color-rule); padding-top: 22px; }
 .sectionHeading { display: flex; align-items: center; justify-content: space-between; }
-.sectionHeading h2 { font-size: 40px; line-height: 1.4; font-weight: 700; letter-spacing: -.04em; }
+.sectionHeading h2 { font-size: var(--text-section); line-height: 1.4; font-weight: 700; letter-spacing: -.04em; }
 .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); list-style: none; padding: 0; margin: 24px 0 28px; }
 .step { display: grid; grid-template-columns: 64px 1fr; gap: 28px; padding: 4px 30px 5px 8px; }
 .step + .step { border-left: 1px solid var(--color-rule); padding-left: 40px; }
@@ -26,17 +26,17 @@
 .stepIcon { width: 56px; height: 56px; margin-top: 4px; }
 .number { display: block; color: var(--color-accent); font: 500 var(--text-3xl)/1.25 var(--font-editorial); margin-bottom: 8px; }
 .step h3 { font-size: var(--text-2xl); line-height: 1.4; font-weight: 700; margin-bottom: 11px; }
-.step p { font-size: var(--text-sm); line-height: 1.8; }
+.step p { font-size: var(--text-base); line-height: 1.8; }
 .mobileText { display: none; }
 .assurance { display: flex; align-items: center; justify-content: center; gap: 24px; border-top: 1px solid var(--color-rule); padding: 28px 6px 32px; text-align: center; }
 .shield { width: 54px; height: 54px; flex-shrink: 0; }
 .assuranceCopy { max-width: 780px; }
-.assurance h2 { font-size: var(--text-2xl); line-height: 1.55; font-weight: 700; }
-.assurance p { font-size: var(--text-sm); line-height: 1.7; }
+.assurance h2 { font-size: var(--text-callout); line-height: 1.65; font-weight: 600; letter-spacing: .015em; }
+.assurance p { font-size: var(--text-lg); line-height: 1.7; }
 @media (max-width: 1100px) {
   .hero { min-height: 380px; }
   .heroCopy { width: 60%; }
-  .titleRow h1 { font-size: 56px; }
+  .titleRow h1 { font-size: var(--text-hero-md); }
   .intro { white-space: normal; }
   
   .actions { gap: 24px; }
@@ -49,7 +49,6 @@
   .step h3 { font-size: var(--text-2xl); }
   .step p { font-size: var(--text-base); }
   .assurance { gap: 16px; }
-  .assurance h2 { font-size: var(--text-2xl); }
   .assurance p { font-size: var(--text-base); }
 }
 @media (max-width: 767px) {
@@ -57,7 +56,7 @@
   .heroCopy { width: 100%; }
   .hero .villa { display: none; }
   .titleRow { gap: 18px; margin-bottom: 16px; }
-  .titleRow h1 { font-size: clamp(38px, 9vw, 54px); line-height: 1.25; }
+  .titleRow h1 { font-size: var(--text-hero-sm); line-height: 1.25; }
   .beta { font-size: var(--text-sm); padding: 4px 8px 4px; border-radius: var(--radius-sm); }
   .intro { font-weight: 600; line-height: 1.7; letter-spacing: -.035em; text-wrap: pretty; }
   .description { margin-top: 8px; line-height: 1.8; }
@@ -83,7 +82,7 @@
 }
 @media (max-width: 359px) {
   
-  .titleRow h1 { font-size: 41px; }
+  .titleRow h1 { font-size: var(--text-hero-xs); }
   .assurance { gap: 10px; }
   .assurance h2 { font-size: var(--text-sm); }
   .assurance p { font-size: var(--text-sm); }

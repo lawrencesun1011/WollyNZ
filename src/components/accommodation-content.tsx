@@ -21,7 +21,7 @@ function ShieldIcon(props: IconProps) {
 }
 
 const steps = [
-  { number: "01", title: "填写意向", Icon: NoteIcon, desktop: "告诉我们意向地区、每周预算、卧室需求与入住安排。", mobile: "地区、每周预算、卧室需求与入住安排等。" },
+  { number: "01", title: "填写意向", Icon: NoteIcon, desktop: "告诉我们意向地区、每周预算、卧室需求与入住安排等。", mobile: "地区、每周预算、卧室需求与入住安排等。" },
   { number: "02", title: "匹配房源", Icon: HouseIcon, desktop: "我们从合作物业中寻找符合您需求的房源。", mobile: "从合作物业中寻找符合需求的房源。" },
   { number: "03", title: "邮件联系", Icon: MailIcon, desktop: "有合适房源时，我们会通过您留下的邮箱主动联系。", mobile: "有合适房源时，我们会主动联系您。" },
 ];

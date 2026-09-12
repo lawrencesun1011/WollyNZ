@@ -52,6 +52,20 @@
   --text-lead: clamp(1rem, 1.6vw, 1.25rem);
   --text-lead--line-height: 1.75;
 
+  /* 响应式标题尺寸（各断点 / 组件专用）。集中定义，组件内一律 var() 引用，禁止写死字号。 */
+  --text-hero-lg: 78px;                       /* 超宽屏 hero 上限 */
+  --text-hero-md: 56px;                       /* 中等屏 hero 固定值 */
+  --text-hero-sm: clamp(38px, 9vw, 54px);     /* 窄屏 hero */
+  --text-hero-xs: 41px;                       /* 极窄屏 hero */
+  --text-accent-md: 33px;                     /* accentHeading 中等屏 */
+  --text-accent-sm: clamp(27px, 6.2vw, 39px); /* accentHeading 窄屏 */
+  --text-callout: clamp(22px, 2.2vw, 29px);   /* 提示条标题（privacy / assurance） */
+  --text-section: 40px;                        /* 区块小标题（如何匹配） */
+  --text-chapter: 28px;                        /* guide 章节标题 */
+  --text-entry: 27px;                          /* 条目标题（footer-brand 等） */
+  --text-marker: clamp(12px, 1.5vw, 20px);    /* 地图标记数字 */
+  --text-h2-sm: clamp(23px, 5.3vw, 32px);     /* 窄屏 section-heading h2 */
+
   /* 圆角：两级语义刻度（组件按角色选用，不要再直接写尺码类）
        control → 交互控件：按钮 / 输入框 / 下拉触发器 / 菜单项 / 图标底座
        surface → 承载容器：卡片 / 面板 / 弹窗 / 浮层 / 空态 / 提示条
@@ -84,9 +98,7 @@
   --color-paper-hover: #eeeede;
   --color-neutral-soft: #eef0ea;
   --color-stroke-strong: #537770;
-  /* 全站统一无衬线：--font-editorial 暂时指向无衬线栈。
-     保留变量名与全部既有声明，若日后想恢复「标题衬线」只需把这一行改回
-     "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif 即可。 */
+  /* --font-editorial 全站统一，与 --font-sans 一致，指向自托管 Noto Sans SC 无衬线栈。 */
   --font-editorial: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", -apple-system, "Segoe UI", system-ui, sans-serif;
 }
 
@@ -99,10 +111,13 @@ html {
 }
 
 /* 全站焦点环基线：任何可聚焦交互元素默认都有可见焦点反馈。
-   用 :where() 保持 0 特异性，已有的更具体焦点样式（.editorial、按钮基元等）仍可覆盖。 */
-:where(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+   放在 @layer base，使页面内的 Tailwind focus-visible:* 工具类（@layer utilities）
+   能正常覆盖此基线；组件自身未分层的 .xxx:focus-visible 规则仍优先于它。 */
+@layer base {
+  :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
 }
 
 body {
@@ -111,7 +126,7 @@ body {
   background: var(--color-paper);
   color: var(--color-ink-soft);
   font-family: var(--font-sans);
-  font-size: 1rem;
+  font-size: var(--text-base);
   line-height: 1.7;
   letter-spacing: 0.005em;
   -webkit-font-smoothing: antialiased;
@@ -150,7 +165,7 @@ body {
   gap: 0.25rem;
   border-radius: 9999px;
   padding: 0.1875rem 0.75rem;
-  font-size: 0.8125rem;
+  font-size: var(--text-xs);
   font-weight: 500;
   line-height: 1.3rem;
 }
@@ -162,7 +177,7 @@ body {
   border: 1px solid var(--color-stroke);
   background: #fff;
   padding: 0.625rem 0.875rem;
-  font-size: 0.9375rem;
+  font-size: var(--text-sm);
   line-height: 1.5;
   color: var(--color-ink);
   transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
@@ -724,6 +739,19 @@ textarea.input {
    用 .accom-editorial 后代选择器（特异性高于页面内 Tailwind text-* 工具类）一次性收口。 */
 .accom-editorial h1 { font-size: var(--text-h1); line-height: 1.3; font-weight: 700; }
 .accom-editorial h2 { font-size: var(--text-xl); line-height: 1.45; font-weight: 700; }
+/* 登录页独立小卡片：标题收小到 T2，保持左对齐（.login-title 特异性高于上方 h1 收口规则）。 */
+.accom-editorial h1.login-title { font-size: var(--text-2xl); line-height: 1.4; }
+
+/* 登录页输入行：焦点反馈统一落在整行容器（含前置图标）上，
+   与 .input:focus 同款「主色描边 + 柔光」；内部 input 已由 outline-none 工具类
+   （@layer utilities，高于全局焦点基线层）压掉默认焦点框。 */
+.accom-editorial .login-field {
+  transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
+}
+.accom-editorial .login-field:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(40, 126, 110, 0.15);
+}
 @layer base {
   /* 表单/账户页默认正文 16px（T4）、h3 区块标题 21px（T3）；
      放入 base 层，使页面内的 Tailwind text-* 工具类能正常覆盖字号
@@ -1146,7 +1174,7 @@ textarea.input {
 .footer-brand {
   display: inline-block;
   color: #102e2c;
-  font: 600 27px/1.25 var(--font-editorial);
+  font: 600 var(--text-entry)/1.25 var(--font-editorial);
   letter-spacing: -0.7px;
 }
 .footer-about p {
@@ -1314,7 +1342,7 @@ textarea.input {
     letter-spacing: 0.13em;
   }
   .hero h1 {
-    font-size: clamp(38px, 9vw, 54px);
+    font-size: var(--text-hero-sm);
     margin-top: 12px;
     margin-bottom: 12px;
     line-height: 1.25;
@@ -1343,7 +1371,7 @@ textarea.input {
     gap: 8px;
   }
   .section-heading h2 {
-    font-size: clamp(23px, 5.3vw, 32px);
+    font-size: var(--text-h2-sm);
     letter-spacing: -0.04em;
   }
   .entry-grid {
@@ -1486,7 +1514,7 @@ textarea.input {
     font-size: var(--text-2xs);
   }
   .hero h1 {
-    font-size: 41px;
+    font-size: var(--text-hero-xs);
   }
 }
 @media (prefers-reduced-motion: reduce) {

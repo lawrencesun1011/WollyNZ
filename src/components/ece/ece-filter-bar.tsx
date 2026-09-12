@@ -160,7 +160,7 @@ function FilterSearch({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className={`flex items-center gap-2 rounded-control border border-stroke bg-white px-4 py-2 ${value ? "border-primary/40 ring-1 ring-primary/10" : ""}`}>
+    <div className={`flex items-center gap-2 rounded-control border border-stroke bg-white px-4 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/10 ${value ? "border-primary/40 ring-1 ring-primary/10" : ""}`}>
       <Search className="h-4 w-4 shrink-0 text-caption" />
       <input
         type="text"
@@ -268,7 +268,7 @@ function FilterCity({
       </button>
       {open && (
         <div className="absolute left-0 top-full z-50 mt-1 w-[240px] overflow-hidden rounded-surface border border-stroke bg-white shadow-md">
-          <div className="flex items-center gap-2 border-b border-stroke px-3 py-2">
+          <div className="flex items-center gap-2 border-b border-stroke px-3 py-2 focus-within:border-primary">
             <Search className="h-3.5 w-3.5 shrink-0 text-caption" />
             <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="搜索城市..." autoFocus
               className="w-full bg-transparent text-sm outline-none placeholder:text-caption/70" />

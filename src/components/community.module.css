@@ -10,7 +10,7 @@
 .joinPanel { display: grid; grid-template-columns: 59% 41%; border: 1px solid var(--color-rule); border-radius: var(--radius-control); padding: 28px 40px 24px; }
 .panelHeading { grid-column: 1; padding-right: 24px; }
 .accentHeading { display: flex; align-items: center; font-size: var(--text-h1); font-weight: 700; line-height: 1.4; letter-spacing: -.025em; }
-.panelHeading p { margin-top: 8px; font-size: var(--text-base); line-height: 1.75; }
+.panelHeading p { margin-top: 8px; font-size: var(--text-xl); line-height: 1.75; }
 .qrArea { grid-column: 2; grid-row: 1 / 3; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid var(--color-rule); padding-left: 38px; }
 .qrCard { width: min(100%, 275px); aspect-ratio: 1.075; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; border: 1px solid var(--color-stroke-strong); border-radius: var(--radius-sm); padding: 24px; }
 .invitationMark { width: 115px; height: auto; color: #356b64; }
@@ -26,7 +26,7 @@
 .stepList { display: grid; gap: 10px; list-style: none; margin: 0; padding: 0; }
 .stepList li { display: flex; align-items: center; gap: 20px; min-height: 43px; }
 .stepNumber { display: inline-flex; align-items: center; justify-content: center; width: 43px; height: 43px; flex-shrink: 0; border-radius: 50%; background: var(--color-accent-soft); color: var(--color-accent); font: 500 var(--text-2xl)/1 var(--font-editorial); }
-.stepText { border-left: 1px solid var(--color-rule); padding: 0 0 0 20px; font-size: var(--text-base); line-height: 1.8; }
+.stepText { border-left: 1px solid var(--color-rule); padding: 0 0 0 20px; font-size: var(--text-xl); line-height: 1.8; }
 .entryNotice { margin-top: 16px; font-size: var(--text-sm); line-height: 1.7; }
 .topics { padding-top: 24px; }
 .topics > h2 { padding-inline: 0; }
@@ -41,7 +41,7 @@
 .privacy { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 1px; padding: 28px 0; }
 .privacyCopy { padding: 8px 0; text-align: center; }
 .privacyIcon { width: 38px; height: 38px; color: #102e2c; flex-shrink: 0; }
-.privacyTitle { font-size: clamp(22px, 2.2vw, 29px); line-height: 1.65; font-weight: 600; letter-spacing: .015em; }
+.privacyTitle { font-size: var(--text-callout); line-height: 1.65; font-weight: 600; letter-spacing: .015em; }
 .privacyTitle span { display: inline-block; margin-inline: 6px; }
 .privacyDescription { margin-top: 4px; font-size: var(--text-lg); line-height: 1.7; }
 .mobileOnly { display: none; }
@@ -56,12 +56,12 @@
 
 @media (max-width: 1100px) and (min-width: 768px) {
   .intro { grid-template-columns: minmax(0, 1fr) 26%; }
-  .intro h1 { font-size: 56px; }
+  .intro h1 { font-size: var(--text-hero-md); }
   
   
   .joinPanel { padding: 24px; grid-template-columns: 58% 42%; }
-  .panelHeading p, .stepText { font-size: var(--text-lg); }
-  .accentHeading { font-size: 33px; }
+  .panelHeading p, .stepText { font-size: var(--text-xl); }
+  .accentHeading { font-size: var(--text-accent-md); }
   .qrArea { padding-left: 26px; }
   .qrCard { padding: 20px; }
   .qrCard p { font-size: var(--text-lg); }
@@ -75,13 +75,13 @@
 
 @media (max-width: 767px) {
   .intro { display: block; min-height: 155px; padding: 20px 4px 24px; }
-  .intro h1 { font-size: clamp(38px, 9vw, 54px); line-height: 1.25; }
+  .intro h1 { font-size: var(--text-hero-sm); line-height: 1.25; }
   .tagline { margin-top: 16px; max-width: 77%; line-height: 1.7; letter-spacing: -.035em; }
   .description { margin-top: 8px; max-width: 72%; line-height: 1.8; }
   .conversationArt { position: absolute; right: 2px; bottom: 17px; width: 29%; max-width: 180px; }
   .joinPanel { display: flex; flex-direction: column; padding: 16px 20px 20px; border-radius: var(--radius-control); }
   .panelHeading { padding: 0; }
-  .accentHeading { font-size: clamp(27px, 6.2vw, 39px); line-height: 1.4; }
+  .accentHeading { font-size: var(--text-accent-sm); line-height: 1.4; }
   .panelHeading p { margin-top: 8px; font-size: var(--text-sm); line-height: 1.8; }
   .qrArea { border-left: 0; padding: 0; margin-top: 20px; }
   .qrCard { width: 190px; aspect-ratio: 1; gap: 18px; padding: 22px; }
@@ -118,7 +118,7 @@
 }
 
 @media (max-width: 359px) {
-  .intro h1 { font-size: 41px; }
+  .intro h1 { font-size: var(--text-hero-xs); }
   .tagline { max-width: 77%; }
   .description { max-width: 76%; }
   .conversationArt { width: 26%; bottom: 20px; }

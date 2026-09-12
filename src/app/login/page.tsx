@@ -96,7 +96,7 @@ export default function LoginPage() {
     <div className="accom-editorial flex min-h-screen flex-col items-center justify-start bg-bg px-4 pb-20 pt-24">
       <div className="w-full max-w-md rounded-3xl border border-(--color-rule)/30 bg-white p-7 shadow-lg animate-fade-up">
         <div className="mb-5">
-          <h1 className="text-xl font-bold text-ink">登录</h1>
+          <h1 className="login-title font-bold text-ink">登录</h1>
           <p className="mt-1 text-sm text-caption">
             无需密码，输入邮箱验证码即可登录；首次登录自动创建账号
           </p>
@@ -115,7 +115,7 @@ export default function LoginPage() {
               邮箱
             </span>
             <div className="flex items-center gap-2">
-              <div className="flex h-11 flex-1 items-center gap-2 rounded-(--radius-sm) border border-stroke bg-white px-3">
+              <div className="login-field flex h-11 flex-1 items-center gap-2 rounded-(--radius-sm) border border-stroke bg-white px-3">
                 <Mail className="h-4 w-4 shrink-0 text-caption" />
                 <input
                   ref={emailRef}
@@ -154,7 +154,7 @@ export default function LoginPage() {
               验证码
             </span>
             <div
-              className={`flex h-11 items-center gap-2 rounded-(--radius-sm) border bg-white px-3 transition-colors ${
+              className={`login-field flex h-11 items-center gap-2 rounded-(--radius-sm) border bg-white px-3 transition-colors ${
                 sent ? "border-stroke" : "border-stroke/50 opacity-60"
               }`}
             >
