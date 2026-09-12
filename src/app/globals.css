@@ -84,7 +84,10 @@
   --color-paper-hover: #eeeede;
   --color-neutral-soft: #eef0ea;
   --color-stroke-strong: #537770;
-  --font-editorial: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  /* 全站统一无衬线：--font-editorial 暂时指向无衬线栈。
+     保留变量名与全部既有声明，若日后想恢复「标题衬线」只需把这一行改回
+     "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif 即可。 */
+  --font-editorial: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", -apple-system, "Segoe UI", system-ui, sans-serif;
 }
 
 :root {
