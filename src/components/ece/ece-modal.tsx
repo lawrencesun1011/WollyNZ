@@ -5,6 +5,7 @@ import { useEscapeKey } from "@/components/ui/use-escape";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toPng } from "html-to-image";
 import type { SchoolFrontend } from "@/lib/types";
+import { buildShareClone } from "@/lib/share-card";
 import { eceEqiText, eceTypeCN } from "@/lib/filters";
 import { X, MapPin, Check, ExternalLink } from "lucide-react";
 import { buttonCls } from "@/components/form-ui";
@@ -78,9 +79,13 @@ export function EceDetailCard({
   }
 
   async function handleShare() {
-    if (!cardRef.current) return;
+    const source = cardRef.current;
+    if (!source) return;
+    // 把卡片复制到离屏容器中，并移除不参与分享的节点（关闭按钮、底部操作区）。
+    // 这样既不会让真实页面上的按钮闪一下，也不会在图片里留下按钮的空白占位
+    const clone = buildShareClone(source);
     try {
-      const dataUrl = await toPng(cardRef.current, {
+      const dataUrl = await toPng(clone, {
         backgroundColor: "#ffffff",
         pixelRatio: 2,
       });
@@ -95,13 +100,15 @@ export function EceDetailCard({
       }
     } catch {
       showToast("复制失败，请重试");
+    } finally {
+      clone.parentElement?.remove();
     }
   }
 
   return (
     <div ref={cardRef} className="relative flex h-full flex-col">
       {toast && (
-        <div className="absolute left-1/2 top-4 z-30 flex -translate-x-1/2 items-center gap-2 rounded-surface bg-ink/95 px-4 py-2 text-sm text-white shadow-md">
+        <div className="no-share absolute left-1/2 top-4 z-30 flex -translate-x-1/2 items-center gap-2 rounded-surface bg-ink/95 px-4 py-2 text-sm text-white shadow-md">
           <Check className="h-4 w-4 text-tertiary" />
           {toast}
         </div>
@@ -171,7 +178,7 @@ export function EceDetailCard({
         </div>
       </div>
 
-      <div className="shrink-0 px-6 pb-2 pt-4">
+      <div className="no-share shrink-0 px-6 pb-2 pt-4">
         <div className="grid grid-cols-3 gap-3">
           {school.website ? (
             <a
@@ -241,7 +248,7 @@ export function EceModal({ school, onClose }: Props) {
               type="button"
               onClick={onClose}
               aria-label="关闭"
-              className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/20 transition-colors hover:bg-white/30"
+              className="no-share absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/20 transition-colors hover:bg-white/30"
             >
               <X className="h-5 w-5" />
             </button>
