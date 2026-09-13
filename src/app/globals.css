@@ -1340,7 +1340,7 @@ textarea.input {
     padding-top: 32px;
   }
   .hero-eyebrow {
-    font-size: var(--text-base);
+    font-size: var(--text-xl);
     letter-spacing: 0.13em;
   }
   .hero h1 {
@@ -1410,7 +1410,7 @@ textarea.input {
   .entry-number {
     grid-column: 2;
     align-self: end;
-    font-size: var(--text-base);
+    font-size: var(--text-lg);
   }
   .entry h3 {
     grid-column: 2;
@@ -1480,7 +1480,7 @@ textarea.input {
     font-size: var(--text-sm);
   }
   .footer-nav h2 {
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
   }
   .footer-nav a,
   .footer-nav button {
