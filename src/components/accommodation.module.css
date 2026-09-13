@@ -63,27 +63,27 @@
   .actions { flex-direction: column; align-items: stretch; gap: 12px; margin-top: 20px; }
   
   
-  .textButton { align-self: center; font-size: var(--text-sm); gap: 10px; min-height: 40px; }
+  .textButton { align-self: center; font-size: var(--text-base); gap: 10px; min-height: 40px; }
   .process { padding-top: 16px; }
   .sectionHeading h2 { font-size: var(--text-3xl); letter-spacing: -.035em; }
   .steps { grid-template-columns: 1fr; margin: 12px 0 0; }
   .step, .step + .step { grid-template-columns: 49px 1fr; gap: 16px; padding: 18px 4px 16px; border-left: 0; }
   .step + .step { border-top: 1px solid var(--color-rule); }
   .stepIcon { width: 42px; height: 42px; margin-top: 4px; }
-  .number { font-size: var(--text-base); margin-bottom: 2px; }
-  .step h3 { font-size: var(--text-base); margin-bottom: 5px; line-height: 1.45; }
+  .number { font-size: var(--text-2xl); margin-bottom: 2px; }
+  .step h3 { font-size: var(--text-xl); margin-bottom: 5px; line-height: 1.45; }
   .step p { font-size: var(--text-base); line-height: 1.75; }
   .desktopText { display: none; }
   .mobileText { display: block; }
   .assurance { flex-direction: column; gap: 12px; padding: 20px 4px 24px; }
   .shield { width: 42px; height: 46px; margin: 0; }
-  .assurance h2 { font-size: var(--text-base); line-height: 1.6; }
-  .assurance p { font-size: var(--text-sm); line-height: 1.75; }
+  .assurance h2 { font-size: var(--text-2xl); line-height: 1.6; }
+  .assurance p { font-size: var(--text-base); line-height: 1.75; }
 }
 @media (max-width: 359px) {
   
   .titleRow h1 { font-size: var(--text-hero-xs); }
   .assurance { gap: 10px; }
-  .assurance h2 { font-size: var(--text-sm); }
+  .assurance h2 { font-size: var(--text-xl); }
   .assurance p { font-size: var(--text-sm); }
 }

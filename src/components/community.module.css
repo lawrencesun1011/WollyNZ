@@ -40,7 +40,7 @@
 .topicArrow { display: none; }
 .privacy { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 1px; padding: 28px 0; }
 .privacyCopy { padding: 8px 0; text-align: center; }
-.privacyIcon { width: 38px; height: 38px; color: #102e2c; flex-shrink: 0; }
+.privacyIcon { width: 54px; height: 54px; color: #102e2c; flex-shrink: 0; }
 .privacyTitle { font-size: var(--text-callout); line-height: 1.65; font-weight: 600; letter-spacing: .015em; }
 .privacyTitle span { display: inline-block; margin-inline: 6px; }
 .privacyDescription { margin-top: 4px; font-size: var(--text-lg); line-height: 1.7; }
@@ -85,11 +85,11 @@
   .joinPanel { display: flex; flex-direction: column; padding: 16px 20px 20px; border-radius: var(--radius-control); }
   .panelHeading { padding: 0; }
   .accentHeading { font-size: var(--text-accent-sm); line-height: 1.4; }
-  .panelHeading p { margin-top: 8px; font-size: var(--text-sm); line-height: 1.8; }
+  .panelHeading p { margin-top: 8px; font-size: var(--text-lg); line-height: 1.8; }
   .qrArea { border-left: 0; padding: 0; margin-top: 20px; }
   .qrCard { width: 190px; aspect-ratio: 1; gap: 18px; padding: 22px; }
   .invitationMark { width: 90px; }
-  .qrCard p { font-size: var(--text-sm); }
+  .qrCard p { font-size: var(--text-base); }
   .qrActions { width: 100%; margin-top: 15px; gap: 12px; }
   
   
@@ -97,8 +97,8 @@
   .instructions { margin-top: 20px; border-top: 1px solid var(--color-rule); padding: 16px 0 0; }
   .stepList { gap: 8px; }
   .stepList li { min-height: 39px; gap: 14px; }
-  .stepNumber { width: 37px; height: 37px; font-size: var(--text-base); }
-  .stepText { padding-left: 14px; font-size: var(--text-sm); line-height: 1.75; }
+  .stepNumber { width: 37px; height: 37px; font-size: var(--text-xl); }
+  .stepText { padding-left: 14px; font-size: var(--text-lg); line-height: 1.75; }
   .topics { padding-top: 24px; }
   .topics > h2 { padding-inline: 0; }
   .topicList { grid-template-columns: 1fr; margin-top: 8px; padding: 0; }
@@ -106,15 +106,15 @@
   .topic + .topic { border-left: 0; border-top: 1px solid var(--color-rule); }
   .topicIcon { width: 43px; height: 43px; margin: 0; }
   .topicNumber { display: none; }
-  .topic h3 { font-size: var(--text-base); line-height: 1.4; }
+  .topic h3 { font-size: var(--text-xl); line-height: 1.4; }
   .topic p { font-size: var(--text-sm); margin-top: 2px; line-height: 1.6; }
   .topicArrow { display: block; width: 14px; height: 18px; }
-  .privacy { padding: 20px 4px; margin-top: 0; }
-  .privacyCopy { padding: 4px 0; margin-block: 14px; }
-  .privacyIcon { width: 30px; height: 30px; }
-  .privacyTitle { font-size: var(--text-sm); line-height: 1.6; letter-spacing: -.045em; text-wrap: balance; }
+  .privacy { flex-direction: column; gap: 12px; padding: 20px 4px; margin-top: 0; }
+  .privacyCopy { padding: 4px 0; }
+  .privacyIcon { width: 42px; height: 46px; }
+  .privacyTitle { font-size: var(--text-2xl); line-height: 1.6; letter-spacing: -.045em; text-wrap: balance; }
   .privacyTitle span { margin-inline: 2px; }
-  .privacyDescription { margin-top: 4px; font-size: var(--text-2xs); line-height: 1.75; }
+  .privacyDescription { margin-top: 4px; font-size: var(--text-base); line-height: 1.75; }
   .desktopOnly { display: none; }
   .mobileOnly { display: inline; }
   p.mobileOnly { display: block; }
@@ -126,11 +126,11 @@
   .accentHeading { font-size: var(--text-2xl); }
   .qrActions { gap: 8px; }
   
-  .stepText { font-size: var(--text-sm); }
+  .stepText { font-size: var(--text-base); }
   .topic { grid-template-columns: 38px minmax(0, 1fr) 12px; gap: 15px; padding-inline: 4px; }
   .topicIcon { width: 35px; height: 35px; }
-  .topic p { font-size: var(--text-2xs); }
+  .topic p { font-size: var(--text-xs); }
   .privacyCopy { padding-left: 12px; }
-  .privacyTitle { font-size: var(--text-sm); }
-  .privacyDescription { font-size: var(--text-2xs); }
+  .privacyTitle { font-size: var(--text-xl); }
+  .privacyDescription { font-size: var(--text-sm); }
 }

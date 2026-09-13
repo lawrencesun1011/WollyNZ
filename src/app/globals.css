@@ -1351,7 +1351,7 @@ textarea.input {
     letter-spacing: -0.035em;
   }
   .hero-description {
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     letter-spacing: 0.005em;
   }
   .hero .primary-button {
@@ -1419,7 +1419,7 @@ textarea.input {
   }
   .entry p {
     grid-column: 2;
-    font-size: var(--text-xs);
+    font-size: var(--text-sm);
     margin: 0;
     letter-spacing: -0.03em;
     line-height: 1.7;
@@ -1460,7 +1460,7 @@ textarea.input {
     text-wrap: balance;
   }
   .community p {
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
     margin-top: 8px;
   }
       .footer-main {
@@ -1513,7 +1513,7 @@ textarea.input {
     width: 108px;
   }
   .entry p {
-    font-size: var(--text-2xs);
+    font-size: var(--text-xs);
   }
   .hero h1 {
     font-size: var(--text-hero-xs);
