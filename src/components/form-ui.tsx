@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 
 /** 输入框 / 下拉框统一基类：圆角 7px 风、描边、聚焦变主色、禁用态。 */
 const controlBase =
-  "w-full rounded-control border border-stroke bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors hover:border-primary/40 focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft disabled:opacity-70";
+  "w-full rounded-control border border-stroke bg-white px-3 py-2.5 text-base text-ink outline-none transition-colors hover:border-primary/40 focus:border-primary disabled:bg-bg-soft disabled:text-ink-soft disabled:opacity-70";
 
 /** 文本 / 日期等输入框。error 时加红色描边。 */
 export function inputCls(error?: string) {

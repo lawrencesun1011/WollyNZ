@@ -142,7 +142,7 @@ export function EceExplorer({ initialSchools }: { initialSchools: SchoolFrontend
       </div>
 
       <div className="px-6 pb-8 lg:px-10">
-        <main className="mx-auto flex h-[720px] max-w-(--width-work) gap-5 overflow-hidden">
+        <main className="mx-auto flex h-auto max-w-(--width-work) gap-5 overflow-hidden lg:h-[720px]">
           <section className="flex w-full flex-col overflow-hidden rounded-surface border border-stroke bg-white shadow-sm lg:w-[420px] xl:w-[480px]">
             <div className="shrink-0 border-b border-stroke px-5 py-3">
               <Toolbar

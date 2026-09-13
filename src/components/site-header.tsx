@@ -104,7 +104,7 @@ export function SiteHeader() {
         </nav>
 
         {/* 右侧：心愿单 + 账户 */}
-        <div className="account-actions flex shrink-0 items-center gap-3">
+        <div className="account-actions relative flex shrink-0 items-center gap-3">
           <div className="relative">
             <button
               type="button"
@@ -123,10 +123,11 @@ export function SiteHeader() {
                 </span>
               )}
             </button>
-            {favOpen && <FavoritesPopover onClose={() => setFavOpen(false)} />}
           </div>
 
           <UserMenu />
+
+          {favOpen && <FavoritesPopover onClose={() => setFavOpen(false)} />}
         </div>
       </div>
     </header>

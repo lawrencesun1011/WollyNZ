@@ -76,9 +76,12 @@
 @media (max-width: 767px) {
   .intro { display: block; min-height: 155px; padding: 20px 4px 24px; }
   .intro h1 { font-size: var(--text-hero-sm); line-height: 1.25; }
-  .tagline { margin-top: 16px; max-width: 77%; line-height: 1.7; letter-spacing: -.035em; }
-  .description { margin-top: 8px; max-width: 72%; line-height: 1.8; }
-  .conversationArt { position: absolute; right: 2px; bottom: 17px; width: 29%; max-width: 180px; }
+  .tagline { margin-top: 16px; line-height: 1.7; letter-spacing: -.035em; }
+  .description { margin-top: 8px; line-height: 1.8; }
+  /* 手机端隐藏顶部插画：与「找住宿」一致，避免遮挡标题/正文。
+     用后代选择器抬高优先级，稳定压过 reference-artwork 的 .art{display:block}——
+     两者同为单类选择器时胜负取决于打包顺序，会导致客户端跳转时隐藏失效。 */
+  .intro .conversationArt { display: none; }
   .joinPanel { display: flex; flex-direction: column; padding: 16px 20px 20px; border-radius: var(--radius-control); }
   .panelHeading { padding: 0; }
   .accentHeading { font-size: var(--text-accent-sm); line-height: 1.4; }
@@ -119,9 +122,6 @@
 
 @media (max-width: 359px) {
   .intro h1 { font-size: var(--text-hero-xs); }
-  .tagline { max-width: 77%; }
-  .description { max-width: 76%; }
-  .conversationArt { width: 26%; bottom: 20px; }
   .joinPanel { padding-inline: 14px; }
   .accentHeading { font-size: var(--text-2xl); }
   .qrActions { gap: 8px; }

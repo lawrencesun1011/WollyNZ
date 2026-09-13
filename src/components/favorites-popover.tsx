@@ -85,7 +85,7 @@ export function FavoritesPopover({ onClose }: Props) {
   return (
     <div
       data-fav-popover
-      className="animate-popover absolute right-0 top-[calc(100%+10px)] z-(--z-popover) w-[340px] origin-top-right"
+      className="animate-popover absolute right-0 top-[calc(100%+10px)] z-(--z-popover) w-[340px] max-w-[calc(100vw-2rem)] origin-top-right"
     >
       <div className="bg-paper overflow-hidden rounded-surface border border-stroke shadow-lg">
         {/* 标题栏 */}

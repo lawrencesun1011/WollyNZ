@@ -739,8 +739,8 @@ export function ApplicationForm({
             )}
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            <div className="flex-1">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="w-full sm:flex-1">
               <div className="grid grid-cols-3 gap-1">
                 <select className={selectCls()} value={fzStart.year} disabled={locked} onChange={(e) => setFzStart({ ...fzStart, year: +e.target.value })}>
                   {START_YEARS.map((y) => (
@@ -765,8 +765,8 @@ export function ApplicationForm({
                 </select>
               </div>
             </div>
-            <span className="text-ink-soft">—</span>
-            <div className="flex-1">
+            <span className="self-center text-ink-soft">—</span>
+            <div className="w-full sm:flex-1">
               <div className="grid grid-cols-3 gap-1">
                 <select className={selectCls()} value={fzEnd.year} disabled={locked} onChange={(e) => setFzEnd({ ...fzEnd, year: +e.target.value })}>
                   {END_YEARS.map((y) => (
@@ -880,11 +880,11 @@ export function ApplicationForm({
       </Section>
 
       {/* 底部三态 */}
-      <div className="flex items-center gap-3 border-t border-stroke/70 px-1 py-6">
+      <div className="flex flex-col gap-3 border-t border-stroke/70 px-1 py-6 sm:flex-row sm:items-center">
         <button
           type="button"
           onClick={() => onCancel?.()}
-          className={ghostBtnCls}
+          className={`${ghostBtnCls} w-full sm:w-auto`}
         >
           取消
         </button>
@@ -892,7 +892,7 @@ export function ApplicationForm({
           type="button"
           onClick={handleSaveDraft}
           disabled={locked || submitting}
-          className={secondaryBtnCls}
+          className={`${secondaryBtnCls} w-full sm:w-auto`}
         >
           <Save className="h-4 w-4" />
           保存草稿
@@ -901,7 +901,7 @@ export function ApplicationForm({
           type="button"
           onClick={handleGenerate}
           disabled={locked || submitting}
-          className={`${primaryBtnCls} flex-1`}
+          className={`${primaryBtnCls} w-full sm:flex-1`}
         >
           {submitting ? (
             <Loader2 className="h-4 w-4 animate-spin" />

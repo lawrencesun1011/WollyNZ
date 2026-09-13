@@ -831,11 +831,11 @@ export function AccommodationForm({
         </div>
 
       {/* 底部按钮 */}
-      <div className="flex items-center gap-3 px-1 py-2">
+      <div className="flex flex-col gap-3 px-1 py-2 sm:flex-row sm:items-center">
         <button
           type="button"
           onClick={() => onCancel?.()}
-          className={ghostBtnCls}
+          className={`${ghostBtnCls} w-full sm:w-auto`}
         >
           取消
         </button>
@@ -843,7 +843,7 @@ export function AccommodationForm({
           type="button"
           onClick={handleSaveDraft}
           disabled={locked || submitting}
-          className={secondaryBtnCls}
+          className={`${secondaryBtnCls} w-full sm:w-auto`}
         >
           <Save className="h-4 w-4" />
           保存草稿
@@ -852,7 +852,7 @@ export function AccommodationForm({
           type="button"
           onClick={handleSubmit}
           disabled={locked || submitting}
-          className={`${primaryBtnCls} flex-1`}
+          className={`${primaryBtnCls} w-full sm:flex-1`}
         >
           {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
           <Send className="h-4 w-4" />

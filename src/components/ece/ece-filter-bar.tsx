@@ -207,7 +207,7 @@ function FilterSelect({
   const hasValue = !!value;
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative max-lg:static">
       <button type="button" onClick={() => setOpen(!open)} className={`${filterBtn} ${hasValue ? "border-primary/30 text-primary font-medium" : ""}`}>
         {helpText && <FilterHelpTip text={helpText} />}
         <span className="text-xs text-caption">{label}</span>
@@ -218,7 +218,7 @@ function FilterSelect({
         )}
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 min-w-[180px] max-h-[260px] overflow-y-auto rounded-surface border border-stroke bg-white py-1 shadow-md">
+        <div className="absolute left-0 top-full z-50 mt-1 min-w-[180px] max-h-[260px] overflow-y-auto rounded-surface border border-stroke bg-white py-1 shadow-md max-lg:right-0 max-lg:w-auto max-lg:min-w-0 max-lg:max-w-[24rem]">
           {options.map((o) => (
             <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false); }}
               className={`block w-full px-4 py-2 text-left text-sm ${o.value === value ? "bg-primary/8 font-medium text-primary" : "text-ink-soft hover:bg-bg-soft"}`}
@@ -257,7 +257,7 @@ function FilterCity({
   const filteredCities = query ? allCities.filter((c) => c.toLowerCase().includes(query.toLowerCase())) : allCities;
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative max-lg:static">
       <button type="button" onClick={() => setOpen(!open)} className={`${filterBtn} ${cities.length > 0 ? "border-primary/30 text-primary font-medium" : ""}`}>
         <span className="text-xs text-caption">城市</span>
         <span>{cities.length > 0 ? displayText : "任意"}</span>
@@ -267,7 +267,7 @@ function FilterCity({
         )}
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 w-[240px] overflow-hidden rounded-surface border border-stroke bg-white shadow-md">
+        <div className="absolute left-0 top-full z-50 mt-1 w-[240px] overflow-hidden rounded-surface border border-stroke bg-white shadow-md max-lg:right-0 max-lg:w-auto max-lg:min-w-0 max-lg:max-w-[24rem]">
           <div className="flex items-center gap-2 border-b border-stroke px-3 py-2 focus-within:border-primary">
             <Search className="h-3.5 w-3.5 shrink-0 text-caption" />
             <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="搜索城市..." autoFocus
@@ -336,7 +336,7 @@ function FilterDistrict({
       : suburbs.slice(0, 2).join("、") + (suburbs.length > 2 ? ` 等${suburbs.length}个` : "");
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative max-lg:static">
       <button
         type="button"
         disabled={disabled}
@@ -358,7 +358,7 @@ function FilterDistrict({
         )}
       </button>
       {open && !disabled && (
-        <div className="absolute left-0 top-full z-50 mt-1 max-h-64 w-[240px] overflow-auto rounded-surface border border-stroke bg-white p-2 shadow-md">
+        <div className="absolute left-0 top-full z-50 mt-1 max-h-64 w-[240px] overflow-auto rounded-surface border border-stroke bg-white p-2 shadow-md max-lg:right-0 max-lg:w-auto max-lg:min-w-0 max-lg:max-w-[24rem]">
           {groups ? (
             groups.map((g) => {
               const allOn = g.suburbs.length > 0 && g.suburbs.every((s) => suburbs.includes(s));
@@ -610,7 +610,7 @@ export function EceFilterBar({ schools, filters, onChange, onClear, active }: Pr
             </button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="relative flex flex-wrap items-center gap-3">
             <FilterCity cities={filters.cities} allCities={cities} onChange={(v) => onChange({ ...filters, hotRegion: "", suburbs: [], cities: v })} />
 
             <FilterDistrict

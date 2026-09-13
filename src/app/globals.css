@@ -177,7 +177,7 @@ body {
   border: 1px solid var(--color-stroke);
   background: #fff;
   padding: 0.625rem 0.875rem;
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   line-height: 1.5;
   color: var(--color-ink);
   transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
@@ -855,7 +855,9 @@ textarea.input {
 }
 
 .site-main {
-  padding-top: var(--header-height);
+  /* 让位固定 header 之外，再留 16px 呼吸空间，
+     避免各页大标题紧贴 header 下沿（原先只有 header 高度，找住宿/社群等页显得贴）。 */
+  padding-top: calc(var(--header-height) + 16px);
 }
 .site-shell {
   max-width: 1440px;
@@ -1462,8 +1464,8 @@ textarea.input {
     margin-top: 8px;
   }
       .footer-main {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px 24px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) max-content;
+    gap: 24px 16px;
     padding: 32px 0 28px;
   }
   .footer-about {
