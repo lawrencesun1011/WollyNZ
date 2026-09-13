@@ -285,7 +285,7 @@ export function SchoolDetailCard({
         {/* ── 底部装饰 ── */}
         <div className="mt-auto shrink-0 pb-4 pt-3 text-center">
           <div className="mx-auto mb-1.5 h-1 w-12 rounded-full bg-gradient-to-r from-primary to-secondary" />
-          <p className="text-xs text-ink-soft">goalnz.com · 一键查校 · 免费申请</p>
+          <p className="text-xs text-ink-soft">goalnz.com · 一键查校 · 开放交流</p>
         </div>
     </div>
   );

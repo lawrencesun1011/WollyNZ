@@ -179,23 +179,7 @@ export function EceDetailCard({
       </div>
 
       <div className="no-share shrink-0 px-6 pb-2 pt-4">
-        <div className="grid grid-cols-3 gap-3">
-          {school.website ? (
-            <a
-              href={school.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={buttonCls("secondary", "sm", "gap-1.5 border-primary/20 px-2 py-3 text-primary")}
-            >
-              访问官网
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          ) : (
-            <span className={buttonCls("secondary", "sm", "gap-1.5 cursor-not-allowed border-primary/10 bg-bg-soft px-2 py-3 text-ink-soft hover:bg-bg-soft")}>
-              访问官网
-              <ExternalLink className="h-3.5 w-3.5" />
-            </span>
-          )}
+        <div className="grid grid-cols-2 gap-3">
           <a
             href={eroUrl(school)}
             target="_blank"
@@ -217,7 +201,7 @@ export function EceDetailCard({
 
       <div className="mt-auto shrink-0 pb-4 pt-3 text-center">
         <div className="mx-auto mb-1.5 h-1 w-12 rounded-full bg-gradient-to-r from-primary to-secondary" />
-        <p className="text-xs text-ink-soft">goalnz.com · 一键查校 · 免费申请</p>
+        <p className="text-xs text-ink-soft">goalnz.com · 便捷查校 · 开放交流</p>
       </div>
     </div>
   );
