@@ -104,12 +104,12 @@ npm run optimize:images       # scripts/optimize-images.mjs     assets-src/image
 
 ```
 content/guide/
-  understand.md   了解游学
-  schools.md      确定学校
-  prepare.md      递交申请
-  stay.md         住宿贴士
-  packing.md      其它准备
-  life.md         入学事项
+  01-understand.md   了解游学
+  02-schools.md      确定学校
+  03-prepare.md      递交申请
+  04-stay.md         住宿贴士
+  05-packing.md      其它准备
+  06-life.md         入学事项
 ```
 
 - 文件顶部用 YAML frontmatter 声明 `label`（章节小标签）与 `title`（章节大标题）
