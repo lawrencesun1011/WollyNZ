@@ -14,10 +14,20 @@ import { EcePreloader } from "@/components/ece-preloader";
 import { AuthProvider } from "@/components/auth-provider";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://goalnz.com"),
   title: "GoalNZ · 让好奇心，在新西兰长大",
   description:
     "新西兰亲子游学信息服务。免费找学校，开启新的成长体验。游学攻略、中小学与幼儿园、家庭住宿和家长社群。",
   icons: { icon: "/icon.svg" },
+  openGraph: {
+    type: "website",
+    siteName: "GoalNZ",
+    locale: "zh_CN",
+    url: "/",
+    title: "GoalNZ · 让好奇心，在新西兰长大",
+    description:
+      "新西兰亲子游学信息服务。免费找学校，开启新的成长体验。游学攻略、中小学与幼儿园、家庭住宿和家长社群。",
+  },
 };
 
 export default function RootLayout({

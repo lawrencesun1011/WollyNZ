@@ -30,7 +30,7 @@
 | 目录 | `src/` 为主目录，`@/*` → `./src/*` |
 | 包管理 | npm |
 | 渲染 | **静态导出**（`output: "export"`，无服务端运行时，因此没有 API Route） |
-| 部署 | **Cloudflare Pages** `https://goalnz.pages.dev` |
+| 部署 | **Cloudflare Pages** `https://goalnz.com`（自定义域名，`www` 同步绑定；`goalnz.pages.dev` 保留） |
 | AI 代理 | **Cloudflare Worker** `workers/ai-proxy/`，转发 OpenRouter（`openrouter/free`） |
 | 数据库 | **Supabase** PostgreSQL，项目 ref `orwqyvjkcqnswpjnoeux`，区域 `ap-southeast-1`（新加坡） |
 | 认证 | Supabase Auth，**纯邮箱 6 位验证码 OTP**（无密码，首次登录即创建账号） |
@@ -185,6 +185,6 @@ npx wrangler deploy -c workers/ai-proxy/wrangler.toml
 
 - [ ] 每日定时全量拉取数据（当前为手动执行 `fetch:data`）
 - [ ] 机构详情独立路由页 `/schools/[id]`（当前为弹层，独立页更利于 SEO）
-- [ ] 绑定自定义域名（当前使用 `goalnz.pages.dev`）
-- [ ] 在 Resend 验证自有域名，替换测试发件人（当前只能发给注册邮箱）
+- [x] 绑定自定义域名（`goalnz.com` / `www.goalnz.com`，SSL 由 Cloudflare 自动签发）
+- [ ] 在 Resend 验证自有域名，替换测试发件人（当前 `smtp_admin_email` 仍为 `onboarding@resend.dev`，只能发给注册邮箱）
 - [ ] 中 / EN 语言切换
