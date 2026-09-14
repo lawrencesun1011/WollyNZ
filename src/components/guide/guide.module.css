@@ -57,7 +57,7 @@
 .prose th { background: #e6eadc; font-weight: 600; text-align: left; }
 .prose td > p:last-child, .prose th > p:last-child { margin-bottom: 0; }
 .prose figure { margin: 30px 0; }
-.prose img { display: block; width: 100%; max-height: 460px; object-fit: contain; border-radius: 2px; margin: 12px 0; }
+.prose img { display: block; width: 100%; object-fit: contain; }
 .prose figcaption { font-size: var(--text-xs); text-align: center; color: #607264; line-height: 1.7; margin-top: 12px; }
 .references { font-size: var(--text-xs); color: #607064; line-height: 1.9; margin-top: 36px; border-top: 1px solid #c5cbbd; padding-top: 18px; overflow-wrap: anywhere; }
 .references summary { cursor: pointer; list-style: revert; }
