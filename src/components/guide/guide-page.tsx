@@ -90,7 +90,7 @@ export function GuidePage({ initialContent }: { initialContent: GuideContent }) 
           <header className={styles.chapterHeader}>
             <p className={styles.eyebrow}>CHAPTER {number(active)} <span>· {chapter.label}</span></p>
             <h2>{chapter.title}</h2>
-            <p className={styles.noteIntro}>GoalNZ 游学手记 <span>本攻略内容来源于我们亲身体验及公开网络信息，仅为经验分享，不代表绝对准确，仅供参考。</span></p>
+            <p className={styles.noteIntro}>GoalNZ 游学手记 <span>本攻略内容来源于我们亲身经验及公开网络信息，仅为经验分享，不代表绝对准确，仅供参考。</span></p>
           </header>
           <GuideDocument doc={chapter.doc} />
           <div className={styles.pageNumber}>— {number(active)} —</div>
