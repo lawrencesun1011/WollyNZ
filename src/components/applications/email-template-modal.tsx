@@ -3,7 +3,7 @@
 import { useEscapeKey } from "@/components/ui/use-escape";
 
 import { useEffect, useState } from "react";
-import { Check, Copy, Loader2, Mail, RefreshCw, X } from "lucide-react";
+import { AlertTriangle, Check, Copy, Loader2, Mail, RefreshCw, X } from "lucide-react";
 import { buttonCls, iconBtnCls } from "@/components/form-ui";
 import type { ApplicationItem } from "@/lib/applications";
 import { generateEmailWithAi } from "@/lib/ai-email";
@@ -136,9 +136,27 @@ export function EmailTemplateModal({ item, onClose }: Props) {
                 未获取到意向学校邮箱，请手动补充收件人后再发送。
               </p>
             )}
-            <p className="mt-1 text-xs text-error">
-              重要！请不要直接群发邮件，QQ邮箱请开启右上角“<strong className="font-bold">分别发送</strong>”， 163邮箱请开启右上角“<strong className="font-bold">群发单显</strong>”，其它邮箱请使用类似功能
-            </p>
+            {/* 重要提醒：默认是"群发"，必须改成逐个发送，否则学校会收到可见的群发痕迹。
+                单独做成整块警示（描边 + 底色 + 图标 + 加粗），避免被当成一行小字忽略。 */}
+            <div className="mt-2 flex gap-2.5 rounded-surface border border-error/40 bg-error/10 px-3.5 py-3">
+              <AlertTriangle className="mt-px h-4 w-4 shrink-0 text-error" />
+              <div className="min-w-0">
+                <p className="text-sm font-bold leading-snug text-error">
+                  重要！请不要直接群发邮件
+                </p>
+                <p className="mt-1.5 text-xs font-semibold leading-relaxed text-error">
+                  QQ 邮箱请开启右上角的
+                  <span className="mx-0.5 inline-block rounded bg-error px-1.5 py-0.5 text-white">
+                    分别发送
+                  </span>
+                  ；163 邮箱请开启右上角的
+                  <span className="mx-0.5 inline-block rounded bg-error px-1.5 py-0.5 text-white">
+                    群发单显
+                  </span>
+                  ；其它邮箱请使用类似功能。
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* 邮件正文 */}
