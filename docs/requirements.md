@@ -32,7 +32,7 @@
 | 渲染 | **静态导出**（`output: "export"`，无服务端运行时，因此没有 API Route） |
 | 部署 | **Cloudflare Pages** `https://goalnz.com`（主域；`goalnz.pages.dev` 保留） |
 | 主域 | `www.goalnz.com` 301 跳转到 `https://goalnz.com`（保留路径与查询参数） |
-| AI 代理 | **Cloudflare Worker** `workers/ai-proxy/`，转发 OpenRouter（`openrouter/free`） |
+| AI 代理 | **Cloudflare Worker** `workers/ai-proxy/`，主供应商 Agnes AI（`agnes-3.0-flash`），失败自动降级到 OpenRouter（`openrouter/free`） |
 | www 跳转 | **Cloudflare Worker** `workers/www-redirect/`，路由 `www.goalnz.com/*` |
 | 数据库 | **Supabase** PostgreSQL，项目 ref `orwqyvjkcqnswpjnoeux`，区域 `ap-southeast-1`（新加坡） |
 | 认证 | Supabase Auth，**纯邮箱 6 位验证码 OTP**（无密码，首次登录即创建账号） |
@@ -185,7 +185,12 @@ npx wrangler deploy -c workers/www-redirect/wrangler.toml
 
 - `NEXT_PUBLIC_SUPABASE_URL`、`NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `NEXT_PUBLIC_AI_PROXY_URL`
-- Worker 侧：`AI_API_KEY`（Secret，不进仓库）
+- AI 代理 Worker 侧（均为 Secret，不进仓库）：
+  - `AGNES_API_KEY`、`OPENROUTER_API_KEY` —— 供应商密钥
+  - `SUPABASE_ANON_KEY` —— 配置后 Worker 强制校验调用者 JWT（前端已带 token）
+- 供应商 base / model 写在 `workers/ai-proxy/wrangler.toml` 的 `[vars]`；
+  主备顺序由 `src/index.ts` 的 `PROVIDER_ORDER` 决定。新增兜底供应商只需
+  加 `{PREFIX}_BASE_URL` / `{PREFIX}_MODEL` 两个变量 + `wrangler secret put {PREFIX}_API_KEY`。
 
 ---
 

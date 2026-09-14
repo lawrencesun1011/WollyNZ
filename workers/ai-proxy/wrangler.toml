@@ -4,21 +4,43 @@ compatibility_date = "2026-09-11"
 
 # 部署：npx wrangler deploy -c workers/ai-proxy/wrangler.toml
 #
-# 密钥（AI_API_KEY）不要写在本文件，使用 Cloudflare Secret 注入：
-#   npx wrangler secret put AI_API_KEY -c workers/ai-proxy/wrangler.toml
+# 密钥不要写在本文件，用 Cloudflare Secret 注入：
+#   npx wrangler secret put AGNES_API_KEY -c workers/ai-proxy/wrangler.toml
+#   npx wrangler secret put OPENROUTER_API_KEY -c workers/ai-proxy/wrangler.toml
+#   npx wrangler secret put SUPABASE_ANON_KEY -c workers/ai-proxy/wrangler.toml
 #
 # 本地开发：在同目录创建 .dev.vars（已被 .gitignore 忽略），内容形如：
-#   AI_API_KEY=sk-or-v1-xxxxxxxx
+#   AGNES_API_KEY=xxxxxxxx
+#   OPENROUTER_API_KEY=sk-or-v1-xxxxxxxx
+#   SUPABASE_ANON_KEY=eyJhbGciOi...
 # 然后 npx wrangler dev -c workers/ai-proxy/wrangler.toml
+#
+# 供应商链在 src/index.ts 的 PROVIDER_ORDER 中定义，顺序即优先级：
+# 前一个失败（网络异常 / 超时 / 非 2xx / 内容为空）会自动降级到下一个。
+# 新增兜底供应商：在此加 {PREFIX}_BASE_URL / {PREFIX}_MODEL 两个变量，
+# 再用 `wrangler secret put {PREFIX}_API_KEY` 注入密钥即可，代码无需改动。
 
 [vars]
-# 供应商 base（OpenAI 兼容）。当前接入 OpenRouter 免费路由，成本为 0。
-AI_BASE_URL = "https://openrouter.ai/api/v1"
-# openrouter/free 会在当前可用免费模型间自动择优；若需要行为稳定，
-# 可改成具体的免费模型 slug，例如 "deepseek/deepseek-chat-v3.1:free"。
-AI_MODEL = "openrouter/free"
+# ---------- 主供应商：Agnes AI（免费文本模型）----------
+AGNES_BASE_URL = "https://apihub.agnes-ai.com/v1"
+# 免费层可选：agnes-3.0-flash / agnes-2.0-flash / agnes-2.5-flash
+# （agnes-2.5-pro 需要付费额度，会返回 insufficient_user_quota）
+AGNES_MODEL = "agnes-3.0-flash"
+
+# ---------- 兜底供应商：OpenRouter 免费路由 ----------
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+# openrouter/free 会在当前可用的免费模型间自动择优
+OPENROUTER_MODEL = "openrouter/free"
+
 # 允许的前端来源（逗号分隔）；localhost 在代码里始终放行，这里只列线上域名。
 ALLOWED_ORIGINS = "https://goalnz.com,https://www.goalnz.com,https://goalnz.pages.dev"
+
+# 站点地址，作为 HTTP-Referer 回传给供应商（可选，用于来源归属）。
+AI_APP_URL = "https://goalnz.com"
+
+# 配置下面这项（+ Secret SUPABASE_ANON_KEY）后，Worker 强制校验调用者的
+# Supabase JWT，避免代理被匿名滥用；前端已携带登录用户的 access token。
+SUPABASE_URL = "https://orwqyvjkcqnswpjnoeux.supabase.co"
 
 [observability]
 enabled = true
