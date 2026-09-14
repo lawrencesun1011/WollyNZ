@@ -166,6 +166,9 @@ npx wrangler pages deploy out --project-name=goalnz
 npx wrangler deploy -c workers/ai-proxy/wrangler.toml
 ```
 
+> ⚠️ 站点为**手动部署**：推送到 GitHub 不会自动上线。改完须本地 `npm run build`，
+> 再执行 `npx wrangler pages deploy out --project-name=goalnz`（Pages 项目名 `goalnz`）。
+
 > 在部分 IDE 内执行 `npm run build` 可能遇到批量删除保护误拦（清理 `.next` 时）。
 > 先手动 `rm -rf .next` 再构建即可，这不是项目问题，CI / 云端构建不会触发。
 
@@ -185,6 +188,7 @@ npx wrangler deploy -c workers/ai-proxy/wrangler.toml
 
 - [ ] 每日定时全量拉取数据（当前为手动执行 `fetch:data`）
 - [ ] 机构详情独立路由页 `/schools/[id]`（当前为弹层，独立页更利于 SEO）
-- [x] 绑定自定义域名（`goalnz.com` / `www.goalnz.com`，SSL 由 Cloudflare 自动签发）
-- [ ] 在 Resend 验证自有域名，替换测试发件人（当前 `smtp_admin_email` 仍为 `onboarding@resend.dev`，只能发给注册邮箱）
+- [x] 绑定自定义域名（`goalnz.com` / `www.goalnz.com`，DNS 指向 `goalnz.pages.dev`，SSL 自动签发）
+- [x] 在 Resend 验证自有域名，替换测试发件人（`smtp_admin_email` 已改为 `noreply@goalnz.com`，任何用户均可收到验证码）
+- [ ] 配置 `www.goalnz.com` → `goalnz.com` 的 301 跳转（避免重复内容）
 - [ ] 中 / EN 语言切换
