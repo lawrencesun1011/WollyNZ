@@ -27,7 +27,7 @@ const ENGLISH_LEVELS = [
   "中级（能进行基础对话，读懂简单故事）",
   "中高级（表达较流利，能讨论复杂话题）",
   "高级（听说读写熟练，接近母语国家同龄学生）",
-  "流利/接近母语。（表达自如，无语言障碍）",
+  "流利/接近母语（表达自如，无语言障碍）",
 ];
 
 /** 性别选项（选填）。 */
@@ -85,6 +85,18 @@ function todayDate(): { year: number; month: number; day: number } {
   return { year: t.getFullYear(), month: t.getMonth() + 1, day: t.getDate() };
 }
 
+/**
+ * 判定两所意向学校是否同一所：双方都有 id 时按 id 比较，缺 id 时退回按校名比较。
+ * （旧草稿里的学校可能没有 id，而从候选列表添加的学校都带 id。）
+ */
+function isSameSchool(
+  a: { id?: string; name: string },
+  b: { id?: string; name: string }
+): boolean {
+  if (a.id && b.id) return a.id === b.id;
+  return a.name === b.name;
+}
+
 export function ApplicationForm({
   category,
   editId,
@@ -126,6 +138,8 @@ export function ApplicationForm({
   const [schoolInput, setSchoolInput] = useState("");
   const [schools, setSchools] = useState<IntendedSchool[]>([]);
   const [, setSchoolSuggest] = useState<SchoolFrontend[]>([]);
+  /** 「从心愿单添加」的结果提示；空串表示不展示 */
+  const [importHint, setImportHint] = useState("");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [schoolSuggestOpen, setSchoolSuggestOpen] = useState(false);
@@ -228,6 +242,7 @@ export function ApplicationForm({
     setCode("");
     setAuthError("");
     setSubmitting(false);
+    setImportHint("");
   }
 
   if (!initialized || formEditId !== editId) {
@@ -242,10 +257,47 @@ export function ApplicationForm({
     const q = schoolInput.trim().toLowerCase();
     if (!q) return [];
     return (schoolsData ?? [])
-      .filter((s) => s.name.toLowerCase().startsWith(q) && !schools.some((x) => x.name === s.name))
+      .filter((s) => s.name.toLowerCase().startsWith(q) && !schools.some((x) => isSameSchool(x, s)))
       .slice(0, 6);
     // schoolsData 为异步加载（ECE 库），缺此依赖会导致数据到达后建议不刷新
   }, [schoolInput, schools, schoolsData]);
+
+  /** 心愿单里属于本表单类别、且能在教育库中命中的学校 */
+  const favoriteSchools = useMemo(() => {
+    const map = new Map((schoolsData ?? []).map((s) => [s.id, s]));
+    return favoriteIds
+      .filter((e) => e.kind === (ece ? "ece" : "school"))
+      .map((e) => map.get(e.id))
+      .filter((s): s is SchoolFrontend => Boolean(s));
+  }, [favoriteIds, schoolsData, ece]);
+
+  /** 心愿单里尚未加入表单的学校（差集）——「从心愿单添加」实际补充的就是这部分 */
+  const importableFavorites = useMemo(
+    () => favoriteSchools.filter((s) => !schools.some((x) => isSameSchool(x, s))),
+    [favoriteSchools, schools]
+  );
+
+  /** 另一端（中小学 / 幼儿园）的心愿单数量：用于解释按钮为何不可用 */
+  const otherKindFavoriteCount = useMemo(
+    () => favoriteIds.filter((e) => e.kind === (ece ? "school" : "ece")).length,
+    [favoriteIds, ece]
+  );
+
+  /** 心愿单按钮文案：可导入时直接标出还能补几所 */
+  const favoriteKindWord = ece ? "幼儿园" : "中小学";
+  const favoriteBtnLabel =
+    favoriteSchools.length === 0
+      ? "心愿单暂无学校"
+      : importableFavorites.length === 0
+        ? "心愿单已全部添加"
+        : `从心愿单添加（${importableFavorites.length}）`;
+  /** 本类别心愿单为空时的解释文案（含"收藏的是另一类"的提示） */
+  const favoriteEmptyHint =
+    favoriteSchools.length > 0
+      ? ""
+      : otherKindFavoriteCount > 0
+        ? `心愿单里有 ${otherKindFavoriteCount} 所${ece ? "中小学" : "幼儿园"}，本表单是${favoriteKindWord}申请`
+        : "心愿单暂无学校：先去学校库点心形收藏";
 
   // 幼儿园与中小学统一使用「学生」称呼（此前幼儿园为「孩子」）。
   const studentWord = "学生";
@@ -412,26 +464,48 @@ export function ApplicationForm({
 
   function addSchool(s: { id?: string; name: string; city?: string; email?: string }) {
     const n = s.name.trim();
-    if (!n || schools.some((x) => x.name === n)) return;
+    if (!n || schools.some((x) => isSameSchool(x, { id: s.id, name: n }))) return;
     setSchools((p) => [...p, { id: s.id, name: n, city: s.city, email: s.email }]);
     setSchoolInput("");
     setSchoolSuggest([]);
     setSchoolSuggestOpen(false);
+    setImportHint("");
   }
 
-  function removeSchool(name: string) {
-    setSchools((p) => p.filter((s) => s.name !== name));
+  function removeSchool(target: IntendedSchool) {
+    setSchools((p) => p.filter((s) => !isSameSchool(s, target)));
+    setImportHint("");
   }
 
+  /** 一键清空已选学校（数量不设上限，故提供整表清空）。 */
+  function clearSchools() {
+    setSchools([]);
+    setImportHint("");
+  }
+
+  /**
+   * 从心愿单补充意向学校：**合并语义（补差集）**，可反复点击。
+   * 已在表单中的不重复添加 —— 所以「删掉一所再点一次」会把删掉的那所补回来，
+   * 而不是像旧实现（schools 非空就直接 return）那样彻底失效。
+   * 数量不做上限，心愿单有几所就能加几所。
+   */
   function importFavorites() {
-    if (schools.length > 0) return;
-    const map = new Map((schoolsData ?? []).map((s) => [s.id, s]));
-    favoriteIds
-      .filter((e) => e.kind === (ece ? "ece" : "school"))
-      .forEach((e) => {
-        const s = map.get(e.id);
-        if (s) addSchool({ id: s.id, name: s.name, city: [s.suburb, s.city].filter(Boolean).join(", ") || undefined, email: s.email });
-      });
+    if (importableFavorites.length === 0) return;
+    const alreadyIn = favoriteSchools.length - importableFavorites.length;
+    setSchools((p) => [
+      ...p,
+      ...importableFavorites.map((s) => ({
+        id: s.id,
+        name: s.name,
+        city: [s.suburb, s.city].filter(Boolean).join(", ") || undefined,
+        email: s.email,
+      })),
+    ]);
+    setImportHint(
+      alreadyIn > 0
+        ? `已添加 ${importableFavorites.length} 所，另有 ${alreadyIn} 所已在列表中`
+        : `已添加 ${importableFavorites.length} 所`
+    );
   }
 
   function updateStudent(idx: number, patch: Partial<Student>) {
@@ -797,8 +871,8 @@ export function ApplicationForm({
 
       {/* ⑥ 意向学校 */}
       <Section title={ece ? "意向幼儿园" : "意向学校"} required>
-        <div className="flex gap-2">
-          <div className="relative flex-1">
+        <div className="flex flex-wrap gap-2">
+          <div className="relative min-w-[180px] flex-1">
             <input
               value={schoolInput}
               disabled={locked}
@@ -836,25 +910,56 @@ export function ApplicationForm({
           <button
             type="button"
             onClick={importFavorites}
-            disabled={locked}
+            disabled={locked || importableFavorites.length === 0}
+            title={
+              favoriteSchools.length === 0
+                ? favoriteEmptyHint
+                : importableFavorites.length === 0
+                  ? "心愿单里的学校都已在列表中"
+                  : undefined
+            }
             className={`${secondaryBtnSmCls} shrink-0`}
           >
             <Heart className="h-4 w-4" />
-            一键导入心愿单
+            {favoriteBtnLabel}
           </button>
         </div>
+        {/* 心愿单为空 / 类别不匹配时解释原因，避免按钮禁用后用户不明就里 */}
+        {favoriteEmptyHint && (
+          <p className="text-xs text-ink-soft">{favoriteEmptyHint}</p>
+        )}
+        {/* 已选学校：状态（优先显示导入结果，否则显示数量）+ 一键清空 */}
+        {(schools.length > 0 || importHint) && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span
+              className={`text-xs ${importHint ? "text-primary" : "text-ink-soft"}`}
+            >
+              {importHint || `已选 ${schools.length} 所`}
+            </span>
+            {schools.length > 0 && (
+              <button
+                type="button"
+                onClick={clearSchools}
+                disabled={locked}
+                className="text-xs text-ink-soft underline underline-offset-2 transition-colors hover:text-error disabled:opacity-50"
+              >
+                清空全部
+              </button>
+            )}
+          </div>
+        )}
         {schools.length > 0 && (
           <div className="flex flex-wrap gap-2 pt-1">
             {schools.map((s) => (
               <span
-                key={s.name}
+                key={s.id ?? s.name}
                 className="chip flex items-center gap-1.5 border border-stroke/40 bg-white text-ink"
               >
                 <Layers className="h-3 w-3" />
                 {s.name}
                 <button
                   type="button"
-                  onClick={() => removeSchool(s.name)}
+                  onClick={() => removeSchool(s)}
                   disabled={locked}
                   className="text-primary/60 hover:text-error disabled:opacity-50"
                 >

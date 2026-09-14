@@ -44,14 +44,14 @@ export function CompareModal({ schools, onClose }: Props) {
 
       {/* 横向平铺区域 */}
       <div
-        className="min-h-0 flex-1 overflow-x-auto p-6 scroll-thin"
+        className="min-h-0 flex-1 overflow-auto p-3 scroll-thin sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mx-auto flex h-full w-max items-stretch gap-5">
+        <div className="mx-auto flex w-max items-stretch gap-3 sm:gap-5">
           {schools.map((s) => (
             <div
               key={s.id}
-              className="flex w-[400px] shrink-0 flex-col overflow-hidden rounded-3xl bg-white shadow-lg"
+              className="flex w-[85vw] max-w-[400px] shrink-0 flex-col overflow-hidden rounded-3xl bg-white shadow-lg"
             >
               <SchoolDetailCard
                 school={s}
