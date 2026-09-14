@@ -30,8 +30,10 @@
 | 目录 | `src/` 为主目录，`@/*` → `./src/*` |
 | 包管理 | npm |
 | 渲染 | **静态导出**（`output: "export"`，无服务端运行时，因此没有 API Route） |
-| 部署 | **Cloudflare Pages** `https://goalnz.com`（自定义域名，`www` 同步绑定；`goalnz.pages.dev` 保留） |
+| 部署 | **Cloudflare Pages** `https://goalnz.com`（主域；`goalnz.pages.dev` 保留） |
+| 主域 | `www.goalnz.com` 301 跳转到 `https://goalnz.com`（保留路径与查询参数） |
 | AI 代理 | **Cloudflare Worker** `workers/ai-proxy/`，转发 OpenRouter（`openrouter/free`） |
+| www 跳转 | **Cloudflare Worker** `workers/www-redirect/`，路由 `www.goalnz.com/*` |
 | 数据库 | **Supabase** PostgreSQL，项目 ref `orwqyvjkcqnswpjnoeux`，区域 `ap-southeast-1`（新加坡） |
 | 认证 | Supabase Auth，**纯邮箱 6 位验证码 OTP**（无密码，首次登录即创建账号） |
 | 邮件 | Supabase SMTP → **Resend** |
@@ -164,6 +166,9 @@ npx wrangler pages deploy out --project-name=goalnz
 
 # 部署 AI 代理 Worker
 npx wrangler deploy -c workers/ai-proxy/wrangler.toml
+
+# 部署 www→主域 301 跳转 Worker（路由 www.goalnz.com/*）
+npx wrangler deploy -c workers/www-redirect/wrangler.toml
 ```
 
 > ⚠️ 站点为**手动部署**：推送到 GitHub 不会自动上线。改完须本地 `npm run build`，
@@ -190,5 +195,5 @@ npx wrangler deploy -c workers/ai-proxy/wrangler.toml
 - [ ] 机构详情独立路由页 `/schools/[id]`（当前为弹层，独立页更利于 SEO）
 - [x] 绑定自定义域名（`goalnz.com` / `www.goalnz.com`，DNS 指向 `goalnz.pages.dev`，SSL 自动签发）
 - [x] 在 Resend 验证自有域名，替换测试发件人（`smtp_admin_email` 已改为 `noreply@goalnz.com`，任何用户均可收到验证码）
-- [ ] 配置 `www.goalnz.com` → `goalnz.com` 的 301 跳转（避免重复内容）
+- [x] `www.goalnz.com` → `goalnz.com` 的 301 跳转（由 `workers/www-redirect/` 实现）
 - [ ] 中 / EN 语言切换

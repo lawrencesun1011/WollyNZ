@@ -1,0 +1,13 @@
+name = "goalnz-www-redirect"
+main = "src/index.ts"
+compatibility_date = "2026-09-11"
+
+# 部署：npx wrangler deploy -c workers/www-redirect/wrangler.toml
+#
+# 只挂在 www 子域上；主域 goalnz.com 不受影响。
+routes = [
+  { pattern = "www.goalnz.com/*", zone_id = "a798b50a2cfce24cab84bf6c1531f3c3" }
+]
+
+[observability]
+enabled = true
